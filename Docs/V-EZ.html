@@ -1010,7 +1010,7 @@ table.CodeRay td.code>pre{padding:0}
 <span class="line-numbers"> 56</span>    <span class="keyword">for</span> (<span class="directive">auto</span> pd : physicalDevices)
 <span class="line-numbers"> 57</span>    {
 <span class="line-numbers"> 58</span>        VkPhysicalDeviceProperties properties;
-<span class="line-numbers"> 59</span>        vkGetPhysicalDeviceProperties(physicalDevice, &amp;properties);
+<span class="line-numbers"> 59</span>        vkGetPhysicalDeviceProperties(pd, &amp;properties);
 <span class="line-numbers"> 60</span>        <span class="keyword">if</span> (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
 <span class="line-numbers"> 61</span>        {
 <span class="line-numbers"> 62</span>            physicalDevice = pd;
