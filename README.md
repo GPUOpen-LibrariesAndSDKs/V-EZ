@@ -11,7 +11,7 @@ V-EZ is a light-weight middleware layer for the Vulkan API that lowers the barri
 The documentation for V-EZ can be found [here](https://gpuopen-librariesandsdks.github.io/V-EZ/)
 ## Prerequisites
 
-* Windows&reg; 10
+* Windows&reg; 10 (Linux release coming soon)
 * Visual Studio&reg; 2015 or later
 * LunarG Vulkan SDK 1.0.68 (Vulkan 1.1 support coming soon)
 
