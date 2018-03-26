@@ -1,10 +1,12 @@
 # V-EZ
 
-V-EZ is a light-weight middleware layer for the Vulkan API that lowers the barrier to entry for developers. The required low-level knowledge of GPU hardware and behavior in Vulkan is much greater than previous graphics APIs.  V-EZ attempts to bridge that gap by augmenting the Vulkan API to allow for traditional usage and semantics while retaining the power and flexibility afforded by Vulkan.
+V-EZ is a light-weight middleware layer for the Vulkan API targeted ISVs in the Professional Workstation Graphics space. The required low-level knowledge of GPU hardware and behavior in Vulkan is much greater than previous graphics APIs.  V-EZ attempts to bridge that gap by augmenting the Vulkan API to lower the barrier to entry and allowing for traditional usage and semantics that Professional CAD ISV developers are use to.
 
 <img src="https://github.com/GPUOpen-LibrariesAndSDKs/V-EZ/blob/master/Docs/img/VulkanAPI.PNG" />
 
 <img src="https://github.com/GPUOpen-LibrariesAndSDKs/V-EZ/blob/master/Docs/img/V-EZ.PNG" />
+
+V-EZ is not aimed at game developers.
 
 ## Documentation
 
