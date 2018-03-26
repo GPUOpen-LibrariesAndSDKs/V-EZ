@@ -6,6 +6,9 @@ V-EZ is a light-weight middleware layer for the Vulkan API that lowers the barri
 
 <img src="https://github.com/GPUOpen-LibrariesAndSDKs/V-EZ/blob/master/Docs/img/V-EZ.PNG" />
 
+## Documentation
+
+The documentation for V-EZ can be found [here](https://gpuopen-librariesandsdks.github.io/V-EZ/)
 ## Prerequisites
 
 * Windows&reg; 10
