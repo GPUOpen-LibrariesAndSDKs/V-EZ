@@ -15,7 +15,7 @@ The documentation for V-EZ can be found [here](https://gpuopen-librariesandsdks.
 
 * Windows&reg; 10 (Linux release coming soon)
 * Visual Studio&reg; 2015 or later
-* LunarG Vulkan SDK 1.0.68 (Vulkan 1.1 support coming soon)
+* LunarG Vulkan SDK 1.1.70 (Vulkan 1.1 support coming soon)
 
 ## Hardware Support
 
