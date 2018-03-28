@@ -595,6 +595,7 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_framebuffers">7.5. Framebuffers</a>
 <ul class="sectlevel3">
 <li><a href="#_multisampled_framebuffers">7.5.1. Multisampled Framebuffers</a></li>
+<li><a href="#_framebuffers_with_no_attachments">7.5.2. Framebuffers With No Attachments</a></li>
 </ul>
 </li>
 </ul>
@@ -1010,7 +1011,7 @@ table.CodeRay td.code>pre{padding:0}
 <span class="line-numbers"> 56</span>    <span class="keyword">for</span> (<span class="directive">auto</span> pd : physicalDevices)
 <span class="line-numbers"> 57</span>    {
 <span class="line-numbers"> 58</span>        VkPhysicalDeviceProperties properties;
-<span class="line-numbers"> 59</span>        vkGetPhysicalDeviceProperties(physicalDevice, &amp;properties);
+<span class="line-numbers"> 59</span>        vkGetPhysicalDeviceProperties(pd, &amp;properties);
 <span class="line-numbers"> 60</span>        <span class="keyword">if</span> (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
 <span class="line-numbers"> 61</span>        {
 <span class="line-numbers"> 62</span>            physicalDevice = pd;
@@ -1600,7 +1601,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="sect2">
 <h3 id="_framebuffers">7.5. Framebuffers</h3>
 <div class="paragraph">
-<p>In Vulkan, an application must specify an array of <code>VkImageView</code> attachments, a <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#renderpass-compatibility">compatible</a> Render Pass, and the dimensions when creating a framebuffer.  V-EZ simplifies this to only requiring the array of attachments.  Render passes are never explicitly created in V-EZ (see <a href="#_render_passes">Render Passes</a>), and therefore are not required when creating a framebuffer.</p>
+<p>In Vulkan, an application must specify an array of <code>VkImageView</code> attachments, a <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#renderpass-compatibility">compatible</a> Render Pass, and the dimensions when creating a framebuffer.  V-EZ simplifies this to only requiring the array of attachments and the dimensions.  Render passes are never explicitly created in V-EZ (see <a href="#_render_passes">Render Passes</a>), and therefore are not required when creating a framebuffer.</p>
 </div>
 <div class="paragraph">
 <p>The coding listing below demonstrates creating a simple framebuffer from a color and depth image. Note that the usage parameter for the color image has the VK_IMAGE_USAGE_TRANSFER_SRC_BIT set.  This is required for any image presented to a window when calling <code>vkQueuePresent</code>.</p>
@@ -1660,9 +1661,11 @@ table.CodeRay td.code>pre{padding:0}
 <span class="line-numbers">51</span>VkFramebufferCreateInfo framebufferCreateInfo = {};
 <span class="line-numbers">52</span>framebufferCreateInfo.attachmentCount = <span class="keyword">static_cast</span>&lt;uint32_t&gt;(attachments.size());
 <span class="line-numbers">53</span>framebufferCreateInfo.pAttachments = attachments.data();
-<span class="line-numbers">54</span>
-<span class="line-numbers">55</span>VkFramebuffer framebuffer = VK_NULL_HANDLE;
-<span class="line-numbers">56</span>vkCreateFramebuffer(device, &amp;framebufferCreateInfo, &amp;framebuffer);</code></pre>
+<span class="line-numbers">54</span>framebufferCreateInfo.width = width;
+<span class="line-numbers">55</span>framebufferCreateInfo.height = height;
+<span class="line-numbers">56</span>framebufferCreateInfo.depth = <span class="integer">1</span>;
+<span class="line-numbers">57</span>VkFramebuffer framebuffer = VK_NULL_HANDLE;
+<span class="line-numbers">58</span>vkCreateFramebuffer(device, &amp;framebufferCreateInfo, &amp;framebuffer);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1672,6 +1675,12 @@ table.CodeRay td.code>pre{padding:0}
 <h4 id="_multisampled_framebuffers">7.5.1. Multisampled Framebuffers</h4>
 <div class="paragraph">
 <p>An application may create a multisampled framebuffer by setting <code>VkImageCreateInfo::samples</code> to the appropriate value when creating the color and depth stencil attachments.  Then the multisample state block must be set appropriately to enable multisampled rendering (see <a href="#_graphics_state">Graphics State</a>).</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_framebuffers_with_no_attachments">7.5.2. Framebuffers With No Attachments</h4>
+<div class="paragraph">
+<p>As described in the Vulkan specification, framebuffers with no attachments but valid dimensions may still be created. To create a framebuffer with no attachments in V-EZ, simply set <code>VkFramebufferCreateInfo::pAttachments</code> to null and <code>VkFramebufferCreateInfo::attachmentCount</code> to 0.  Then set appropriate values for width, height, depth and samples.</p>
 </div>
 </div>
 </div>
@@ -1689,7 +1698,7 @@ table.CodeRay td.code>pre{padding:0}
 <h2 id="_command_buffers">9. Command Buffers</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The primary difference between Vulkan and V-EZ with respect to command buffers is the removal of command pools in V-EZ. An application need no longer manage individual command pools across threads. Only <code>VkCommandBuffer</code> handles are exposed to applications in V-EZ. Furthermore, V-EZ allows an applications to call <code>vkBeginCommandBuffer</code> on a <code>VkCommandBuffer</code> handle after it has already been submitted to a queue but before it has completed execution. In V-EZ, <code>VkCommandBuffer</code> are light-weight handles compared to Vulkan.</p>
+<p>The primary differences between Vulkan and V-EZ with respect to command buffers are the removal of command pools and secondary command buffers in V-EZ. An application need no longer manage individual command pools across threads. Only <code>VkCommandBuffer</code> handles are exposed to applications in V-EZ. Furthermore, V-EZ allows an applications to call <code>vkBeginCommandBuffer</code> on a <code>VkCommandBuffer</code> handle after it has already been submitted to a queue but before it has completed execution. In V-EZ, <code>VkCommandBuffer</code> are light-weight handles compared to Vulkan.</p>
 </div>
 <div class="paragraph">
 <p>A secondary difference is with respect to pipeline barriers. As previously stated in <a href="#_synchronization">Synchronization</a>, V-EZ does not expose pipeline barriers. Within a command buffer, and between command buffer submissions, pipeline barriers are handled automatically. An application is no longer responsible for managing this level of synchronization.</p>
@@ -1704,15 +1713,14 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>VkQueue graphicsQueue = VK_NULL_HANDLE;
-<span class="line-numbers"> 2</span>vkGetDeviceGraphicsQueue(device, <span class="integer">0</span>, &amp;graphicsQueue);
-<span class="line-numbers"> 3</span>
-<span class="line-numbers"> 4</span>VkCommandBufferAllocateInfo allocInfo = {};
-<span class="line-numbers"> 5</span>allocInfo.queue = graphicsQueue;
-<span class="line-numbers"> 6</span>allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-<span class="line-numbers"> 7</span>allocInfo.commandBufferCount = <span class="integer">1</span>;
-<span class="line-numbers"> 8</span>VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
-<span class="line-numbers"> 9</span>VkResult result = vkAllocateCommandBuffers(device, &amp;allocInfo, &amp;commandBuffer);</code></pre>
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span>VkQueue graphicsQueue = VK_NULL_HANDLE;
+<span class="line-numbers">2</span>vkGetDeviceGraphicsQueue(device, <span class="integer">0</span>, &amp;graphicsQueue);
+<span class="line-numbers">3</span>
+<span class="line-numbers">4</span>VkCommandBufferAllocateInfo allocInfo = {};
+<span class="line-numbers">5</span>allocInfo.queue = graphicsQueue;
+<span class="line-numbers">6</span>allocInfo.commandBufferCount = <span class="integer">1</span>;
+<span class="line-numbers">7</span>VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+<span class="line-numbers">8</span>VkResult result = vkAllocateCommandBuffers(device, &amp;allocInfo, &amp;commandBuffer);</code></pre>
 </div>
 </div>
 <div class="paragraph">
