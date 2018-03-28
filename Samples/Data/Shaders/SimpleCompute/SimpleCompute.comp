@@ -1,0 +1,30 @@
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
+
+layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+
+layout(push_constant) uniform PushConstants
+{
+    int vertexCount;
+    float theta;
+} pushConstants;
+
+layout(std430, binding = 0) restrict buffer StorageBuffer
+{
+    vec4 vertices[];
+};
+
+void main()
+{
+    if (gl_GlobalInvocationID.x < pushConstants.vertexCount)
+    {
+        vec4 v = vertices[gl_GlobalInvocationID.x];
+        float speed = 0.5f / length(v.xy);
+        float theta = pushConstants.theta * speed;
+        float x = v.x * cos(theta) - v.y * sin(theta);
+        float y = v.y * cos(theta) + v.x * sin(theta);
+        v.x = x;
+        v.y = y;
+        vertices[gl_GlobalInvocationID.x] = v;
+    }
+}

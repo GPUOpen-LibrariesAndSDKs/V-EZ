@@ -11,10 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{BAB6E694-A66E-28E2-0F76-013EFB4CC3D2}</ProjectGuid>
+    <ProjectGuid>{FF2F2115-6B9C-DC0F-3490-746DA0BBFE77}</ProjectGuid>
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>SimpleQuad</RootNamespace>
+    <RootNamespace>SoftwareRasterization</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -42,15 +42,15 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\Bin\x86_64\</OutDir>
-    <IntDir>obj\x64\Debug\SimpleQuad\</IntDir>
-    <TargetName>SimpleQuadD</TargetName>
+    <IntDir>obj\x64\Debug\SoftwareRasterization\</IntDir>
+    <TargetName>SoftwareRasterizationD</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\Bin\x86_64\</OutDir>
-    <IntDir>obj\x64\Release\SimpleQuad\</IntDir>
-    <TargetName>SimpleQuad</TargetName>
+    <IntDir>obj\x64\Release\SoftwareRasterization\</IntDir>
+    <TargetName>SoftwareRasterization</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -97,16 +97,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\Common\AppBase.h" />
-    <ClInclude Include="..\SimpleQuad\SimpleQuad.h" />
+    <ClInclude Include="..\SoftwareRasterization\SoftwareRasterization.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Common\AppBase.cpp" />
-    <ClCompile Include="..\SimpleQuad\SimpleQuad.cpp" />
-    <ClCompile Include="..\SimpleQuad\main.cpp" />
+    <ClCompile Include="..\SoftwareRasterization\SoftwareRasterization.cpp" />
+    <ClCompile Include="..\SoftwareRasterization\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Data\Shaders\SimpleQuad\SimpleQuad.frag" />
-    <None Include="..\Data\Shaders\SimpleQuad\SimpleQuad.vert" />
+    <None Include="..\Data\Shaders\SoftwareRasterization\SoftwareRasterization.comp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

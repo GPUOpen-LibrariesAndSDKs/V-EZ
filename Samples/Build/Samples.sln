@@ -9,6 +9,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShadowMapping", "ShadowMapp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OcclusionCulling", "OcclusionCulling.vcxproj", "{A2D97B41-8ED2-9A93-B704-8018A35C7A9F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleCompute", "SimpleCompute.vcxproj", "{CC698C54-382A-088B-0165-51086DE44C67}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SoftwareRasterization", "SoftwareRasterization.vcxproj", "{FF2F2115-6B9C-DC0F-3490-746DA0BBFE77}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +35,14 @@ Global
 		{A2D97B41-8ED2-9A93-B704-8018A35C7A9F}.Debug|x64.Build.0 = Debug|x64
 		{A2D97B41-8ED2-9A93-B704-8018A35C7A9F}.Release|x64.ActiveCfg = Release|x64
 		{A2D97B41-8ED2-9A93-B704-8018A35C7A9F}.Release|x64.Build.0 = Release|x64
+		{CC698C54-382A-088B-0165-51086DE44C67}.Debug|x64.ActiveCfg = Debug|x64
+		{CC698C54-382A-088B-0165-51086DE44C67}.Debug|x64.Build.0 = Debug|x64
+		{CC698C54-382A-088B-0165-51086DE44C67}.Release|x64.ActiveCfg = Release|x64
+		{CC698C54-382A-088B-0165-51086DE44C67}.Release|x64.Build.0 = Release|x64
+		{FF2F2115-6B9C-DC0F-3490-746DA0BBFE77}.Debug|x64.ActiveCfg = Debug|x64
+		{FF2F2115-6B9C-DC0F-3490-746DA0BBFE77}.Debug|x64.Build.0 = Debug|x64
+		{FF2F2115-6B9C-DC0F-3490-746DA0BBFE77}.Release|x64.ActiveCfg = Release|x64
+		{FF2F2115-6B9C-DC0F-3490-746DA0BBFE77}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

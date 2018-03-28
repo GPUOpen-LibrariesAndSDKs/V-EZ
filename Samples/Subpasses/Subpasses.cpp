@@ -367,7 +367,6 @@ void Subpasses::CreateCommandBuffer()
     // Create a command buffer handle.
     VkCommandBufferAllocateInfo allocInfo = {};
     allocInfo.queue = m_graphicsQueue;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = 1;
     if (vkAllocateCommandBuffers(AppBase::GetDevice(), &allocInfo, &m_commandBuffer) != VK_SUCCESS)
         FATAL("vkAllocateCommandBuffers failed");

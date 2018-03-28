@@ -300,7 +300,6 @@ void ShadowMapping::CreateCommandBuffer()
     // Create a command buffer handle.
     VkCommandBufferAllocateInfo allocInfo = {};
     allocInfo.queue = m_graphicsQueue;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = 1;
     if (vkAllocateCommandBuffers(AppBase::GetDevice(), &allocInfo, &m_commandBuffer) != VK_SUCCESS)
         FATAL("vkAllocateCommandBuffers failed");
@@ -380,7 +379,7 @@ void ShadowMapping::ScenePass()
     int width, height;
     AppBase::GetWindowSize(&width, &height);
 
-    // Set the viewport state and dimensions.    
+    // Set the viewport state and dimensions.
     VkViewport viewport = { 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
     VkRect2D scissor = { { 0, 0 },{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) } };
     vkCmdSetViewport(m_commandBuffer, 0, 1, &viewport);
@@ -400,7 +399,7 @@ void ShadowMapping::ScenePass()
     VkRenderPassBeginInfo beginInfo = {};
     beginInfo.framebuffer = AppBase::GetFramebuffer();
     beginInfo.attachmentCount = static_cast<uint32_t>(attachmentReferences.size());
-    beginInfo.pAttachments = attachmentReferences.data();    
+    beginInfo.pAttachments = attachmentReferences.data();
     vkCmdBeginRenderPass(m_commandBuffer, &beginInfo);
 
     // Bind the pipeline.

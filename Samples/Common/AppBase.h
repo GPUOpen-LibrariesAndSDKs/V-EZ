@@ -62,6 +62,7 @@ protected:
     VkDevice GetDevice() const { return m_device; }
     VkFramebuffer GetFramebuffer() { return m_framebuffer.handle; }
     VkImage GetColorAttachment() { return m_framebuffer.colorImage; }
+    VkImageView GetColorAttachmentView() { return m_framebuffer.colorImageView; }
     GLFWwindow* GetWindow() const { return m_window; }
     void GetWindowSize(int* width, int* height);
 

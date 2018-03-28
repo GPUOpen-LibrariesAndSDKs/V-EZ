@@ -202,7 +202,7 @@ int AppBase::Run()
     // Initialize a VulkanEZ instance and enable the standard set of LunarG validation layers.
 #ifdef _DEBUG
     std::vector<const char*> enabledLayers = { "VK_LAYER_LUNARG_standard_validation" };
-    std::vector<const char*> enabledExtensions = { };
+    std::vector<const char*> enabledExtensions = { VK_EXT_DEBUG_REPORT_EXTENSION_NAME  };
 #else
     std::vector<const char*> enabledLayers = { };
     std::vector<const char*> enabledExtensions = {};
@@ -216,7 +216,7 @@ int AppBase::Run()
     auto result = vkCreateInstance(&createInfo, &m_instance);
     if (result != VK_SUCCESS)
     {
-        std::cout << "vkCreateInstance failed\n";
+        std::cout << "vkCreateInstance failed result=" << result << "\n";
         return -1;
     }
 
@@ -308,7 +308,7 @@ int AppBase::Run()
         CreateFramebuffer();
 
     // Initialize the application.
-    Initialize();
+    Initialize();  
 
     // Track time elapsed from one Update call to the next.
     double lastTime = glfwGetTime();
@@ -440,7 +440,7 @@ void AppBase::CreateFramebuffer()
     imageCreateInfo.arrayLayers = 1;
     imageCreateInfo.samples = m_sampleCountFlag;
     imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-    imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     auto result = vkCreateImage(m_device, VK_MEMORY_GPU_ONLY, &imageCreateInfo, &m_framebuffer.colorImage);
     if (result != VK_SUCCESS)
     {

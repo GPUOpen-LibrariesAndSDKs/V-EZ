@@ -345,7 +345,6 @@ void OcclusionCulling::CreateCommandBuffers()
     // Create a command buffer handle for the occlusion test pass.
     VkCommandBufferAllocateInfo allocInfo = {};
     allocInfo.queue = m_graphicsQueue;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = 1;
     if (vkAllocateCommandBuffers(AppBase::GetDevice(), &allocInfo, &m_occlusionTestCmdBuf) != VK_SUCCESS)
         FATAL("vkAllocateCommandBuffers failed"); 

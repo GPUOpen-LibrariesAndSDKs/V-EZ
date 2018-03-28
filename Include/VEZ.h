@@ -420,14 +420,8 @@ typedef enum VkQueryPipelineStatisticFlagBits {
 } VkQueryPipelineStatisticFlagBits;
 typedef VkFlags VkQueryPipelineStatisticFlags;
 
-typedef enum VkCommandBufferLevel {
-    VK_COMMAND_BUFFER_LEVEL_PRIMARY = 0,
-    VK_COMMAND_BUFFER_LEVEL_SECONDARY = 1,
-} VkCommandBufferLevel;
-
 typedef enum VkCommandBufferUsageFlagBits {
     VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT = 0x00000001,
-    VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT = 0x00000002,
     VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT = 0x00000004,
 } VkCommandBufferUsageFlagBits;
 typedef VkFlags VkCommandBufferUsageFlags;
@@ -497,8 +491,8 @@ typedef enum VkImageUsageFlagBits {
     VK_IMAGE_USAGE_STORAGE_BIT = 0x00000008,
     VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT = 0x00000010,
     VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT = 0x00000020,
-    //VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT = 0x00000040,
     VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT = 0x00000080,
+    VK_IMAGE_USAGE_GENERAL_BIT = 0x00000100
 } VkImageUsageFlagBits;
 typedef VkFlags VkImageUsageFlags;
 
@@ -1100,7 +1094,6 @@ typedef struct VkQueryPoolCreateInfo {
 
 typedef struct VkCommandBufferAllocateInfo {
     VkQueue queue;
-    VkCommandBufferLevel level;
     uint32_t commandBufferCount;
 } VkCommandBufferAllocateInfo;
 

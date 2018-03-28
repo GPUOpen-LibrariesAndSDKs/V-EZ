@@ -1,41 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="\Common">
-      <UniqueIdentifier>{9DAA10CA-098A-8F65-12A2-1A3C7E00F6C6}</UniqueIdentifier>
+    <Filter Include="Common">
+      <UniqueIdentifier>{8EEA3EAC-7A8C-6982-6347-7DD64F88F0D2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="\Shaders">
-      <UniqueIdentifier>{DE6E97CA-CA3B-F2D5-F354-E07DDF802764}</UniqueIdentifier>
+    <Filter Include="Data">
+      <UniqueIdentifier>{3F05847C-2B3C-850D-D428-6B10C03E010F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="\Source">
-      <UniqueIdentifier>{65AB67EF-D18A-E68A-DAA2-716146014DEC}</UniqueIdentifier>
+    <Filter Include="Data\Shaders">
+      <UniqueIdentifier>{18F93C28-045C-CCCC-ADE1-04839923984F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data\Shaders\SimpleQuad">
+      <UniqueIdentifier>{7C389E32-E86F-E6C9-F179-4AED5D300DC3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{56EB95D1-428D-C0A7-2B48-D4FB178947F8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Data\Shaders\SimpleQuad.frag">
-      <Filter>\Shaders</Filter>
+    <None Include="..\Data\Shaders\SimpleQuad\SimpleQuad.frag">
+      <Filter>Data\Shaders\SimpleQuad</Filter>
     </None>
-    <None Include="..\Data\Shaders\SimpleQuad.vert">
-      <Filter>\Shaders</Filter>
+    <None Include="..\Data\Shaders\SimpleQuad\SimpleQuad.vert">
+      <Filter>Data\Shaders\SimpleQuad</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Common\AppBase.h">
-      <Filter>\Common</Filter>
+      <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SimpleQuad\SimpleQuad.h">
-      <Filter>\Source</Filter>
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Common\AppBase.cpp">
-      <Filter>\Common</Filter>
+      <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="..\SimpleQuad\SimpleQuad.cpp">
-      <Filter>\Source</Filter>
+      <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\SimpleQuad\main.cpp">
-      <Filter>\Source</Filter>
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
