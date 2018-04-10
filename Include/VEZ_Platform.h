@@ -33,7 +33,7 @@ extern "C" {
     #define VKAPI_ATTR
     #define VKAPI_CALL __stdcall
     #define VKAPI_PTR VKAPI_CALL
-#elif
+#else
     #define VKAPI_ATTR
     #define VKAPI_CALL
     #define VKAPI_PTR VKAPI_CALL
