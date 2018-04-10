@@ -815,9 +815,9 @@ table.CodeRay td.code>pre{padding:0}
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>VkApplicationInfo appInfo = {};
 <span class="line-numbers"> 2</span>appInfo.pApplicationName = <span class="string"><span class="delimiter">&quot;</span><span class="content">MyApplication</span><span class="delimiter">&quot;</span></span>;
-<span class="line-numbers"> 3</span>appInfo.applicationVersion = VKEZ_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
+<span class="line-numbers"> 3</span>appInfo.applicationVersion = VEZ_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
 <span class="line-numbers"> 4</span>appInfo.pEngineName = <span class="string"><span class="delimiter">&quot;</span><span class="content">MyEngine</span><span class="delimiter">&quot;</span></span>;
-<span class="line-numbers"> 5</span>appinfo.engineVersion = VKEZ_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
+<span class="line-numbers"> 5</span>appinfo.engineVersion = VEZ_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
 <span class="line-numbers"> 6</span>
 <span class="line-numbers"> 7</span>VkInstanceCreateInfo createInfo = {};
 <span class="line-numbers"> 8</span>createInfo.pApplicationInfo = &amp;appInfo;
@@ -982,9 +982,9 @@ table.CodeRay td.code>pre{padding:0}
 <span class="line-numbers"> 27</span>    <span class="comment">// Create the V-EZ instance.</span>
 <span class="line-numbers"> 28</span>    VkApplicationInfo appInfo = {};
 <span class="line-numbers"> 29</span>    appInfo.pApplicationName = <span class="string"><span class="delimiter">&quot;</span><span class="content">MyApplication</span><span class="delimiter">&quot;</span></span>;
-<span class="line-numbers"> 30</span>    appInfo.applicationVersion = VKEZ_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
+<span class="line-numbers"> 30</span>    appInfo.applicationVersion = VEZ_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
 <span class="line-numbers"> 31</span>    appInfo.pEngineName = <span class="string"><span class="delimiter">&quot;</span><span class="content">MyEngine</span><span class="delimiter">&quot;</span></span>;
-<span class="line-numbers"> 32</span>    appinfo.engineVersion = VKEZ_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
+<span class="line-numbers"> 32</span>    appinfo.engineVersion = VEZ_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
 <span class="line-numbers"> 33</span>
 <span class="line-numbers"> 34</span>    VkInstanceCreateInfo instanceCreateInfo = {};
 <span class="line-numbers"> 35</span>    instanceCreateInfo.pApplicationInfo = &amp;appInfo;
