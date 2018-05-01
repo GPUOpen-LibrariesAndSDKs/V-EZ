@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 1.5.6.2">
+<meta name="generator" content="Asciidoctor 1.5.6.1">
 <meta name="author" content="Advanced Micro Devices - Version 1.1.0, 2018-05-01">
 <title>V-EZ API Documentation</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -589,14 +589,15 @@ table.CodeRay td.code>pre{padding:0}
 </li>
 <li><a href="#_resource_creation">6. Resource Creation</a>
 <ul class="sectlevel2">
-<li><a href="#_buffers">6.1. Buffers</a></li>
-<li><a href="#_buffer_views">6.2. Buffer Views</a></li>
-<li><a href="#_images">6.3. Images</a></li>
-<li><a href="#_image_views">6.4. Image Views</a></li>
-<li><a href="#_framebuffers">6.5. Framebuffers</a>
+<li><a href="#_vulkan_memory_management">6.1. Vulkan Memory Management</a></li>
+<li><a href="#_buffers">6.2. Buffers</a></li>
+<li><a href="#_buffer_views">6.3. Buffer Views</a></li>
+<li><a href="#_images">6.4. Images</a></li>
+<li><a href="#_image_views">6.5. Image Views</a></li>
+<li><a href="#_framebuffers">6.6. Framebuffers</a>
 <ul class="sectlevel3">
-<li><a href="#_multisampled_framebuffers">6.5.1. Multisampled Framebuffers</a></li>
-<li><a href="#_framebuffers_with_no_attachments">6.5.2. Framebuffers With No Attachments</a></li>
+<li><a href="#_multisampled_framebuffers">6.6.1. Multisampled Framebuffers</a></li>
+<li><a href="#_framebuffers_with_no_attachments">6.6.2. Framebuffers With No Attachments</a></li>
 </ul>
 </li>
 </ul>
@@ -1232,6 +1233,9 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 <div class="paragraph">
 <p>An application may obtain semaphore objects when calling <code>vkQueueSubmit</code> or <code>vkQueuePresent</code>.  In both cases, the semaphores are set to be signaled when either operation completes and may be passed as wait semaphores to a proceeding queue submission or present operation.  In V-EZ, semaphores are never explicitly destroyed by the application, rather once they are passed as wait semaphores to a proceeding queue operation, the application no longer maintains ownership. See the previous code listing in <a href="#_queue_presentation">Queue Presentation</a>.</p>
 </div>
+<div class="paragraph">
+<p>The only exception to this behavior is if a semaphore created by VEZ is then passed as a wait semaphore to a native Vulkan queue submission.  In this case, the application must call vezDestroySemaphore once the native Vulkan queue submission completes and the semaphore has been waited on.</p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_events">3.3. Events</h3>
@@ -1538,7 +1542,8 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 <span class="line-numbers">4</span>    VEZ_MEMORY_CPU_TO_GPU = <span class="hex">0x00000002</span>,
 <span class="line-numbers">5</span>    VEZ_MEMORY_GPU_TO_CPU = <span class="hex">0x00000004</span>,
 <span class="line-numbers">6</span>    VEZ_MEMORY_DEDICATED_ALLOCATION = <span class="hex">0x00000008</span>,
-<span class="line-numbers">7</span>} VezMemoryFlagsBits;</code></pre>
+<span class="line-numbers">7</span>    VEZ_MEMORY_NO_ALLOCATION = <span class="hex">0x00000010</span>,
+<span class="line-numbers">8</span>} VezMemoryFlagsBits;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1557,10 +1562,19 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 <p><strong>VEZ_MEMORY_DEDICATED_ALLOCATION</strong> specifies that the buffer or image should use a unique memory block.</p>
 </div>
 <div class="paragraph">
+<p><strong>VEZ_MEMORY_NO_ALLOCATION</strong> specifies that the application will provide the memory backing for the created buffer or image.</p>
+</div>
+<div class="paragraph">
 <p>V-EZ&#8217;s internal memory management sub-allocates memory blocks by default.  If an application prefers that a particular buffer or image have its own dedicated memory block, <strong>VEZ_MEMORY_DEDICATED_ALLOCATION</strong> can be used.</p>
 </div>
 <div class="sect2">
-<h3 id="_buffers">6.1. Buffers</h3>
+<h3 id="_vulkan_memory_management">6.1. Vulkan Memory Management</h3>
+<div class="paragraph">
+<p>V-EZ typically manages all memory allocations transparently.  However in the case where an application desires fine grain control over allocations for one or more objects, the <code>VEZ_MEMORY_NO_ALLOCATION</code> enumeration value may be passed to the <code>memFlags</code> parameter of either <code>vezCreateBuffer</code> or <code>vezCreateImage</code>.  An application must then query the memory requirements of the object, find the appropriate heap index, allocate the memory with <code>vkAllocateMemory</code> and then subsequently bind the memory to the buffer or image with <code>vkBindBufferMemory</code> or <code>vkBindImageMemory</code>. See the VulkanMemory sample included with V-EZ for a code example.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_buffers">6.2. Buffers</h3>
 <div class="paragraph">
 <p>Buffers are represented by <code>VkBuffer</code> handles and created by calling <code>vkCreateBuffer</code>. The code listing below demonstrates creating a buffer to be used for <em>staging</em>, or data transfers optimized for host to device.</p>
 </div>
@@ -1585,13 +1599,13 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 </div>
 </div>
 <div class="sect2">
-<h3 id="_buffer_views">6.2. Buffer Views</h3>
+<h3 id="_buffer_views">6.3. Buffer Views</h3>
 <div class="paragraph">
 <p>Creating buffer views from buffers has nearly identical syntax to Vulkan. An application calls <code>vezCreateBufferView</code> with appropriate values for fields in <code>VezBufferViewCreateInfo</code>. Buffer views are destroyed by calling <code>vezDestroyBufferView</code>.  For more information on buffer views, see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#resources-buffer-views">Vulkan spec</a>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_images">6.3. Images</h3>
+<h3 id="_images">6.4. Images</h3>
 <div class="paragraph">
 <p>Images are represented by <code>VkImage</code> handles and created by calling <code>vezCreateImage</code>.  Like buffers, <code>VezMemoryFlags</code> is passed to <code>vezCreateImage</code> allowing an application to specify how the memory will be used and where the it should reside.  The syntax and behavior of <code>vezCreateImage</code> and <code>VezImageCreateInfo</code> in V-EZ are nearly identical to Vulkan, see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#resources-images">Vulkan spec</a> for more information.</p>
 </div>
@@ -1600,13 +1614,13 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 </div>
 </div>
 <div class="sect2">
-<h3 id="_image_views">6.4. Image Views</h3>
+<h3 id="_image_views">6.5. Image Views</h3>
 <div class="paragraph">
 <p>See the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#resources-image-views">Vulkan spec</a> for more information on image views.  The behavior and syntax in V-EZ is nearly identical to Vulkan.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_framebuffers">6.5. Framebuffers</h3>
+<h3 id="_framebuffers">6.6. Framebuffers</h3>
 <div class="paragraph">
 <p>In Vulkan, an application must specify an array of <code>VkImageView</code> attachments, a <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#renderpass-compatibility">compatible</a> Render Pass, and the dimensions when creating a framebuffer.  V-EZ simplifies this to only requiring the array of attachments and the dimensions.  Render passes are never explicitly created by applications V-EZ (see <a href="#_render_passes">Render Passes</a>), and therefore are not required when creating a framebuffer.</p>
 </div>
@@ -1679,13 +1693,13 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 <p>Framebuffers are destroyed by calling <code>vezDestroyFramebuffer</code>.</p>
 </div>
 <div class="sect3">
-<h4 id="_multisampled_framebuffers">6.5.1. Multisampled Framebuffers</h4>
+<h4 id="_multisampled_framebuffers">6.6.1. Multisampled Framebuffers</h4>
 <div class="paragraph">
 <p>An application may create a multisampled framebuffer by setting <code>VezImageCreateInfo::samples</code> to the appropriate value when creating the color and depth stencil attachments.  Then the multisample state block must be set appropriately to enable multisampled rendering (see <a href="#_graphics_state">Graphics State</a>).</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_framebuffers_with_no_attachments">6.5.2. Framebuffers With No Attachments</h4>
+<h4 id="_framebuffers_with_no_attachments">6.6.2. Framebuffers With No Attachments</h4>
 <div class="paragraph">
 <p>As described in the Vulkan specification, framebuffers with no attachments but valid dimensions may still be created. To create a framebuffer with no attachments in V-EZ, simply set <code>VezFramebufferCreateInfo::pAttachments</code> to null and <code>VezFramebufferCreateInfo::attachmentCount</code> to 0.  Then set appropriate values for width, height, depth and samples.</p>
 </div>
@@ -2261,7 +2275,7 @@ The preprocessor macro <code>VK_WHOLE_SIZE</code> may be passed to the <code>ran
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-04-21 11:33:58 Central Daylight Time
+Last updated 2018-04-23 07:33:35 DST
 </div>
 </div>
 </body>
