@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 1.5.6.1">
-<meta name="author" content="Advanced Micro Devices - Version 1.0.0, 2018-01-26">
+<meta name="generator" content="Asciidoctor 1.5.6.2">
+<meta name="author" content="Advanced Micro Devices - Version 1.1.0, 2018-05-01">
 <title>V-EZ API Documentation</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -522,7 +522,7 @@ table.CodeRay td.code>pre{padding:0}
 <div id="header">
 <h1>V-EZ API Documentation</h1>
 <div class="details">
-<span id="author" class="author">Advanced Micro Devices - Version 1.0.0, 2018-01-26</span><br>
+<span id="author" class="author">Advanced Micro Devices - Version 1.1.0, 2018-05-01</span><br>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -532,98 +532,99 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_what_is_v_ez">1.1. What is V-EZ?</a></li>
 <li><a href="#_what_is_abstracted_from_vulkan">1.2. What is Abstracted From Vulkan?</a></li>
 <li><a href="#_performance_comparisons">1.3. Performance Comparisons</a></li>
-<li><a href="#_vulkan_compatibility">1.4. Vulkan Compatibility</a></li>
+<li><a href="#_native_vulkan_calls">1.4. Native Vulkan Calls</a></li>
 </ul>
 </li>
-<li><a href="#_initialization">2. Initialization</a>
+<li><a href="#_initialization">Initialization</a>
 <ul class="sectlevel2">
-<li><a href="#_preprocessor_macros">2.1. Preprocessor Macros</a></li>
-<li><a href="#_instances">2.2. Instances</a></li>
-<li><a href="#_surfaces">2.3. Surfaces</a></li>
-<li><a href="#_physical_devices">2.4. Physical Devices</a>
+<li><a href="#_preprocessor_macros">Preprocessor Macros</a></li>
+<li><a href="#_instances">Instances</a></li>
+<li><a href="#_surfaces">Surfaces</a></li>
+<li><a href="#_physical_devices">Physical Devices</a>
 <ul class="sectlevel3">
-<li><a href="#_enumeration">2.4.1. Enumeration</a></li>
-<li><a href="#_surface_and_present_support">2.4.2. Surface and Present Support</a></li>
-<li><a href="#_extensions_properties_and_support">2.4.3. Extensions Properties and Support</a></li>
-<li><a href="#_layers_support">2.4.4. Layers Support</a></li>
+<li><a href="#_extensions_support">Extensions Support</a></li>
+<li><a href="#_layers_support">Layers Support</a></li>
 </ul>
 </li>
-<li><a href="#_devices">2.5. Devices</a></li>
-<li><a href="#_putting_it_all_together">2.6. Putting It All Together</a></li>
+<li><a href="#_devices">Devices</a></li>
+<li><a href="#_swapchains_and_present_support">Swapchains and Present Support</a></li>
+<li><a href="#_putting_it_all_together">Putting It All Together</a></li>
 </ul>
 </li>
-<li><a href="#_queues">3. Queues</a>
+<li><a href="#_queues">2. Queues</a>
 <ul class="sectlevel2">
-<li><a href="#_queue_families">3.1. Queue Families</a></li>
-<li><a href="#_queue_submission">3.2. Queue Submission</a></li>
-<li><a href="#_queue_presentation">3.3. Queue Presentation</a>
+<li><a href="#_queue_families">2.1. Queue Families</a></li>
+<li><a href="#_queue_submission">2.2. Queue Submission</a></li>
+<li><a href="#_queue_presentation">2.3. Queue Presentation</a>
 <ul class="sectlevel3">
-<li><a href="#_multisampled_images">3.3.1. Multisampled Images</a></li>
+<li><a href="#_multisampled_images">2.3.1. Multisampled Images</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#_synchronization">4. Synchronization</a>
+<li><a href="#_synchronization">3. Synchronization</a>
 <ul class="sectlevel2">
-<li><a href="#_fences">4.1. Fences</a></li>
-<li><a href="#_semaphores">4.2. Semaphores</a></li>
-<li><a href="#_events">4.3. Events</a></li>
-<li><a href="#_wait_idle_operations">4.4. Wait Idle Operations</a></li>
+<li><a href="#_fences">3.1. Fences</a></li>
+<li><a href="#_semaphores">3.2. Semaphores</a></li>
+<li><a href="#_events">3.3. Events</a></li>
+<li><a href="#_wait_idle_operations">3.4. Wait Idle Operations</a></li>
 </ul>
 </li>
-<li><a href="#_pipelines">5. Pipelines</a>
+<li><a href="#_pipelines">4. Pipelines</a>
 <ul class="sectlevel2">
-<li><a href="#_shader_modules">5.1. Shader Modules</a></li>
-<li><a href="#_graphics_pipelines">5.2. Graphics Pipelines</a></li>
-<li><a href="#_compute_pipelines">5.3. Compute Pipelines</a></li>
-<li><a href="#_pipeline_reflection">5.4. Pipeline Reflection</a></li>
-<li><a href="#_pipeline_binding">5.5. Pipeline Binding</a></li>
+<li><a href="#_shader_modules">4.1. Shader Modules</a></li>
+<li><a href="#_graphics_pipelines">4.2. Graphics Pipelines</a></li>
+<li><a href="#_compute_pipelines">4.3. Compute Pipelines</a></li>
+<li><a href="#_specialization_constants">4.4. Specialization Constants</a></li>
+<li><a href="#_push_constants">4.5. Push Constants</a></li>
+<li><a href="#_pipeline_reflection">4.6. Pipeline Reflection</a></li>
+<li><a href="#_pipeline_binding">4.7. Pipeline Binding</a></li>
 </ul>
 </li>
-<li><a href="#_vertex_input_formats">6. Vertex Input Formats</a>
+<li><a href="#_vertex_input_formats">5. Vertex Input Formats</a>
 <ul class="sectlevel2">
-<li><a href="#_creation">6.1. Creation</a></li>
-<li><a href="#_destruction">6.2. Destruction</a></li>
+<li><a href="#_creation">5.1. Creation</a></li>
+<li><a href="#_destruction">5.2. Destruction</a></li>
 </ul>
 </li>
-<li><a href="#_resource_creation">7. Resource Creation</a>
+<li><a href="#_resource_creation">6. Resource Creation</a>
 <ul class="sectlevel2">
-<li><a href="#_buffers">7.1. Buffers</a></li>
-<li><a href="#_buffer_views">7.2. Buffer Views</a></li>
-<li><a href="#_images">7.3. Images</a></li>
-<li><a href="#_image_views">7.4. Image Views</a></li>
-<li><a href="#_framebuffers">7.5. Framebuffers</a>
+<li><a href="#_buffers">6.1. Buffers</a></li>
+<li><a href="#_buffer_views">6.2. Buffer Views</a></li>
+<li><a href="#_images">6.3. Images</a></li>
+<li><a href="#_image_views">6.4. Image Views</a></li>
+<li><a href="#_framebuffers">6.5. Framebuffers</a>
 <ul class="sectlevel3">
-<li><a href="#_multisampled_framebuffers">7.5.1. Multisampled Framebuffers</a></li>
-<li><a href="#_framebuffers_with_no_attachments">7.5.2. Framebuffers With No Attachments</a></li>
+<li><a href="#_multisampled_framebuffers">6.5.1. Multisampled Framebuffers</a></li>
+<li><a href="#_framebuffers_with_no_attachments">6.5.2. Framebuffers With No Attachments</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#_samplers">8. Samplers</a></li>
-<li><a href="#_command_buffers">9. Command Buffers</a>
+<li><a href="#_samplers">7. Samplers</a></li>
+<li><a href="#_command_buffers">8. Command Buffers</a>
 <ul class="sectlevel2">
-<li><a href="#_allocation_and_management">9.1. Allocation and Management</a></li>
-<li><a href="#_recording">9.2. Recording</a></li>
-<li><a href="#_graphics_state">9.3. Graphics State</a></li>
-<li><a href="#_resource_binding">9.4. Resource Binding</a></li>
+<li><a href="#_allocation_and_management">8.1. Allocation and Management</a></li>
+<li><a href="#_recording">8.2. Recording</a></li>
+<li><a href="#_graphics_state">8.3. Graphics State</a></li>
+<li><a href="#_resource_binding">8.4. Resource Binding</a></li>
 </ul>
 </li>
-<li><a href="#_render_passes">10. Render Passes</a>
+<li><a href="#_render_passes">9. Render Passes</a>
 <ul class="sectlevel2">
-<li><a href="#_begin_a_render_pass">10.1. Begin A Render Pass</a></li>
-<li><a href="#_next_subpass">10.2. Next Subpass</a></li>
-<li><a href="#_end_a_render_pass">10.3. End A Render Pass</a></li>
-<li><a href="#_input_attachments">10.4. Input Attachments</a></li>
+<li><a href="#_begin_a_render_pass">9.1. Begin A Render Pass</a></li>
+<li><a href="#_next_subpass">9.2. Next Subpass</a></li>
+<li><a href="#_end_a_render_pass">9.3. End A Render Pass</a></li>
+<li><a href="#_input_attachments">9.4. Input Attachments</a></li>
 </ul>
 </li>
-<li><a href="#_updating_memory">11. Updating Memory</a>
+<li><a href="#_updating_memory">10. Updating Memory</a>
 <ul class="sectlevel2">
-<li><a href="#_map_and_unmap">11.1. Map and Unmap</a></li>
-<li><a href="#_utility_functions">11.2. Utility Functions</a></li>
+<li><a href="#_map_and_unmap">10.1. Map and Unmap</a></li>
+<li><a href="#_utility_functions">10.2. Utility Functions</a></li>
 </ul>
 </li>
-<li><a href="#_glsl_guide">12. GLSL Guide</a></li>
+<li><a href="#_glsl_guide">11. GLSL Guide</a></li>
 </ul>
 </div>
 </div>
@@ -632,12 +633,12 @@ table.CodeRay td.code>pre{padding:0}
 <h2 id="_introduction">1. Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This document describes the V-EZ middleware layer, what it is, what it abstracts away from the Vulkan API, and how to use it. Comparisons to Vulkan are made with the assumption the reader has a moderate understanding of the Khronos specification. In many sections of this documentation, details of functions calls are omitted since the behavior is nearly identical to Vulkan. The latest specification for the Vulkan API can be found <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html">here</a>.</p>
+<p>This document describes the V-EZ Vulkan wrapper library, what it is, what it abstracts away from the Vulkan API, and how to use it. Comparisons to Vulkan are made with the assumption the reader has a moderate understanding of the Khronos specification. In many sections of this documentation, details of functions calls are omitted since the behavior is nearly identical to Vulkan. The latest specification for the Vulkan API can be found <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html">here</a>.</p>
 </div>
 <div class="sect2">
 <h3 id="_what_is_v_ez">1.1. What is V-EZ?</h3>
 <div class="paragraph">
-<p>V-EZ is designed to be a middleware layer around Vulkan which maintains nearly identical syntax but abstracts away the lower level complexities. The motivation behind this design is to accelerate adoption of Vulkan among software vendors outside of the gaming industry, who desire modern graphics API features without all of the low level responsibilities. The goal of V-EZ is to ease the transition from OpenGL to Vulkan, not replace Vulkan.</p>
+<p>V-EZ is designed to be a C based light-weight layer around Vulkan which maintains mostly identical semantics but abstracts away the lower level complexities. The motivation behind this design is to accelerate adoption of Vulkan among software vendors outside of the gaming industry, who desire modern graphics API features without all of the low level responsibilities.</p>
 </div>
 </div>
 <div class="sect2">
@@ -702,7 +703,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="sect2">
 <h3 id="_performance_comparisons">1.3. Performance Comparisons</h3>
 <div class="paragraph">
-<p>Since V-EZ is a middleware layer on top of the Vulkan API, there will inherently be some cases where performance may decrease slightly. However in most cases the performance overhead is negligible.  Existing best practices with respect to Vulkan are still applicable with V-EZ.  These include, but are not limited to:</p>
+<p>V-EZ incurs only slight overhead compared to native Vulkan API calls. However in most cases the performance overhead is negligible.  Existing best practices with respect to Vulkan are still applicable with V-EZ.  These include, but are not limited to:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -728,69 +729,42 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 </div>
 <div class="sect2">
-<h3 id="_vulkan_compatibility">1.4. Vulkan Compatibility</h3>
+<h3 id="_native_vulkan_calls">1.4. Native Vulkan Calls</h3>
 <div class="paragraph">
-<p>Given that V-EZ contains similar function and object declarations found in Vulkan, this presents two minor issues:  V-EZ and Vulkan header files cannot be included within the same source file, and linking against both VulkanEZ and Vulkan will result in linker errors.  To circumvent the latter, VulkanEZ includes a dynamic runtime linking utility header so that entry points may be retrieved at runtime and not conflict with those found within the Vulkan library.</p>
-</div>
-<div class="paragraph">
-<p>To support applications requiring third party libraries which use Vulkan, many object handles returned by V-EZ are the native ones.  These include the following:</p>
+<p>Most object handles created by V-EZ are the native Vulkan objects.  These can be used in native Vulkan.  There are only a few exceptions, which are prefixed with <code>vez</code> rather than <code>vk</code>.  These object handles may only be passed to V-EZ.</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>VkInstance</p>
+<p>vezSwapchain</p>
 </li>
 <li>
-<p>VkPhysicalDevice</p>
+<p>vezCommandBuffer</p>
 </li>
 <li>
-<p>VkDevice</p>
+<p>vezPipeline</p>
 </li>
 <li>
-<p>VkQueue</p>
-</li>
-<li>
-<p>VkFence</p>
-</li>
-<li>
-<p>VkSemaphore</p>
-</li>
-<li>
-<p>VkEvent</p>
-</li>
-<li>
-<p>VkQueryPool</p>
-</li>
-<li>
-<p>VkBuffer</p>
-</li>
-<li>
-<p>VkBufferView</p>
-</li>
-<li>
-<p>VkImage</p>
-</li>
-<li>
-<p>VkImageView</p>
+<p>vezFramebuffer</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>Given the additional level of responsibility V-EZ alleviates from applications, other object handles cannot be directly used with Vulkan.  These include the obvious ones missing from the list above, namely VkCommandBuffer, VkPipeline and VkFramebuffer.</p>
+<p>Any native Vulkan API functions that do not exist within V-EZ may be used with Vulkan object handles returned by V-EZ.</p>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_initialization">2. Initialization</h2>
+<h2 id="_initialization">Initialization</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>This section describes how an application initializes V-EZ, enumerates devices attached to the system and creates one or more handles to those devices for use.</p>
 </div>
 <div class="sect2">
-<h3 id="_preprocessor_macros">2.1. Preprocessor Macros</h3>
+<h3 id="_preprocessor_macros">Preprocessor Macros</h3>
 <div class="paragraph">
-<p>An application must first define which platform is being used with V-EZ. To faciliate this, existing preprocessor macros from the Vulkan API are used. One of these should be defined before including <code>VEZ.h</code> in the application&#8217;s source code.</p>
+<p>An application must first define which windowing platform is being used with V-EZ. To faciliate this, existing preprocessor macros from the Vulkan API are used. One of these should be defined before including <code>V-EZ.h</code> in the application&#8217;s source code.</p>
 </div>
 <div class="ulist">
 <ul>
@@ -798,156 +772,165 @@ table.CodeRay td.code>pre{padding:0}
 <p>VK_USE_PLATFORM_WIN32_KHR</p>
 </li>
 <li>
+<p>VK_USE_PLATFORM_MACOS_MVK</p>
+</li>
+<li>
 <p>VK_USE_PLATFORM_XLIB_KHR</p>
 </li>
 <li>
 <p>VK_USE_PLATFORM_XCB_KHR</p>
 </li>
+<li>
+<p>VK_USE_PLATFORM_WAYLAND_KHR</p>
+</li>
 </ul>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_instances">2.2. Instances</h3>
+<h3 id="_instances">Instances</h3>
 <div class="paragraph">
-<p>The next step to using V-EZ is to create a <code>VkInstance</code> object by calling <code>vkCreateInstance</code> with appropriate parameter values set in <code>VkInstanceCreateInfo</code> and <code>VkApplicationInfo</code>. These structures allow an application to pass information about itself to V-EZ. Below is a simple example call.</p>
+<p>The next step to using V-EZ is to create a <code>VkInstance</code> object by calling <code>vezCreateInstance</code> with appropriate parameter values set in <code>VezInstanceCreateInfo</code> and <code>VezApplicationInfo</code>. These structures allow an application to pass information about itself to V-EZ. Below is a simple example call.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>VkApplicationInfo appInfo = {};
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>VezApplicationInfo appInfo = {};
 <span class="line-numbers"> 2</span>appInfo.pApplicationName = <span class="string"><span class="delimiter">&quot;</span><span class="content">MyApplication</span><span class="delimiter">&quot;</span></span>;
-<span class="line-numbers"> 3</span>appInfo.applicationVersion = VEZ_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
+<span class="line-numbers"> 3</span>appInfo.applicationVersion = VK_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
 <span class="line-numbers"> 4</span>appInfo.pEngineName = <span class="string"><span class="delimiter">&quot;</span><span class="content">MyEngine</span><span class="delimiter">&quot;</span></span>;
-<span class="line-numbers"> 5</span>appinfo.engineVersion = VEZ_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
+<span class="line-numbers"> 5</span>appinfo.engineVersion = VK_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
 <span class="line-numbers"> 6</span>
-<span class="line-numbers"> 7</span>VkInstanceCreateInfo createInfo = {};
+<span class="line-numbers"> 7</span>VezInstanceCreateInfo createInfo = {};
 <span class="line-numbers"> 8</span>createInfo.pApplicationInfo = &amp;appInfo;
 <span class="line-numbers"> 9</span>
 <span class="line-numbers">10</span>VkInstance instance = VK_NULL_HANDLE;
-<span class="line-numbers">11</span>VkResult result = vkCreateInstance(&amp;createInfo, &amp;instance);</code></pre>
+<span class="line-numbers">11</span>VkResult result = vezCreateInstance(&amp;createInfo, &amp;instance);</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>As with Vulkan, instance layers and extensions can be enabled by passing the relevant string names to <code>VkInstanceCreateInfo::ppEnabledLayerNames</code> and <code>VkInstanceCreateInfo::ppEnabledExtensionNames</code>. For example, to enable the LunarG standard validation layer, the above code would be modified to be the following below.</p>
+<p>As with Vulkan, instance layers and extensions can be enabled by passing the relevant string names to <code>VezInstanceCreateInfo::ppEnabledLayerNames</code> and <code>VezInstanceCreateInfo::ppEnabledExtensionNames</code>. For example, to enable the LunarG standard validation layer, the above code would be modified to be the following below.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span>std::array&lt;<span class="directive">const</span> <span class="predefined-type">char</span>*&gt; enabledLayers = { <span class="string"><span class="delimiter">&quot;</span><span class="content">VK_LAYER_LUNARG_standard_validation</span><span class="delimiter">&quot;</span></span> };
 <span class="line-numbers">2</span>
-<span class="line-numbers">3</span>VkInstanceCreateInfo createInfo = {};
+<span class="line-numbers">3</span>VezInstanceCreateInfo createInfo = {};
 <span class="line-numbers">4</span>createInfo.pApplicationInfo = &amp;appInfo;
 <span class="line-numbers">5</span>createInfo.enabledLayerCount = <span class="keyword">static_cast</span>&lt;uint32_t&gt;(enabledLayers.size());
 <span class="line-numbers">6</span>createInfo.ppEnabledLayerNames = enabledLayers.data();</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The <code>vkEnumerateInstanceExtensionProperties</code> and <code>vkEnumerateInstanceLayerProperties</code> are also available and have identical behavior to Vulkan. For more information about vkCreateInstance and instance layers and extensions, see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#initialization-instances">Vulkan spec</a>.</p>
+<p>The <code>vezEnumerateInstanceExtensionProperties</code> and <code>vezEnumerateInstanceLayerProperties</code> may be used to enumerate available instance extensions and layers.  The behavior is identical to native Vulkan. For more information about vkCreateInstance and instance layers and extensions, see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#initialization-instances">Vulkan spec</a>.</p>
 </div>
 <div class="paragraph">
-<p>A <code>VkInstance</code> object is destroyed by calling <code>VkDestroyInstance</code> when an application terminates.</p>
+<p>A <code>VkInstance</code> object is destroyed by calling <code>VezDestroyInstance</code> when an application terminates.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span>vkDestroyInstance(instance);</code></pre>
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span>vezDestroyInstance(instance);</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_surfaces">2.3. Surfaces</h3>
+<h3 id="_surfaces">Surfaces</h3>
 <div class="paragraph">
-<p>Vulkan implements support for different window systems by implementing extensions for each platform. An application must define the correct preprocessor macro depending on the platform (see <a href="#_preprocessor_macros">Preprocessor Macros</a>), then call that platform specific function set. V-EZ simplifies this interface down to a single function <code>vkCreateSurface</code>. The code snippet below demonstrates creating a <code>VkSurface</code> object under Windows with an application that uses the GLFW library.</p>
+<p>Vulkan implements support for different window systems by implementing extensions for each platform. An application must define the correct preprocessor macro depending on the platform (see <a href="#_preprocessor_macros">Preprocessor Macros</a>), then call that platform specific function set. V-EZ simplifies this interface down to a single function <code>vezCreateSurface</code> with <code>VezSurfaceCreateInfo</code> containing the necessary parameters for each platform. The code snippet below demonstrates creating a <code>VkSurface</code> object under Windows with an application that uses the GLFW library.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span>VkSurfaceCreateInfo createInfo = {};
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span>VezSurfaceCreateInfo createInfo = {};
 <span class="line-numbers">2</span>createInfo.hinstance = GetModuleHandle(<span class="predefined-constant">nullptr</span>);
 <span class="line-numbers">3</span>createInfo.hwnd = glfwGetWin32Window(window);
 <span class="line-numbers">4</span>
-<span class="line-numbers">5</span>VkSurface surface = VK_NULL_HANDLE;
-<span class="line-numbers">6</span>VkResult result = vkCreateSurface(instance, &amp;createInfo, &amp;surface);</code></pre>
+<span class="line-numbers">5</span>VkSurfaceKHR surface = VK_NULL_HANDLE;
+<span class="line-numbers">6</span>VkResult result = vezCreateSurface(instance, &amp;createInfo, &amp;surface);</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>If an application is rendering to a platform window handle, it is important to create the <code>VkSurface</code> object before selecting a physical device since surface format and presentation support must be validated with the physical device chosen.</p>
+<p>If an application is rendering to a platform window handle, it is important to create the <code>VkSurface</code> object before selecting a physical device since surface format, and presentation support, must be validated with the physical device chosen.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_physical_devices">2.4. Physical Devices</h3>
+<h3 id="_physical_devices">Physical Devices</h3>
 <div class="paragraph">
-<p>Once a <code>VkInstance</code> handle is created, and if rendering to a window a <code>VkSurface</code>, physical devices in the system can be enumerated.</p>
-</div>
-<div class="sect3">
-<h4 id="_enumeration">2.4.1. Enumeration</h4>
-<div class="paragraph">
-<p>To retrieve a list of physical devices in the system, call <code>vkEnumeratePhysicalDevices</code>, which behaves identically to its counterpart in Vulkan. Physical device properties and features can be retrieved via <code>vkGetPhysicalDeviceProperties</code> and <code>vkGetPhysicalDeviceFeatures</code>. The following code snippet demonstrates enumerating all available physical devices in a system and their properties and features.</p>
+<p>To retrieve a list of physical devices in the system, call <code>vezEnumeratePhysicalDevices</code>, which behaves identically to its counterpart in Vulkan. Physical device properties and features can be retrieved via <code>vezGetPhysicalDeviceProperties</code> and <code>vezGetPhysicalDeviceFeatures</code>. The following code snippet demonstrates enumerating all available physical devices in a system and their properties and features.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>uint32_t physicalDeviceCount;
-<span class="line-numbers"> 2</span>vkEnumeratePhysicalDevices(instance, &amp;physicalDeviceCount, <span class="predefined-constant">nullptr</span>);
+<span class="line-numbers"> 2</span>vezEnumeratePhysicalDevices(instance, &amp;physicalDeviceCount, <span class="predefined-constant">nullptr</span>);
 <span class="line-numbers"> 3</span>
 <span class="line-numbers"> 4</span>std::vector&lt;VkPhysicalDevice&gt; physicalDevices(physicalDeviceCount);
-<span class="line-numbers"> 5</span>vkEnumeratePhysicalDevices(instance, &amp;physicalDeviceCount, physicalDevices.data());
+<span class="line-numbers"> 5</span>vezEnumeratePhysicalDevices(instance, &amp;physicalDeviceCount, physicalDevices.data());
 <span class="line-numbers"> 6</span>
 <span class="line-numbers"> 7</span><span class="keyword">for</span> (<span class="directive">auto</span> physicalDevice : physicalDevices)
 <span class="line-numbers"> 8</span>{
 <span class="line-numbers"> 9</span>    VkPhysicalDeviceProperties properties;
-<span class="line-numbers">10</span>    vkGetPhysicalDeviceProperties(physicalDevice, &amp;properties);
+<span class="line-numbers">10</span>    vezetPhysicalDeviceProperties(physicalDevice, &amp;properties);
 <span class="line-numbers">11</span>
 <span class="line-numbers">12</span>    VkPhysicalDeviceFeatures features;
-<span class="line-numbers">13</span>    vkGetPhysicalDeviceFeatures(physicalDevice, &amp;features);
+<span class="line-numbers">13</span>    vezGetPhysicalDeviceFeatures(physicalDevice, &amp;features);
 <span class="line-numbers">14</span>}</code></pre>
 </div>
 </div>
-</div>
 <div class="sect3">
-<h4 id="_surface_and_present_support">2.4.2. Surface and Present Support</h4>
+<h4 id="_extensions_support">Extensions Support</h4>
 <div class="paragraph">
-<p>To determine if a physical device supports a particular surface format, call <code>vkGetPhysicalDeviceSurfaceFormats</code>. This will retrieve an array of <code>VkFormat</code> and <code>VkColorSpace</code> values which can be used to determine if HDR10 is supported for example. In some cases a surface attached to a window handle may not support being presented to, or may only support present with a specific queue family index (see <a href="#_queues">Queues</a>). This can be determined by calling <code>vkGetPhysicalDevicePresentSupport</code>.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_extensions_properties_and_support">2.4.3. Extensions Properties and Support</h4>
-<div class="paragraph">
-<p>All available Vulkan extensions for a physical device may be enumerated by calling <code>vkEnumerateDeviceExtensionProperties</code>. Each <code>VkExtensionProperties</code> entry in the output array will contain the string name of the supported extension. If an application needs to quickly check for the existence of a specific extension, it can call <code>vkGetPhysicalDeviceExtensionSupport</code>.</p>
+<p>All available Vulkan extensions for a physical device may be enumerated by calling <code>vezEnumerateDeviceExtensionProperties</code>. Each <code>VkExtensionProperties</code> entry in the output array will contain the string name of the supported extension. If an application needs to quickly check for the existence of a specific extension, it can call <code>vezGetPhysicalDeviceExtensionSupport</code>.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_layers_support">2.4.4. Layers Support</h4>
+<h4 id="_layers_support">Layers Support</h4>
 <div class="paragraph">
-<p>As with physical device specific extensions, layers can be enumerated with <code>vkEnumerateDeviceLayerProperties</code>.</p>
+<p>As with physical device specific extensions, layers can be enumerated with <code>vezEnumerateDeviceLayerProperties</code>.</p>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_devices">2.5. Devices</h3>
+<h3 id="_devices">Devices</h3>
 <div class="paragraph">
-<p>Device objects represent logical connections to physical devices (see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#devsandqueues-devices">Vulkan spec</a>). An application must create separate device object handles for each physical device it will use.  <code>vkCreateDevice</code> is used to create a logical connection to a physical device.</p>
+<p>Device objects represent logical connections to physical devices (see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#devsandqueues-devices">Vulkan spec</a>). An application must create separate device object handles for each physical device it will use.  <code>vezCreateDevice</code> is used to create a logical connection to a physical device.</p>
 </div>
 <div class="paragraph">
-<p>In contrast to Vulkan, V-EZ manages most of the responsibilities of an application&#8217;s swapchain. If <code>VkSwapchainCreateInfo</code> is specified, an application supplies a handle to the surface it intends to render to as well as the required image format and color space. As described in <a href="#_surface_and_present_support">Surface and Present Support</a> supported image formats may be enumerated with <code>vkGetPhysicalDeviceSurfaceFormats</code>.</p>
-</div>
-<div class="paragraph">
-<p>An application may also specify a list of device level extensions to enable (see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#extended-functionality-extensions">Vulkan spec</a>).</p>
+<p>An application may specify a list of device level extensions to enable (see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#extended-functionality-extensions">Vulkan spec</a>) by populating <code>vezCreateDeviceInfo::ppEnabledExtensionNames</code>.  Device level layers can be enabled by populating <code>vezCreateDeviceInfo::ppEnabledLayerNames</code>.  The code snippet below demonstrates creating a device with the <code>VK_KHR_swapchain</code> extension enabled.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>VkSwapchainCreateInfo swapchainCreateInfo = {};
-<span class="line-numbers"> 2</span>swapchainCreateInfo.surface = surface;
-<span class="line-numbers"> 3</span>swapchainCreateInfo.imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-<span class="line-numbers"> 4</span>swapchainCreateInfo.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-<span class="line-numbers"> 5</span>
-<span class="line-numbers"> 6</span>VkDeviceCreateInfo deviceCreateInfo = {};
-<span class="line-numbers"> 7</span>deviceCreateInfo.enabledExtensionCount = <span class="integer">0</span>;
-<span class="line-numbers"> 8</span>deviceCreateInfo.ppEnabledExtensionNames = <span class="predefined-constant">nullptr</span>;
-<span class="line-numbers"> 9</span>deviceCreateInfo.pSwapchainCreateInfo = &amp;swapchainCreateInfo;
-<span class="line-numbers">10</span>
-<span class="line-numbers">11</span>VkDevice device = VK_NULL_HANDLE;
-<span class="line-numbers">12</span>VkResult result = vkCreateDevice(physicalDevice, &amp;deviceCreateInfo, &amp;device);</code></pre>
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span>std::array&lt;<span class="directive">const</span> <span class="predefined-type">char</span>*, <span class="integer">1</span>&gt; enabledExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+<span class="line-numbers">2</span>
+<span class="line-numbers">3</span>VezDeviceCreateInfo deviceCreateInfo = {};
+<span class="line-numbers">4</span>deviceCreateInfo.enabledExtensionCount = <span class="keyword">static_cast</span>&lt;uint32_t&gt;(enabledExtensions.size());
+<span class="line-numbers">5</span>deviceCreateInfo.ppEnabledExtensionNames = enabledExtensions.data();
+<span class="line-numbers">6</span>
+<span class="line-numbers">7</span>VkDevice device = VK_NULL_HANDLE;
+<span class="line-numbers">8</span>VkResult result = vezCreateDevice(physicalDevice, &amp;deviceCreateInfo, &amp;device);</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_putting_it_all_together">2.6. Putting It All Together</h3>
+<h3 id="_swapchains_and_present_support">Swapchains and Present Support</h3>
+<div class="paragraph">
+<p>To determine if a physical device supports a particular surface format, call <code>vezGetPhysicalDeviceSurfaceFormats</code>. This will retrieve an array of <code>VkFormat</code> and <code>VkColorSpace</code> values which can be used to check for required compatibility, for example HDR10. In some cases a surface attached to a window handle may not support being presented to, or may only support present with a specific queue family index (see <a href="#_queues">Queues</a>). This can be determined by calling <code>vezGetPhysicalDevicePresentSupport</code>.</p>
+</div>
+<div class="paragraph">
+<p>After enumerating supported image formats and color spaces for a given physical device, an application can create one or more swapchains in V-EZ by calling <code>vezCreateSwapchain</code> with appropriate parameters for <code>VezSwapchainCreateInfo</code>. In contrast to Vulkan, V-EZ manages most of the responsibilities of an application&#8217;s swapchain.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span>VezSwapchainCreateInfo swapchainCreateInfo = {};
+<span class="line-numbers">2</span>swapchainCreateInfo.surface = surface;
+<span class="line-numbers">3</span>swapchainCreateInfo.format = { VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+<span class="line-numbers">4</span>
+<span class="line-numbers">5</span>VezSwapchain swapchain = VK_NULL_HANDLE;
+<span class="line-numbers">6</span><span class="directive">auto</span> result = vezCreateSwapchain(device, &amp;swapchainCreateInfo, &amp;swapchain);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the format specified in <code>VezSwapchainCreateInfo</code> was not supported, V-EZ will choose a default one. An application may query the final image format by calling <code>vezGetSwapchainSurfaceFormat</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_putting_it_all_together">Putting It All Together</h3>
 <div class="paragraph">
 <p>Below is a coding listing demonstrating each preceeding section.</p>
 </div>
@@ -959,117 +942,128 @@ table.CodeRay td.code>pre{padding:0}
 <span class="line-numbers">  4</span><span class="preprocessor">#include</span> <span class="include">&lt;GLFW/glfw3.h&gt;</span>
 <span class="line-numbers">  5</span><span class="preprocessor">#include</span> <span class="include">&lt;GLFW/glfw3native.h&gt;</span>
 <span class="line-numbers">  6</span><span class="preprocessor">#define</span> VK_USE_PLATFORM_WIN32_KHR
-<span class="line-numbers">  7</span><span class="preprocessor">#include</span> <span class="include">&lt;VEZ.h&gt;</span>
+<span class="line-numbers">  7</span><span class="preprocessor">#include</span> <span class="include">&lt;V-EZ.h&gt;</span>
 <span class="line-numbers">  8</span>
 <span class="line-numbers">  9</span>GLFWwindow* window = <span class="predefined-constant">nullptr</span>;
 <span class="line-numbers"> 10</span>VkInstance instance = VK_NULL_HANDLE;
 <span class="line-numbers"> 11</span>VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-<span class="line-numbers"> 12</span>VkDevice device = VK_NULL_HANDLE;
-<span class="line-numbers"> 13</span>
-<span class="line-numbers"> 14</span><span class="predefined-type">bool</span> InitWindow()
-<span class="line-numbers"> 15</span>{
-<span class="line-numbers"> 16</span>    glfwInit();
-<span class="line-numbers"> 17</span>    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-<span class="line-numbers"> 18</span>    window = glfwCreateWindow(<span class="integer">800</span>, <span class="integer">600</span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">MyApplication</span><span class="delimiter">&quot;</span></span>, <span class="predefined-constant">nullptr</span>, <span class="predefined-constant">nullptr</span>);
-<span class="line-numbers"> 19</span>    <span class="keyword">if</span> (!window)
-<span class="line-numbers"> 20</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
-<span class="line-numbers"> 21</span>
-<span class="line-numbers"> 22</span>    <span class="keyword">return</span> <span class="predefined-constant">true</span>;
-<span class="line-numbers"> 23</span>}
-<span class="line-numbers"> 24</span>
-<span class="line-numbers"> 25</span><span class="predefined-type">bool</span> InitVulkanEZ()
-<span class="line-numbers"> 26</span>{
-<span class="line-numbers"> 27</span>    <span class="comment">// Create the V-EZ instance.</span>
-<span class="line-numbers"> 28</span>    VkApplicationInfo appInfo = {};
-<span class="line-numbers"> 29</span>    appInfo.pApplicationName = <span class="string"><span class="delimiter">&quot;</span><span class="content">MyApplication</span><span class="delimiter">&quot;</span></span>;
-<span class="line-numbers"> 30</span>    appInfo.applicationVersion = VEZ_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
-<span class="line-numbers"> 31</span>    appInfo.pEngineName = <span class="string"><span class="delimiter">&quot;</span><span class="content">MyEngine</span><span class="delimiter">&quot;</span></span>;
-<span class="line-numbers"> 32</span>    appinfo.engineVersion = VEZ_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
-<span class="line-numbers"> 33</span>
-<span class="line-numbers"> 34</span>    VkInstanceCreateInfo instanceCreateInfo = {};
-<span class="line-numbers"> 35</span>    instanceCreateInfo.pApplicationInfo = &amp;appInfo;
-<span class="line-numbers"> 36</span>
-<span class="line-numbers"> 37</span>    VkResult result = vkCreateInstance(&amp;instanceCreateInfo, &amp;instance);
-<span class="line-numbers"> 38</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
-<span class="line-numbers"> 39</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
-<span class="line-numbers"> 40</span>
-<span class="line-numbers"> 41</span>    <span class="comment">// Create a surface to render to.</span>
-<span class="line-numbers"> 42</span>    VkSurfaceCreateInfo surfaceCreateInfo = {};
-<span class="line-numbers"> 43</span>    surfaceCreateInfo.hinstance = GetModuleHandle(<span class="predefined-constant">nullptr</span>);
-<span class="line-numbers"> 44</span>    surfaceCreateInfo.hwnd = glfwGetWin32Window(window);
-<span class="line-numbers"> 45</span>    result = vkCreateSurface(instance, &amp;surfaceCreateInfo, &amp;surface);
-<span class="line-numbers"> 46</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
-<span class="line-numbers"> 47</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
-<span class="line-numbers"> 48</span>
-<span class="line-numbers"> 49</span>    <span class="comment">// Enumerate and select the first discrete GPU physical device.</span>
-<span class="line-numbers"> 50</span>    uint32_t physicalDeviceCount;
-<span class="line-numbers"> 51</span>    vkEnumeratePhysicalDevices(instance, &amp;physicalDeviceCount, <span class="predefined-constant">nullptr</span>);
-<span class="line-numbers"> 52</span>
-<span class="line-numbers"> 53</span>    std::vector&lt;VkPhysicalDevice&gt; physicalDevices(physicalDeviceCount);
-<span class="line-numbers"> 54</span>    vkEnumeratePhysicalDevices(instance, &amp;physicalDeviceCount, physicalDevices.data());
-<span class="line-numbers"> 55</span>
-<span class="line-numbers"> 56</span>    <span class="keyword">for</span> (<span class="directive">auto</span> pd : physicalDevices)
-<span class="line-numbers"> 57</span>    {
-<span class="line-numbers"> 58</span>        VkPhysicalDeviceProperties properties;
-<span class="line-numbers"> 59</span>        vkGetPhysicalDeviceProperties(pd, &amp;properties);
-<span class="line-numbers"> 60</span>        <span class="keyword">if</span> (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
-<span class="line-numbers"> 61</span>        {
-<span class="line-numbers"> 62</span>            physicalDevice = pd;
-<span class="line-numbers"> 63</span>            <span class="keyword">break</span>;
-<span class="line-numbers"> 64</span>        }
-<span class="line-numbers"> 65</span>    }
-<span class="line-numbers"> 66</span>
-<span class="line-numbers"> 67</span>    <span class="keyword">if</span> (physicalDevice == VK_NULL_HANDLE)
-<span class="line-numbers"> 68</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
-<span class="line-numbers"> 69</span>
-<span class="line-numbers"> 70</span>    <span class="comment">// Create a logical device connection to the physical device.</span>
-<span class="line-numbers"> 71</span>    <span class="comment">// Assume the 8-bit RGBA surface image format is supported.</span>
-<span class="line-numbers"> 72</span>    VkSwapchainCreateInfo swapchainCreateInfo = {};
-<span class="line-numbers"> 73</span>    swapchainCreateInfo.surface = surface;
-<span class="line-numbers"> 74</span>    swapchainCreateInfo.imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-<span class="line-numbers"> 75</span>    swapchainCreateInfo.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-<span class="line-numbers"> 76</span>
-<span class="line-numbers"> 77</span>    VkDeviceCreateInfo deviceCreateInfo = {};
-<span class="line-numbers"> 78</span>    deviceCreateInfo.enabledExtensionCount = <span class="integer">0</span>;
-<span class="line-numbers"> 79</span>    deviceCreateInfo.ppEnabledExtensionNames = <span class="predefined-constant">nullptr</span>;
-<span class="line-numbers"> 80</span>    deviceCreateInfo.pSwapchainCreateInfo = &amp;swapchainCreateInfo;
-<span class="line-numbers"> 81</span>    result = vkCreateDevice(physicalDevice, &amp;deviceCreateInfo, &amp;device);
-<span class="line-numbers"> 82</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
-<span class="line-numbers"> 83</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
-<span class="line-numbers"> 84</span>
-<span class="line-numbers"> 85</span>    <span class="keyword">return</span> <span class="predefined-constant">true</span>;
-<span class="line-numbers"> 86</span>}
+<span class="line-numbers"> 12</span>VkSurfaceKHR surface = VK_NULL_HANDLE;
+<span class="line-numbers"> 13</span>VkDevice device = VK_NULL_HANDLE;
+<span class="line-numbers"> 14</span>VezSwapchain swapchain = VK_NULL_HANDLE;
+<span class="line-numbers"> 15</span>
+<span class="line-numbers"> 16</span><span class="predefined-type">bool</span> InitWindow()
+<span class="line-numbers"> 17</span>{
+<span class="line-numbers"> 18</span>    glfwInit();
+<span class="line-numbers"> 19</span>    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+<span class="line-numbers"> 20</span>    window = glfwCreateWindow(<span class="integer">800</span>, <span class="integer">600</span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">MyApplication</span><span class="delimiter">&quot;</span></span>, <span class="predefined-constant">nullptr</span>, <span class="predefined-constant">nullptr</span>);
+<span class="line-numbers"> 21</span>    <span class="keyword">if</span> (!window)
+<span class="line-numbers"> 22</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
+<span class="line-numbers"> 23</span>
+<span class="line-numbers"> 24</span>    <span class="keyword">return</span> <span class="predefined-constant">true</span>;
+<span class="line-numbers"> 25</span>}
+<span class="line-numbers"> 26</span>
+<span class="line-numbers"> 27</span><span class="predefined-type">bool</span> InitVulkanEZ()
+<span class="line-numbers"> 28</span>{
+<span class="line-numbers"> 29</span>    <span class="comment">// Create the V-EZ instance.</span>
+<span class="line-numbers"> 30</span>    VezApplicationInfo appInfo = {};
+<span class="line-numbers"> 31</span>    appInfo.pApplicationName = <span class="string"><span class="delimiter">&quot;</span><span class="content">MyApplication</span><span class="delimiter">&quot;</span></span>;
+<span class="line-numbers"> 32</span>    appInfo.applicationVersion = VK_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
+<span class="line-numbers"> 33</span>    appInfo.pEngineName = <span class="string"><span class="delimiter">&quot;</span><span class="content">MyEngine</span><span class="delimiter">&quot;</span></span>;
+<span class="line-numbers"> 34</span>    appinfo.engineVersion = VK_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
+<span class="line-numbers"> 35</span>
+<span class="line-numbers"> 36</span>    VezInstanceCreateInfo instanceCreateInfo = {};
+<span class="line-numbers"> 37</span>    instanceCreateInfo.pApplicationInfo = &amp;appInfo;
+<span class="line-numbers"> 38</span>
+<span class="line-numbers"> 39</span>    VkResult result = vezCreateInstance(&amp;instanceCreateInfo, &amp;instance);
+<span class="line-numbers"> 40</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
+<span class="line-numbers"> 41</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
+<span class="line-numbers"> 42</span>
+<span class="line-numbers"> 43</span>    <span class="comment">// Create a surface to render to.</span>
+<span class="line-numbers"> 44</span>    VezSurfaceCreateInfo surfaceCreateInfo = {};
+<span class="line-numbers"> 45</span>    surfaceCreateInfo.hinstance = GetModuleHandle(<span class="predefined-constant">nullptr</span>);
+<span class="line-numbers"> 46</span>    surfaceCreateInfo.hwnd = glfwGetWin32Window(window);
+<span class="line-numbers"> 47</span>    result = vezCreateSurface(instance, &amp;surfaceCreateInfo, &amp;surface);
+<span class="line-numbers"> 48</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
+<span class="line-numbers"> 49</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
+<span class="line-numbers"> 50</span>
+<span class="line-numbers"> 51</span>    <span class="comment">// Enumerate and select the first discrete GPU physical device.</span>
+<span class="line-numbers"> 52</span>    uint32_t physicalDeviceCount;
+<span class="line-numbers"> 53</span>    vezEnumeratePhysicalDevices(instance, &amp;physicalDeviceCount, <span class="predefined-constant">nullptr</span>);
+<span class="line-numbers"> 54</span>
+<span class="line-numbers"> 55</span>    std::vector&lt;VkPhysicalDevice&gt; physicalDevices(physicalDeviceCount);
+<span class="line-numbers"> 56</span>    veznumeratePhysicalDevices(instance, &amp;physicalDeviceCount, physicalDevices.data());
+<span class="line-numbers"> 57</span>
+<span class="line-numbers"> 58</span>    <span class="keyword">for</span> (<span class="directive">auto</span> pd : physicalDevices)
+<span class="line-numbers"> 59</span>    {
+<span class="line-numbers"> 60</span>        VkPhysicalDeviceProperties properties;
+<span class="line-numbers"> 61</span>        vezGetPhysicalDeviceProperties(pd, &amp;properties);
+<span class="line-numbers"> 62</span>        <span class="keyword">if</span> (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+<span class="line-numbers"> 63</span>        {
+<span class="line-numbers"> 64</span>            physicalDevice = pd;
+<span class="line-numbers"> 65</span>            <span class="keyword">break</span>;
+<span class="line-numbers"> 66</span>        }
+<span class="line-numbers"> 67</span>    }
+<span class="line-numbers"> 68</span>
+<span class="line-numbers"> 69</span>    <span class="keyword">if</span> (physicalDevice == VK_NULL_HANDLE)
+<span class="line-numbers"> 70</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
+<span class="line-numbers"> 71</span>
+<span class="line-numbers"> 72</span>    <span class="comment">// Create a surface.</span>
+<span class="line-numbers"> 73</span>    VezSurfaceCreateInfo createInfo = {};
+<span class="line-numbers"> 74</span>    createInfo.hinstance = GetModuleHandle(<span class="predefined-constant">nullptr</span>);
+<span class="line-numbers"> 75</span>    createInfo.hwnd = glfwGetWin32Window(window);
+<span class="line-numbers"> 76</span>    result = vezCreateSurface(instance, &amp;createInfo, &amp;surface);
+<span class="line-numbers"> 77</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
+<span class="line-numbers"> 78</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
+<span class="line-numbers"> 79</span>
+<span class="line-numbers"> 80</span>    <span class="comment">// Create a logical device connection to the physical device.</span>
+<span class="line-numbers"> 81</span>    VkDeviceCreateInfo deviceCreateInfo = {};
+<span class="line-numbers"> 82</span>    deviceCreateInfo.enabledExtensionCount = <span class="integer">0</span>;
+<span class="line-numbers"> 83</span>    deviceCreateInfo.ppEnabledExtensionNames = <span class="predefined-constant">nullptr</span>;
+<span class="line-numbers"> 84</span>    result = vezCreateDevice(physicalDevice, &amp;deviceCreateInfo, &amp;device);
+<span class="line-numbers"> 85</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
+<span class="line-numbers"> 86</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
 <span class="line-numbers"> 87</span>
-<span class="line-numbers"> 88</span><span class="predefined-type">int</span> main(<span class="predefined-type">int</span> argc, <span class="predefined-type">char</span>** argv)
-<span class="line-numbers"> 89</span>{
-<span class="line-numbers"> 90</span>    <span class="keyword">if</span> (!InitGLFW())
-<span class="line-numbers"> 91</span>    {
-<span class="line-numbers"> 92</span>        std::cout &lt;&lt; <span class="string"><span class="delimiter">&quot;</span><span class="content">Failed to create GLFW window!</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>;
-<span class="line-numbers"> 93</span>        <span class="keyword">return</span> -<span class="integer">1</span>;
-<span class="line-numbers"> 94</span>    }
+<span class="line-numbers"> 88</span>    <span class="comment">// Create the swapchain.</span>
+<span class="line-numbers"> 89</span>    VezSwapchainCreateInfo swapchainCreateInfo = {};
+<span class="line-numbers"> 90</span>    swapchainCreateInfo.surface = surface;
+<span class="line-numbers"> 91</span>    swapchainCreateInfo.format = { VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+<span class="line-numbers"> 92</span>    result = vezCreateSwapchain(device, &amp;swapchainCreateInfo, &amp;swapchain);
+<span class="line-numbers"> 93</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
+<span class="line-numbers"> 94</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
 <span class="line-numbers"> 95</span>
-<span class="line-numbers"> 96</span>    <span class="keyword">if</span> (!InitVulkanEZ())
-<span class="line-numbers"> 97</span>    {
-<span class="line-numbers"> 98</span>        std::cout &lt;&lt; <span class="string"><span class="delimiter">&quot;</span><span class="content">Failed to initialize V-EZ!</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>;
-<span class="line-numbers"> 99</span>        <span class="keyword">return</span> -<span class="integer">1</span>;
-<span class="line-numbers">100</span>    }
-<span class="line-numbers">101</span>
-<span class="line-numbers">102</span>    vkDestroyDevice(device);
-<span class="line-numbers">103</span>    vkDestroyInstance(instance);
-<span class="line-numbers">104</span>    <span class="keyword">return</span> <span class="integer">0</span>;
-<span class="line-numbers">105</span>}</code></pre>
+<span class="line-numbers"> 96</span>    <span class="keyword">return</span> <span class="predefined-constant">true</span>;
+<span class="line-numbers"> 97</span>}
+<span class="line-numbers"> 98</span>
+<span class="line-numbers"> 99</span><span class="predefined-type">int</span> main(<span class="predefined-type">int</span> argc, <span class="predefined-type">char</span>** argv)
+<span class="line-numbers">100</span>{
+<span class="line-numbers">101</span>    <span class="keyword">if</span> (!InitGLFW())
+<span class="line-numbers">102</span>    {
+<span class="line-numbers">103</span>        std::cout &lt;&lt; <span class="string"><span class="delimiter">&quot;</span><span class="content">Failed to create GLFW window!</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>;
+<span class="line-numbers">104</span>        <span class="keyword">return</span> -<span class="integer">1</span>;
+<span class="line-numbers">105</span>    }
+<span class="line-numbers">106</span>
+<span class="line-numbers">107</span>    <span class="keyword">if</span> (!InitVulkanEZ())
+<span class="line-numbers">108</span>    {
+<span class="line-numbers">109</span>        std::cout &lt;&lt; <span class="string"><span class="delimiter">&quot;</span><span class="content">Failed to initialize V-EZ!</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>;
+<span class="line-numbers">110</span>        <span class="keyword">return</span> -<span class="integer">1</span>;
+<span class="line-numbers">111</span>    }
+<span class="line-numbers">112</span>
+<span class="line-numbers">113</span>    vkDestroyDevice(device);
+<span class="line-numbers">114</span>    vkDestroyInstance(instance);
+<span class="line-numbers">115</span>    <span class="keyword">return</span> <span class="integer">0</span>;
+<span class="line-numbers">116</span>}</code></pre>
 </div>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_queues">3. Queues</h2>
+<h2 id="_queues">2. Queues</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_queue_families">3.1. Queue Families</h3>
+<h3 id="_queue_families">2.1. Queue Families</h3>
 <div class="paragraph">
-<p>As discussed in the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#devsandqueues-queues">Vulkan spec</a>, each physical device may have one or more queue families.  A physical device&#8217;s queue families can be queried with <code>vkGetPhysicalDeviceQueueFamilyProperties</code>.  The returned <code>VkQueueFamilyProperties</code> array contains the following fields:</p>
+<p>As discussed in the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#devsandqueues-queues">Vulkan spec</a>, each physical device may have one or more queue families.  A physical device&#8217;s queue families can be queried with <code>vezGetPhysicalDeviceQueueFamilyProperties</code>.  The returned <code>VkQueueFamilyProperties</code> array contains the following fields:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -1082,79 +1076,52 @@ table.CodeRay td.code>pre{padding:0}
 </ul>
 </div>
 <div class="paragraph">
-<p>In V-EZ there is no need to explicitly create or request the different queue families.  By default, all queue families and the maximum counts are created and accessible to the application.  An application can obtain <code>VkQueue</code> handles to each queue family by calling <code>vkGetDeviceQueue</code> with the desired <code>queueFamilyIndex</code> and <code>queueIndex</code>, which must be less than <code>queueCount</code> obtained in <code>VkQueueFamilyProperties</code>.  Utility functions are also provided to explicitly request the graphics, compute or transfer queue families.</p>
+<p>In V-EZ there is no need to explicitly create or request the different queue families.  By default, all queue families and the maximum counts are created and accessible to the application.  An application can obtain <code>VkQueue</code> handles to each queue family by calling <code>vezGetDeviceQueue</code> with the desired <code>queueFamilyIndex</code> and <code>queueIndex</code>, which must be less than <code>queueCount</code> obtained in <code>VkQueueFamilyProperties</code>.  Utility functions are also provided to explicitly request the graphics, compute or transfer queue families.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span><span class="directive">void</span> vkGetDeviceQueue(VkDevice device, uint32_t queueFamilyIndex, uint32_t queueIndex, VkQueue* pQueue);</code></pre>
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span><span class="directive">void</span> vezGetDeviceQueue(VkDevice device, uint32_t queueFamilyIndex, uint32_t queueIndex, VkQueue* pQueue);</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span><span class="directive">void</span> vkGetDeviceGraphicsQueue(VkDevice device, uint32_t queueIndex, VkQueue* pQueue);
-<span class="line-numbers">2</span><span class="directive">void</span> vkGetDeviceComputeQueue(VkDevice device, uint32_t queueIndex, VkQueue* pQueue);
-<span class="line-numbers">3</span><span class="directive">void</span> vkGetDeviceTransferQueue(VkDevice device, uint32_t queueIndex, VkQueue* pQueue);</code></pre>
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span><span class="directive">void</span> vezGetDeviceGraphicsQueue(VkDevice device, uint32_t queueIndex, VkQueue* pQueue);
+<span class="line-numbers">2</span><span class="directive">void</span> vezGetDeviceComputeQueue(VkDevice device, uint32_t queueIndex, VkQueue* pQueue);
+<span class="line-numbers">3</span><span class="directive">void</span> vezGetDeviceTransferQueue(VkDevice device, uint32_t queueIndex, VkQueue* pQueue);</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>VkQueue</code> handles do not need to be explicitly destroyed by the application.  The code listing below demonstrates enumerating all available queue families that support graphics, compute and transfer.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span><span class="comment">// Get the number of queue families.</span>
-<span class="line-numbers"> 2</span>uint32_t queueFamilyCount;
-<span class="line-numbers"> 3</span>vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &amp;queueFamilyCount, <span class="predefined-constant">nullptr</span>);
-<span class="line-numbers"> 4</span>
-<span class="line-numbers"> 5</span><span class="comment">// Get the array of VkQueueFamilyProperties.</span>
-<span class="line-numbers"> 6</span>std::vector&lt;VkQueueFamilyProperties&gt; queueFamilyProperties(queueFamilyCount);
-<span class="line-numbers"> 7</span>vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &amp;queueFamilyCount, queueFamilyProperties.data());
-<span class="line-numbers"> 8</span>
-<span class="line-numbers"> 9</span><span class="comment">// Find all queue families that support graphics, compute and transfer.</span>
-<span class="line-numbers">10</span>std::vector&lt;VkQueue&gt; queues;
-<span class="line-numbers">11</span><span class="keyword">for</span> (<span class="directive">auto</span> i = <span class="integer">0</span>U; i &lt; queueFamilyCount; ++i)
-<span class="line-numbers">12</span>{
-<span class="line-numbers">13</span>    <span class="directive">auto</span> allQueueFamilies = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT;
-<span class="line-numbers">14</span>    <span class="directive">auto</span>&amp; props = queueFamilyProperties[i];
-<span class="line-numbers">15</span>    <span class="keyword">if</span> ((props.queueFlags &amp; allQueueFamilies) == allQueueFamilies)
-<span class="line-numbers">16</span>    {
-<span class="line-numbers">17</span>        <span class="keyword">for</span> (<span class="directive">auto</span> j = <span class="integer">0</span>U; j &lt; props.queueCount; ++j)
-<span class="line-numbers">18</span>        {
-<span class="line-numbers">19</span>            VkQueue queue = VK_NULL_HANDLE;
-<span class="line-numbers">20</span>            vkGetDeviceQueue(device, i, j, &amp;queue);
-<span class="line-numbers">21</span>            queues.push_back(queue);
-<span class="line-numbers">22</span>        }
-<span class="line-numbers">23</span>
-<span class="line-numbers">24</span>        <span class="keyword">break</span>;
-<span class="line-numbers">25</span>    }
-<span class="line-numbers">26</span>}</code></pre>
-</div>
+<p><code>VkQueue</code> handles do not need to be explicitly destroyed by the application.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_queue_submission">3.2. Queue Submission</h3>
+<h3 id="_queue_submission">2.2. Queue Submission</h3>
 <div class="paragraph">
-<p>Queue submission behavior and syntax in V-EZ is nearly identical to Vulkan.  An application fills in the <code>VkSubmitInfo</code> structure as described in the Vulkan spec.  Please see  <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#devsandqueues-queues">4.3.5 Queue Submission</a> for detailed information on this topic.</p>
+<p>Queue submission behavior and syntax in V-EZ is nearly identical to Vulkan.  An application fills in a <code>VezSubmitInfo</code> structure as described in the Vulkan spec.  Please see  <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#devsandqueues-queues">4.3.5 Queue Submission</a> for detailed information on this topic.</p>
 </div>
 <div class="paragraph">
-<p>The primary differences are with respect to semaphores and fences.  In V-EZ, semaphores and fences are not explicitly allocated, rather valid <em>unitialized</em> <code>VkSemaphore</code> and <code>VkFence</code> handles are passed to <code>VkSubmitInfo::pSignalSemaphores</code> and the final parameter of <code>vkQueueSubmit</code>.  V-EZ will allocate the objects and store them in the handles passed in by the application.  An application is still responsible for calling <code>vkDestroySemaphore</code> and <code>vkDestroyFence</code>.</p>
+<p>The primary differences are with respect to semaphores and fences.  In V-EZ, semaphores and fences are never explicitly created by an application.  Instead an application requests them to be created when calling <code>VezQueueSubmit</code> by passing valid, uninitialized, object handles to <code>VezSubmitInfo::pSignalSemaphores</code> and the final <code>pFence</code> parameter of <code>VezQueueSubmit</code>. V-EZ will allocate the objects and store them in these handles. An application is responsible for calling <code>vezDestroyFence</code> for any <code>VkFence</code> object handle returned by V-EZ. As in Vulkan, an application must ensure any queue submission has completed and the <code>VkFence</code> object has been signaled before deletion.</p>
+</div>
+<div class="paragraph">
+<p>For semaphores returned by V-EZ, an application may only pass them to proceeding calls to <code>VezQueueSubmit</code> as wait semaphores. V-EZ will ensure the object handles are properly destroyed after the queue submission completes. External semaphores created by native Vulkan may be passed to V-EZ via <code>VezSubmitInfo::pWaitSemaphores</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>VkSemaphore semaphore = VK_NULL_HANDLE;
 <span class="line-numbers"> 2</span>VkFence fence = VK_NULL_HANDLE;
 <span class="line-numbers"> 3</span>
-<span class="line-numbers"> 4</span>VkSubmitInfo submitInfo = {};
+<span class="line-numbers"> 4</span>VezSubmitInfo submitInfo = {};
 <span class="line-numbers"> 5</span>submitInfo.commandBufferCount = <span class="integer">1</span>;
 <span class="line-numbers"> 6</span>submitInfo.pCommandBuffers = &amp;commandBuffer;
 <span class="line-numbers"> 7</span>submitInfo.signalSemaphoreCount = <span class="integer">1</span>;
 <span class="line-numbers"> 8</span>submitInfo.pSignalSemaphores = &amp;semaphore;
-<span class="line-numbers"> 9</span>VkResult result = vkQueueSubmit(queue, <span class="integer">1</span>, &amp;submitInfo, &amp;fence);
+<span class="line-numbers"> 9</span>VkResult result = vezQueueSubmit(queue, <span class="integer">1</span>, &amp;submitInfo, &amp;fence);
 <span class="line-numbers">10</span>
 <span class="line-numbers">11</span><span class="comment">// Pass semaphore to another vkQueueSubmit call as a wait semaphore.</span>
-<span class="line-numbers">12</span><span class="comment">// Wait on fence to complete.</span>
-<span class="line-numbers">13</span>
-<span class="line-numbers">14</span>vkDestroySemaphore(device, semaphore);
-<span class="line-numbers">15</span>vkDestroyFence(device, fence);</code></pre>
+<span class="line-numbers">12</span>
+<span class="line-numbers">13</span><span class="comment">// Wait on fence to complete.</span>
+<span class="line-numbers">14</span>vezWaitForFences(device, <span class="integer">1</span>, &amp;fence, VK_TRUE, ~<span class="integer">0</span>ULL);
+<span class="line-numbers">15</span>vezDestroyFence(device, fence);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1162,101 +1129,118 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 </div>
 <div class="sect2">
-<h3 id="_queue_presentation">3.3. Queue Presentation</h3>
+<h3 id="_queue_presentation">2.3. Queue Presentation</h3>
 <div class="paragraph">
-<p>V-EZ alleviates most of the responsibility for managing the Vulkan swapchain from the application.  The only operation an application must perform to display a rendered image to a window is call <code>vkQueuePresent</code> with the <code>VkPresentInfo</code> parameter correctly set.  The semantics of <code>VkPresentInfo</code> differ quite a bit from Vulkan&#8217;s <code>VkPresentInfoKHR</code>.  Namely, in V-EZ an application presents a <code>VkImage</code> object handle rather than specifying the image index of the Vulkan swapchain.  Furthermore, V-EZ allows an application to specify signal semaphores in <code>VkPresentInfo</code> which can be used to determine when the <code>VkImage</code> object handle is no longer in use.</p>
+<p>V-EZ alleviates most of the responsibility for managing the Vulkan swapchain from the application.  The only operation an application must perform to display a rendered image to a window is call <code>vezQueuePresent</code> with the <code>VezPresentInfo</code> parameter correctly set.  The semantics of <code>VezPresentInfo</code> differ quite a bit from Vulkan&#8217;s <code>VkPresentInfoKHR</code>.  Namely, in V-EZ an application presents a <code>VkImage</code> object handle rather than specifying the image index of the Vulkan swapchain.  Furthermore, V-EZ allows an application to specify signal semaphores in <code>VezPresentInfo</code> which can be used to determine when the <code>VkImage</code> object handle is no longer in use.</p>
+</div>
+<div class="paragraph">
+<p>More than one swapchain may be presented in a single call.  The <code>pImages</code> array must contains the same number of entries as <code>pSwapchains</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VkPresentInfo {
-<span class="line-numbers">2</span>    VkImage srcImage;
-<span class="line-numbers">3</span>    uint32_t waitSemaphoreCount;
-<span class="line-numbers">4</span>    <span class="directive">const</span> VkSemaphore* pWaitSemaphores;
-<span class="line-numbers">5</span>    uint32_t signalSemaphoreCount;
-<span class="line-numbers">6</span>    VkSemaphore* pSignalSemaphores;
-<span class="line-numbers">7</span>} VkPresentInfo;</code></pre>
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VezPresentInfo {
+<span class="line-numbers"> 2</span>    <span class="directive">const</span> <span class="directive">void</span>* pNext;
+<span class="line-numbers"> 3</span>    uint32_t waitSemaphoreCount;
+<span class="line-numbers"> 4</span>    <span class="directive">const</span> VkSemaphore* pWaitSemaphores;
+<span class="line-numbers"> 5</span>    uint32_t swapchainCount;
+<span class="line-numbers"> 6</span>    <span class="directive">const</span> VezSwapchain* pSwapchains;
+<span class="line-numbers"> 7</span>    <span class="directive">const</span> VkImage* pImages;
+<span class="line-numbers"> 8</span>    uint32_t signalSemaphoreCount;
+<span class="line-numbers"> 9</span>    VkSemaphore* pSignalSemaphores;
+<span class="line-numbers">10</span>    VkResult* pResults;
+<span class="line-numbers">11</span>} VkPresentInfo;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>As was described in <a href="#_queue_submission">Queue Submission</a>, any semaphores returned by <code>VkPresentInfo::pSignalSemaphores</code> must be explicitly destroyed by the application by calling <code>vkDestroySemaphore</code>.  The code listing below demonstrates presenting an image the application has rendered into, specifying a single wait semaphore from a previous queue submission and retrieving a signal semaphore.</p>
+<p>The code listing below demonstrates presenting an image the application has rendered into, specifying a single wait semaphore from a previous queue submission and retrieving a signal semaphore.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>VkSemaphore semaphore = VK_NULL_HANDLE;
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>VkSemaphore signalSemaphore = VK_NULL_HANDLE;
 <span class="line-numbers"> 2</span>
-<span class="line-numbers"> 3</span>VkPresentInfo presentInfo = {};
-<span class="line-numbers"> 4</span>presentInfo.srcImage = renderedImage;
+<span class="line-numbers"> 3</span>VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+<span class="line-numbers"> 4</span>VezPresentInfo presentInfo = {};
 <span class="line-numbers"> 5</span>presentInfo.waitSemaphoreCount = <span class="integer">1</span>;
-<span class="line-numbers"> 6</span>presentInfo.pWaitSemaphores = waitSemaphoreFromPrevoiusSubmission;
-<span class="line-numbers"> 7</span>presentInfo.signalSemaphoreCount = <span class="integer">1</span>;
-<span class="line-numbers"> 8</span>presentInfo.pSignalSemaphores = &amp;semaphore;
-<span class="line-numbers"> 9</span>VkResult result = vkQueuePresent(queue, &amp;presentInfo);
-<span class="line-numbers">10</span>
-<span class="line-numbers">11</span><span class="comment">// Wait on the signal semaphore before using renderedImage again.</span>
-<span class="line-numbers">12</span><span class="comment">// Ex: pass the semaphore to VkSubmitInfo::pWaitSemaphores.</span>
-<span class="line-numbers">13</span>
-<span class="line-numbers">14</span>vkDestroySemaphore(device, semaphore);</code></pre>
+<span class="line-numbers"> 6</span>presentInfo.pWaitSemaphores = &amp;semaphore;
+<span class="line-numbers"> 7</span>presentInfo.pWaitDstStageMask = &amp;waitDstStageMask;
+<span class="line-numbers"> 8</span>presentInfo.swapchainCount = <span class="integer">1</span>;
+<span class="line-numbers"> 9</span>presentInfo.pSwapchains = &amp;swapchain;
+<span class="line-numbers">10</span>presentInfo.pImages = &amp;srcImage;
+<span class="line-numbers">11</span>presentInfo.signalSemaphoreCount = <span class="integer">1</span>;
+<span class="line-numbers">12</span>presentInfo.pSignalSemaphores = &amp;signalSemaphore;
+<span class="line-numbers">13</span>VkResult result = vezQueuePresent(graphicsQueue, &amp;presentInfo);
+<span class="line-numbers">14</span>
+<span class="line-numbers">15</span><span class="comment">// Wait on the signal semaphore before using renderedImage again.</span>
+<span class="line-numbers">16</span><span class="comment">// Ex: pass the semaphore to VezSubmitInfo::pWaitSemaphores.</span></code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Any images passed to <code>VezPresentInfo::pImages</code> must be created with the VK_IMAGE_USAGE_TRANSFER_SRC_BIT usage flag bit. See <a href="#_resource_creation">Resource Creation</a> for details on image creation and usage flags.
+</td>
+</tr>
+</table>
 </div>
 <div class="sect3">
-<h4 id="_multisampled_images">3.3.1. Multisampled Images</h4>
+<h4 id="_multisampled_images">2.3.1. Multisampled Images</h4>
 <div class="paragraph">
-<p>If the srcImage handle passed to VkPresentInfo is multisampled, no additional steps need to be taken before calling vkQueuePresent.  V-EZ will automatically resolve the image as its presented to the target window.</p>
+<p>If any entry in <code>VezPresentInfo::pImages</code> is multisampled, no additional steps need to be taken before calling vezQueuePresent.  V-EZ will automatically resolve the image as its presented to the target window.</p>
 </div>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_synchronization">4. Synchronization</h2>
+<h2 id="_synchronization">3. Synchronization</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>In contrast to Vulkan, the application&#8217;s responsibilities for resource access synchronization is partially alleviated by V-EZ.  Namely, <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-pipeline-barriers">Pipeline Barriers</a> and <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-memory-barriers">Memory Barriers</a> are no longer explicitly required by the application, but handled by V-EZ.  Additionally, fences and semaphores are not explicitly created by the application but requested when calling <code>VkQueueSubmit</code> or <code>vkQueuePresent</code> as previously described in <a href="#_queue_submission">Queue Submission</a>.</p>
 </div>
 <div class="sect2">
-<h3 id="_fences">4.1. Fences</h3>
+<h3 id="_fences">3.1. Fences</h3>
 <div class="paragraph">
-<p>As described in the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-fences">Vulkan spec</a>, fences are a synchronization primitive that can be used between a queue and the host.  A fence is either signaled, after the execution of a queue submission, or unsignaled by an application calling <code>vkResetFences</code>.  An application may wait on a fence by calling <code>vkWaitForFences</code> or the status queried with <code>vkGetFenceStatus</code>.</p>
-</div>
-<div class="paragraph">
-<p>As previously described, a <code>VkFence</code> object may be returned by either <code>vkQueueSubmit</code> or <code>vkQueuePresent</code> as shown in the code listing below.  An application must call <code>vkDestroyFence</code> when the object is no longer used.</p>
+<p>As described in the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-fences">Vulkan spec</a>, fences are a synchronization primitive that can be used between a queue and the host. In Vulkan, a fence is either signaled, after the execution of a queue submission, or unsignaled after being reset. In V-EZ, fences are never reset.  Once a fence is requested, its status may be queried via <code>vezGetFenceStatus</code> or waited on with <code>vezWaitForFences</code>. An application must call <code>vezDestroyFence</code> when the object is no longer used.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span><span class="comment">// Submit a command buffer to a queue and request a fence object for the submission.</span>
 <span class="line-numbers"> 2</span>VkFence fence = VK_NULL_HANDLE;
 <span class="line-numbers"> 3</span>
-<span class="line-numbers"> 4</span>VkSubmitInfo submitInfo = {};
+<span class="line-numbers"> 4</span>VezSubmitInfo submitInfo = {};
 <span class="line-numbers"> 5</span>submitInfo.commandBufferCount = <span class="integer">1</span>;
 <span class="line-numbers"> 6</span>submitInfo.pCommandBuffers = &amp;commandBuffer;
-<span class="line-numbers"> 7</span>vkQueueSubmit(queue, <span class="integer">1</span>, &amp;submitInfo, &amp;fence);
+<span class="line-numbers"> 7</span>vezQueueSubmit(queue, <span class="integer">1</span>, &amp;submitInfo, &amp;fence);
 <span class="line-numbers"> 8</span>
 <span class="line-numbers"> 9</span><span class="comment">// Wait until the queue submission has finished executing.</span>
-<span class="line-numbers">10</span><span class="comment">// Set the timeout to the maximum number of nanoseconds.</span>
-<span class="line-numbers">11</span>vkWaitForFences(device, <span class="integer">1</span>, &amp;fence, VK_TRUE, ~<span class="integer">0</span>);
-<span class="line-numbers">12</span>
-<span class="line-numbers">13</span><span class="comment">// Destroy the fence.</span>
-<span class="line-numbers">14</span>vkDestroyFence(device, fence);</code></pre>
+<span class="line-numbers">10</span>vezWaitForFences(device, <span class="integer">1</span>, &amp;fence, VK_TRUE, ~<span class="integer">0</span>);
+<span class="line-numbers">11</span>
+<span class="line-numbers">12</span><span class="comment">// Destroy the fence.</span>
+<span class="line-numbers">13</span>vezDestroyFence(device, fence);</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_semaphores">4.2. Semaphores</h3>
+<h3 id="_semaphores">3.2. Semaphores</h3>
 <div class="paragraph">
 <p>Semaphores are a synchronization primitive used to insert dependencies between queue submissions within the same queue or between different queues.  Like fences, semaphores can be signaled or unsignaled.  For a more detailed explanation of semaphores, see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-semaphores">Vulkan spec</a>.</p>
 </div>
 <div class="paragraph">
-<p>An application may obtain semaphore objects when calling <code>vkQueueSubmit</code> or <code>vkQueuePresent</code>.  In both cases, the semaphores are set to be signaled when either operation completes and may be passed as wait semaphores to a proceeding queue submission or present operation.  Semaphores must be explicitly destroyed by the application by calling <code>vkDestroySemaphore</code>.  See the previous code listing in <a href="#_queue_presentation">Queue Presentation</a>.</p>
+<p>An application may obtain semaphore objects when calling <code>vkQueueSubmit</code> or <code>vkQueuePresent</code>.  In both cases, the semaphores are set to be signaled when either operation completes and may be passed as wait semaphores to a proceeding queue submission or present operation.  In V-EZ, semaphores are never explicitly destroyed by the application, rather once they are passed as wait semaphores to a proceeding queue operation, the application no longer maintains ownership. See the previous code listing in <a href="#_queue_presentation">Queue Presentation</a>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_events">4.3. Events</h3>
+<h3 id="_events">3.3. Events</h3>
 <div class="paragraph">
 <p>Events in V-EZ have identical behavior and operation as in Vulkan.  See the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-events">Vulkan spec</a> for more information.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_wait_idle_operations">4.4. Wait Idle Operations</h3>
+<h3 id="_wait_idle_operations">3.4. Wait Idle Operations</h3>
 <div class="paragraph">
 <p>Wait idle operations in V-EZ have identical behavior and operation as in Vulkan.  See the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-wait-idle">Vulkan spec</a> for more information.</p>
 </div>
@@ -1264,7 +1248,7 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 </div>
 <div class="sect1">
-<h2 id="_pipelines">5. Pipelines</h2>
+<h2 id="_pipelines">4. Pipelines</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Pipeline creation and management in V-EZ has been significantly simplified compared to Vulkan. When creating a pipeline in Vulkan, the following graphics state and object handles must be passed to <code>vkCreateGraphicsPipeline</code>.</p>
@@ -1304,73 +1288,98 @@ table.CodeRay td.code>pre{padding:0}
 </ul>
 </div>
 <div class="paragraph">
-<p>V-EZ alleviates the need to specify any of this information at creation time, thus allowing an application the flexibility to use the same <code>VkPipeline</code> object with different graphics state permutations, vertex attribute bindings and render passes.</p>
+<p>V-EZ alleviates the need to specify any of this information at creation time, thus allowing an application the flexibility to use the same <code>VezPipeline</code> object with different graphics state permutations, vertex attribute bindings and render passes.</p>
 </div>
 <div class="sect2">
-<h3 id="_shader_modules">5.1. Shader Modules</h3>
+<h3 id="_shader_modules">4.1. Shader Modules</h3>
 <div class="paragraph">
-<p>Shader modules represent the different shader stages of a pipeline. In Vulkan shader modules can only be created from SPIR-V binaries. However V-EZ allows shader module creation from both SPIR-V and GLSL source. To create a shader module, <code>vkCreateShaderModule</code> is called with <code>VkShaderModuleCreateInfo</code> specifying the stage and GLSL source or SPIR_V binary. The behavior and syntax remain largely the same as Vulkan, with the exception of added GLSL support. The code listing below shows a shader module being created from GLSL source.</p>
+<p>Shader modules represent the different shader stages of a pipeline. In Vulkan shader modules can only be created from SPIR-V binaries. However V-EZ allows shader module creation from both SPIR-V and GLSL source. To create a shader module, <code>vezCreateShaderModule</code> is called with <code>VezShaderModuleCreateInfo</code> specifying the stage and GLSL source or SPIR_V binary. The behavior and syntax remain largely the same as Vulkan, with the exception of added GLSL support. The code listing below shows a shader module being created from GLSL source.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>std::<span class="predefined-type">string</span> glslSource = ReadFile(<span class="string"><span class="delimiter">&quot;</span><span class="content">shader.vert</span><span class="delimiter">&quot;</span></span>);
 <span class="line-numbers"> 2</span>
-<span class="line-numbers"> 3</span>VkShaderModuleCreateInfo createInfo = {};
+<span class="line-numbers"> 3</span>VezShaderModuleCreateInfo createInfo = {};
 <span class="line-numbers"> 4</span>createInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
 <span class="line-numbers"> 5</span>createInfo.codeSize = <span class="keyword">static_cast</span>&lt;uint32_t&gt;(glslSource.size());
 <span class="line-numbers"> 6</span>createInfo.pGLSLSource = glslSource.c_str();
 <span class="line-numbers"> 7</span>createInfo.pEntryPoint = <span class="string"><span class="delimiter">&quot;</span><span class="content">main</span><span class="delimiter">&quot;</span></span>;
 <span class="line-numbers"> 8</span>
 <span class="line-numbers"> 9</span>VkShaderModule shaderModule = VK_NULL_HANDLE;
-<span class="line-numbers">10</span>VkResult result = vkCreateShaderModule(device, &amp;createInfo, &amp;shaderModule);</code></pre>
+<span class="line-numbers">10</span>VkResult result = vezCreateShaderModule(device, &amp;createInfo, &amp;shaderModule);</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The <code>VkShaderModuleCreateInfo::pEntryPoint</code> field is only required when creating a shader module from GLSL source. For more information on shader modules, please see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#shader-modules">Vulkan spec</a>.</p>
+<p>The <code>VezShaderModuleCreateInfo::pEntryPoint</code> field is only required when creating a shader module from GLSL source. For more information on shader modules, please see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#shader-modules">Vulkan spec</a>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_graphics_pipelines">5.2. Graphics Pipelines</h3>
+<h3 id="_graphics_pipelines">4.2. Graphics Pipelines</h3>
 <div class="paragraph">
-<p>To create a graphics pipeline, call <code>vkCreateGraphicsPipeline</code> with an array of <code>VkPipelineShaderStageCreateInfo</code> entries, one for each shader stage the pipeline will use. The code listing below assumes vertex and fragment shader modules have already been created.</p>
+<p>To create a graphics pipeline, call <code>vezCreateGraphicsPipeline</code> with an array of <code>VezPipelineShaderStageCreateInfo</code> entries, one for each shader stage the pipeline will use. The code listing below assumes vertex and fragment shader modules have already been created.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>std::array&lt;<span class="integer">2</span>, VkPipelineShaderStageCreateInfo&gt; stages;
-<span class="line-numbers"> 2</span>stages[<span class="integer">0</span>].module = vertexStageShaderModule;
-<span class="line-numbers"> 3</span>stages[<span class="integer">0</span>].pEntryPoint = <span class="predefined-constant">nullptr</span>;
-<span class="line-numbers"> 4</span>stages[<span class="integer">1</span>].module = fragmentStageShaderModule;
-<span class="line-numbers"> 5</span>stages[<span class="integer">1</span>].pEntryPoint = <span class="predefined-constant">nullptr</span>;
-<span class="line-numbers"> 6</span>
-<span class="line-numbers"> 7</span>VkGraphicsPipelineCreateInfo createInfo = {};
-<span class="line-numbers"> 8</span>createInfo.stageCount = <span class="keyword">static_cast</span>&lt;uint32_t&gt;(stages.size());
-<span class="line-numbers"> 9</span>createInfo.pStages = stages.data();
-<span class="line-numbers">10</span>
-<span class="line-numbers">11</span>VkPipeline pipeline = VK_NULL_HANDLE;
-<span class="line-numbers">12</span>VkResult result = vkCreateGraphicsPipeline(device, &amp;createInfo, &amp;pipeline);</code></pre>
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>std::array&lt;VezPipelineShaderStageCreateInfo, <span class="integer">2</span>&gt; stages = { { {}, {} } };
+<span class="line-numbers"> 2</span>stages[<span class="integer">0</span>] = {};
+<span class="line-numbers"> 3</span>stages[<span class="integer">0</span>].module = vertexStageShaderModule;
+<span class="line-numbers"> 4</span>stages[<span class="integer">0</span>].pEntryPoint = <span class="predefined-constant">nullptr</span>;
+<span class="line-numbers"> 5</span>stages[<span class="integer">1</span>] = {};
+<span class="line-numbers"> 6</span>stages[<span class="integer">1</span>].module = fragmentStageShaderModule;
+<span class="line-numbers"> 7</span>stages[<span class="integer">1</span>].pEntryPoint = <span class="predefined-constant">nullptr</span>;
+<span class="line-numbers"> 8</span>
+<span class="line-numbers"> 9</span>VezGraphicsPipelineCreateInfo createInfo = {};
+<span class="line-numbers">10</span>createInfo.stageCount = <span class="keyword">static_cast</span>&lt;uint32_t&gt;(stages.size());
+<span class="line-numbers">11</span>createInfo.pStages = stages.data();
+<span class="line-numbers">12</span>
+<span class="line-numbers">13</span>VezPipeline pipeline = VK_NULL_HANDLE;
+<span class="line-numbers">14</span>VkResult result = vezCreateGraphicsPipeline(device, &amp;createInfo, &amp;pipeline);</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The <code>VkPipelineShaderStageCreateInfo::pEntryPoint</code> allows an application to re-specify alternate entry points for a shader module. This is useful in the case where a single shader module contains multiple entry points for a given shader stage and used between more than one pipeline.</p>
+<p>The <code>VezPipelineShaderStageCreateInfo::pEntryPoint</code> allows an application to re-specify alternate entry points for a shader module. This is useful in the case where a single shader module contains multiple entry points for a given shader stage and used between more than one pipeline.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_compute_pipelines">5.3. Compute Pipelines</h3>
+<h3 id="_compute_pipelines">4.3. Compute Pipelines</h3>
 <div class="paragraph">
-<p>Compute pipelines are created with a single <code>VkPipelineShaderStageCreateInfo</code> object and a call to <code>vkCreateComputePipeline</code>.</p>
+<p>Compute pipelines are created with a single <code>VezPipelineShaderStageCreateInfo</code> object and a call to <code>vezCreateComputePipeline</code>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_pipeline_reflection">5.4. Pipeline Reflection</h3>
+<h3 id="_specialization_constants">4.4. Specialization Constants</h3>
 <div class="paragraph">
-<p>Unlike Vulkan, V-EZ allows full pipeline shader stage reflection if the shader stages were created from GLSL source, or the SPIR-V binary source contains the relevant meta-data. To enumerate all pipeline resources call <code>vkEnumeratePipelineResources</code>, which returns an array of <code>VkPipelineResource</code> entries.</p>
+<p>Specialization constants in V-EZ work the same as they do in Vulkan. An application sets <code>VezPipelineShaderStageCreateInfo::pSpecializationInfo</code> accordingly. For more information on specialization constants, please see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#pipelines-specialization-constants">Vulkan spec</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_push_constants">4.5. Push Constants</h3>
+<div class="paragraph">
+<p>Push constants are a "<em>high speed path to modify constant data in pipelines that is expected to out perform memory-backed resource updates</em>". For more information on push constants, please see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#descriptorsets-pipelinelayout">Vulkan spec</a>.</p>
+</div>
+<div class="paragraph">
+<p>V-EZ simplifies the use of push constants by only requiring an application call <code>vezCmdPushConstants</code> to update the memory, requiring only an offset, size and pointer to host data to update the push constants memory with. A valid pipeline must be bound before calling <code>vezCmdPushConstants</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VkPipelineResource {
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span><span class="directive">void</span> vezCmdPushConstants(VezCommandBuffer commandBuffer, uint32_t offset, uint32_t size, <span class="directive">const</span> <span class="directive">void</span>* pValues);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the case where multiple shader stages within a pipeline define push constants at different byte offsets, an application may query these offsets and sizes with V-EZ&#8217;s pipeline reflection described in the next section.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pipeline_reflection">4.6. Pipeline Reflection</h3>
+<div class="paragraph">
+<p>Unlike Vulkan, V-EZ allows full pipeline shader stage reflection if the shader stages were created from GLSL source, or the SPIR-V binary source contains the relevant meta-data. To enumerate all pipeline resources call <code>vezEnumeratePipelineResources</code>, which returns an array of <code>VkPipelineResource</code> entries.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VezPipelineResource {
 <span class="line-numbers"> 2</span>    VkShaderStageFlags stages;
-<span class="line-numbers"> 3</span>    VkPipelineResourceType resourceType;
-<span class="line-numbers"> 4</span>    VkPipelineResourceBaseType baseType;
+<span class="line-numbers"> 3</span>    VezPipelineResourceType resourceType;
+<span class="line-numbers"> 4</span>    VezPipelineResourceBaseType baseType;
 <span class="line-numbers"> 5</span>    VkAccessFlags access;
 <span class="line-numbers"> 6</span>    uint32_t set;
 <span class="line-numbers"> 7</span>    uint32_t binding;
@@ -1391,32 +1400,32 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span><span class="keyword">typedef</span> <span class="keyword">enum</span> VkPipelineResourceType {
-<span class="line-numbers"> 2</span>    VK_PIPELINE_RESOURCE_TYPE_INPUT = <span class="integer">0</span>,
-<span class="line-numbers"> 3</span>    VK_PIPELINE_RESOURCE_TYPE_OUTPUT = <span class="integer">1</span>,
-<span class="line-numbers"> 4</span>    VK_PIPELINE_RESOURCE_TYPE_SAMPLER = <span class="integer">2</span>,
-<span class="line-numbers"> 5</span>    VK_PIPELINE_RESOURCE_TYPE_COMBINED_IMAGE_SAMPLER = <span class="integer">3</span>,
-<span class="line-numbers"> 6</span>    VK_PIPELINE_RESOURCE_TYPE_SAMPLED_IMAGE = <span class="integer">4</span>,
-<span class="line-numbers"> 7</span>    VK_PIPELINE_RESOURCE_TYPE_STORAGE_IMAGE = <span class="integer">5</span>,
-<span class="line-numbers"> 8</span>    VK_PIPELINE_RESOURCE_TYPE_UNIFORM_TEXEL_BUFFER = <span class="integer">6</span>,
-<span class="line-numbers"> 9</span>    VK_PIPELINE_RESOURCE_TYPE_STORAGE_TEXEL_BUFFER = <span class="integer">7</span>,
-<span class="line-numbers">10</span>    VK_PIPELINE_RESOURCE_TYPE_UNIFORM_BUFFER = <span class="integer">8</span>,
-<span class="line-numbers">11</span>    VK_PIPELINE_RESOURCE_TYPE_STORAGE_BUFFER = <span class="integer">9</span>,
-<span class="line-numbers">12</span>    VK_PIPELINE_RESOURCE_TYPE_ATOMIC_COUNTER = <span class="integer">10</span>,
-<span class="line-numbers">13</span>    VK_PIPELINE_RESOURCE_TYPE_PUSH_CONSTANT_BUFFER = <span class="integer">11</span>,
-<span class="line-numbers">14</span>} VkPipelineResourceType;</code></pre>
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span><span class="keyword">typedef</span> <span class="keyword">enum</span> VezPipelineResourceType {
+<span class="line-numbers"> 2</span>    VEZ_PIPELINE_RESOURCE_TYPE_INPUT = <span class="integer">0</span>,
+<span class="line-numbers"> 3</span>    VEZ_PIPELINE_RESOURCE_TYPE_OUTPUT = <span class="integer">1</span>,
+<span class="line-numbers"> 4</span>    VEZ_PIPELINE_RESOURCE_TYPE_SAMPLER = <span class="integer">2</span>,
+<span class="line-numbers"> 5</span>    VEZ_PIPELINE_RESOURCE_TYPE_COMBINED_IMAGE_SAMPLER = <span class="integer">3</span>,
+<span class="line-numbers"> 6</span>    VEZ_PIPELINE_RESOURCE_TYPE_SAMPLED_IMAGE = <span class="integer">4</span>,
+<span class="line-numbers"> 7</span>    VEZ_PIPELINE_RESOURCE_TYPE_STORAGE_IMAGE = <span class="integer">5</span>,
+<span class="line-numbers"> 8</span>    VEZ_PIPELINE_RESOURCE_TYPE_UNIFORM_TEXEL_BUFFER = <span class="integer">6</span>,
+<span class="line-numbers"> 9</span>    VEZ_PIPELINE_RESOURCE_TYPE_STORAGE_TEXEL_BUFFER = <span class="integer">7</span>,
+<span class="line-numbers">10</span>    VEZ_PIPELINE_RESOURCE_TYPE_UNIFORM_BUFFER = <span class="integer">8</span>,
+<span class="line-numbers">11</span>    VEZ_PIPELINE_RESOURCE_TYPE_STORAGE_BUFFER = <span class="integer">9</span>,
+<span class="line-numbers">12</span>    VEZ_PIPELINE_RESOURCE_TYPE_ATOMIC_COUNTER = <span class="integer">10</span>,
+<span class="line-numbers">13</span>    VEZ_PIPELINE_RESOURCE_TYPE_PUSH_CONSTANT_BUFFER = <span class="integer">11</span>,
+<span class="line-numbers">14</span>} VezPipelineResourceType;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The <strong>baseType</strong> field specifies the data type. For GLSL vec4, baseType would be VK_BASE_TYPE_FLOAT for example.</p>
+<p>The <strong>baseType</strong> field specifies the data type. For GLSL vec4, baseType would be VEZ_PIPELINE_RESOURCE_BASE_TYPE_FLOAT for example.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span><span class="keyword">typedef</span> <span class="keyword">enum</span> VkPipelineResourceBaseType {
-<span class="line-numbers">2</span>    VK_BASE_TYPE_INT = <span class="integer">0</span>,
-<span class="line-numbers">3</span>    VK_BASE_TYPE_UINT = <span class="integer">1</span>,
-<span class="line-numbers">4</span>    VK_BASE_TYPE_FLOAT = <span class="integer">2</span>,
-<span class="line-numbers">5</span>    VK_BASE_TYPE_DOUBLE = <span class="integer">3</span>,
+<span class="line-numbers">2</span>    VEZ_PIPELINE_RESOURCE_BASE_TYPE_INT = <span class="integer">0</span>,
+<span class="line-numbers">3</span>    VEZ_PIPELINE_RESOURCE_BASE_TYPE_UINT = <span class="integer">1</span>,
+<span class="line-numbers">4</span>    VEZ_PIPELINE_RESOURCE_BASE_TYPE_FLOAT = <span class="integer">2</span>,
+<span class="line-numbers">5</span>    VEZ_PIPELINE_RESOURCE_BASE_TYPE_DOUBLE = <span class="integer">3</span>,
 <span class="line-numbers">6</span>} VkPipelineResourceBaseType;</code></pre>
 </div>
 </div>
@@ -1445,29 +1454,29 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 </div>
 <div class="sect2">
-<h3 id="_pipeline_binding">5.5. Pipeline Binding</h3>
+<h3 id="_pipeline_binding">4.7. Pipeline Binding</h3>
 <div class="paragraph">
-<p>Graphics pipelines must be bound between <code>vkCmdBeginRenderPass</code> and <code>vkCmdEndRenderPass</code> calls. Compute pipelines must be bound outside of a render pass.  To bind a pipeline, call <code>vkCmdBindPipeline</code>.</p>
+<p>Graphics pipelines must be bound between <code>vezCmdBeginRenderPass</code> and <code>vezCmdEndRenderPass</code> calls. Compute pipelines must be bound outside of a render pass.  To bind a pipeline, call <code>vezCmdBindPipeline</code>.</p>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_vertex_input_formats">6. Vertex Input Formats</h2>
+<h2 id="_vertex_input_formats">5. Vertex Input Formats</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>In Vulkan the expected vertex input state must be specified at graphics pipeline creation time. The downside to this is that an application must manage different permutations of the same pipeline if it&#8217;s used with more than one vertex input format.  The vertex input format consists of an array of vertex binding descriptions, via <code>VkVertexInputBindingDescription</code>, and vertex attribute descriptions, via <code>VkVertexInputAttributeDescription</code>.</p>
 </div>
 <div class="paragraph">
-<p>V-EZ alleviates this requirement, as graphics pipeline creation only requires an array of shader modules (<a href="#_graphics_pipelines">Graphics Pipelines</a>).  Instead, the desired vertex input format is set during command buffer recording by calling <code>vkCmdSetVertexInputFormat</code>.</p>
+<p>V-EZ alleviates this requirement, as graphics pipeline creation only requires an array of shader modules (<a href="#_graphics_pipelines">Graphics Pipelines</a>).  Instead, the desired vertex input format is set during command buffer recording by calling <code>vezCmdSetVertexInputFormat</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span><span class="directive">void</span> vkCmdSetVertexInputFormat(VkCommandBuffer commandBuffer, VkVertexInputFormat format);</code></pre>
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span><span class="directive">void</span> vezCmdSetVertexInputFormat(VkCommandBuffer commandBuffer, VezVertexInputFormat format);</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_creation">6.1. Creation</h3>
+<h3 id="_creation">5.1. Creation</h3>
 <div class="paragraph">
 <p>An application now only needs to manage vertex input formats at the mesh or object level.  V-EZ moves the specification of the <code>VkVertexInputBindingDescription</code> and <code>VkVertexInputAttributeDescription</code> arrays to the <code>VkVertexInputFormat</code> object creation.  In the code listing below, a vertex input format is created specifying a single binding point and two vertex attributes.</p>
 </div>
@@ -1490,14 +1499,14 @@ table.CodeRay td.code>pre{padding:0}
 <span class="line-numbers">15</span>attributeDescriptions[<span class="integer">1</span>].offset = <span class="keyword">sizeof</span>(<span class="predefined-type">float</span>) * <span class="integer">3</span>;
 <span class="line-numbers">16</span>attributeDescriptions[<span class="integer">1</span>].format = VK_FORMAT_R32G32_SFLOAT;
 <span class="line-numbers">17</span>
-<span class="line-numbers">18</span>VkVertexInputFormatCreateInfo createInfo = {};
+<span class="line-numbers">18</span>VezVertexInputFormatCreateInfo createInfo = {};
 <span class="line-numbers">19</span>createInfo.vertexBindingDescriptionCount = <span class="integer">1</span>;
 <span class="line-numbers">20</span>createInfo.pVertexBindingDescriptions = &amp;bindingDescription;
 <span class="line-numbers">21</span>createInfo.vertexAttributeDescriptionCount = <span class="keyword">static_cast</span>&lt;uin32_t&gt;(attributeDescriptions.size());
 <span class="line-numbers">22</span>createInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 <span class="line-numbers">23</span>
-<span class="line-numbers">24</span>VkVertexInputFormat vertexInputFormat = VK_NULL_HANDLE;
-<span class="line-numbers">25</span>VkResult result = vkCreateVertexInputFormat(device, &amp;createInfo, &amp;vertexInputFormat);</code></pre>
+<span class="line-numbers">24</span>VezVertexInputFormat vertexInputFormat = VK_NULL_HANDLE;
+<span class="line-numbers">25</span>VkResult result = vezCreateVertexInputFormat(device, &amp;createInfo, &amp;vertexInputFormat);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1505,111 +1514,109 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 </div>
 <div class="sect2">
-<h3 id="_destruction">6.2. Destruction</h3>
+<h3 id="_destruction">5.2. Destruction</h3>
 <div class="paragraph">
-<p>When an application no longer requires a <code>VkVertexInputFormat</code> it should be destroyed by calling <code>vkDestroyVertexInputFormat</code>.</p>
+<p>When an application no longer requires a <code>VezVertexInputFormat</code> it should be destroyed by calling <code>vezDestroyVertexInputFormat</code>.</p>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_resource_creation">7. Resource Creation</h2>
+<h2 id="_resource_creation">6. Resource Creation</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Like Vulkan, V-EZ supports two low-level resource types: <em>buffers</em> and <em>images</em>. However V-EZ does not require an application to manage the underlying memory, which is completely abstracted away. All the application sees are <code>VkBuffer</code> and <code>VkImage</code> objects. For more information on resource creation and memory, see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#resources">Vulkan spec</a>.</p>
 </div>
 <div class="paragraph">
-<p>Since memory management is hidden from the application, V-EZ exposes <code>VkMemoryFlags</code> when creating buffers and images. These flags allow an application to specify how the memory will be used and where the it should reside.</p>
+<p>Since memory management is hidden from the application, V-EZ exposes <code>VezMemoryFlags</code> when creating buffers and images. These flags allow an application to specify how the memory will be used and where the it should reside.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span><span class="keyword">typedef</span> <span class="keyword">enum</span> VkMemoryFlagsBits {
-<span class="line-numbers">2</span>    VK_MEMORY_GPU_ONLY = <span class="hex">0x00000000</span>,
-<span class="line-numbers">3</span>    VK_MEMORY_CPU_ONLY = <span class="hex">0x00000001</span>,
-<span class="line-numbers">4</span>    VK_MEMORY_CPU_TO_GPU = <span class="hex">0x00000002</span>,
-<span class="line-numbers">5</span>    VK_MEMORY_GPU_TO_CPU = <span class="hex">0x00000004</span>,
-<span class="line-numbers">6</span>    VK_MEMORY_DEDICATED_ALLOCATION = <span class="hex">0x00000008</span>,
-<span class="line-numbers">7</span>} VkMemoryFlagsBits;</code></pre>
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span><span class="keyword">typedef</span> <span class="keyword">enum</span> VezMemoryFlagsBits {
+<span class="line-numbers">2</span>    VEZ_MEMORY_GPU_ONLY = <span class="hex">0x00000000</span>,
+<span class="line-numbers">3</span>    VEZ_MEMORY_CPU_ONLY = <span class="hex">0x00000001</span>,
+<span class="line-numbers">4</span>    VEZ_MEMORY_CPU_TO_GPU = <span class="hex">0x00000002</span>,
+<span class="line-numbers">5</span>    VEZ_MEMORY_GPU_TO_CPU = <span class="hex">0x00000004</span>,
+<span class="line-numbers">6</span>    VEZ_MEMORY_DEDICATED_ALLOCATION = <span class="hex">0x00000008</span>,
+<span class="line-numbers">7</span>} VezMemoryFlagsBits;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><strong>VK_MEMORY_GPU_ONLY</strong> specifies a buffer or image memory backing should reside in a device&#8217;s local memory only.</p>
+<p><strong>VEZ_MEMORY_GPU_ONLY</strong> specifies a buffer or image memory backing should reside in a device&#8217;s local memory only.</p>
 </div>
 <div class="paragraph">
-<p><strong>VK_MEMORY_CPU_ONLY</strong> specifies a buffer or image memory backing should reside in host memory.</p>
+<p><strong>VEZ_MEMORY_CPU_ONLY</strong> specifies a buffer or image memory backing should reside in host memory.</p>
 </div>
 <div class="paragraph">
-<p><strong>VK_MEMORY_CPU_TO_GPU</strong> specifies a buffer or image memory backing should be optimized for data transfers from the host to the device.</p>
+<p><strong>VEZ_MEMORY_CPU_TO_GPU</strong> specifies a buffer or image memory backing should be optimized for data transfers from the host to the device.</p>
 </div>
 <div class="paragraph">
-<p><strong>VK_MEMORY_GPU_TO_CPU</strong> specifies a buffer or image memory backing should be optimized for data transfers from the device to the host.</p>
+<p><strong>VEZ_MEMORY_GPU_TO_CPU</strong> specifies a buffer or image memory backing should be optimized for data transfers from the device to the host.</p>
 </div>
 <div class="paragraph">
-<p><strong>VK_MEMORY_DEDICATED_ALLOCATION</strong> specifies that the buffer or image should use a unique memory block.</p>
+<p><strong>VEZ_MEMORY_DEDICATED_ALLOCATION</strong> specifies that the buffer or image should use a unique memory block.</p>
 </div>
 <div class="paragraph">
-<p>V-EZ&#8217;s internal memory management sub-allocates memory blocks by default.  If an application prefers that a particular buffer or image have its own dedicated memory block, <strong>VK_MEMORY_DEDICATED_ALLOCATION</strong> can be used.</p>
+<p>V-EZ&#8217;s internal memory management sub-allocates memory blocks by default.  If an application prefers that a particular buffer or image have its own dedicated memory block, <strong>VEZ_MEMORY_DEDICATED_ALLOCATION</strong> can be used.</p>
 </div>
 <div class="sect2">
-<h3 id="_buffers">7.1. Buffers</h3>
+<h3 id="_buffers">6.1. Buffers</h3>
 <div class="paragraph">
 <p>Buffers are represented by <code>VkBuffer</code> handles and created by calling <code>vkCreateBuffer</code>. The code listing below demonstrates creating a buffer to be used for <em>staging</em>, or data transfers optimized for host to device.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span>VkBufferCreateInfo createInfo = {};
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span>VezBufferCreateInfo createInfo = {};
 <span class="line-numbers">2</span>createInfo.size = (<span class="integer">32</span> &lt;&lt; <span class="integer">20</span>ULL) <span class="comment">// 32 megabytes</span>
 <span class="line-numbers">3</span>createInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-<span class="line-numbers">4</span>createInfo.queueFamilyIndexCount = <span class="integer">0</span>;
-<span class="line-numbers">5</span>createInfo.pQueueFamilyIndices = <span class="predefined-constant">nullptr</span>;
-<span class="line-numbers">6</span>
-<span class="line-numbers">7</span>VkBuffer buffer = VK_NULL_HANDLE;
-<span class="line-numbers">8</span>VkResult result = vkCreateBuffer(device, VK_MEMORY_CPU_TO_GPU, &amp;createInfo, &amp;buffer);</code></pre>
+<span class="line-numbers">4</span>
+<span class="line-numbers">5</span>VkBuffer buffer = VK_NULL_HANDLE;
+<span class="line-numbers">6</span>VkResult result = vezCreateBuffer(device, VEZMEMORY_CPU_TO_GPU, &amp;createInfo, &amp;buffer);</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The application must always specify the intended usage for a buffer using the <code>VkBufferUsageFlagBits</code> enumeration values. In the code listing above, the buffer is only used as a <em>source</em> for data transfers.</p>
+<p>The application must always specify the intended usage for a buffer using the <code>VezBufferUsageFlagBits</code> enumeration values. In the code listing above, the buffer is only used as a <em>source</em> for data transfers.</p>
 </div>
 <div class="paragraph">
 <p>Like Vulkan, V-EZ allows an application to specify an array of queue family indices the buffer will be used with. If an application sets <code>queueFamilyIndexCount</code> to 0, V-EZ defaults the buffer to being accessible to all queue families.</p>
 </div>
 <div class="paragraph">
-<p>When a <code>VkBuffer</code> handle is no longer used by an application, it should be destroyed with <code>vkDestroyBuffer</code>.</p>
+<p>When a <code>VkBuffer</code> handle is no longer used by an application, it should be destroyed with <code>vezDestroyBuffer</code>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_buffer_views">7.2. Buffer Views</h3>
+<h3 id="_buffer_views">6.2. Buffer Views</h3>
 <div class="paragraph">
-<p>Creating buffer views from buffers has nearly identical syntax to Vulkan. An application calls <code>vkCreateBufferView</code> with appropriate values for fields in <code>VkBufferViewCreateInfo</code>. Buffer views are destroyed by calling <code>vkDestroyBufferView</code>.  For more information on buffer views, see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#resources-buffer-views">Vulkan spec</a>.</p>
+<p>Creating buffer views from buffers has nearly identical syntax to Vulkan. An application calls <code>vezCreateBufferView</code> with appropriate values for fields in <code>VezBufferViewCreateInfo</code>. Buffer views are destroyed by calling <code>vezDestroyBufferView</code>.  For more information on buffer views, see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#resources-buffer-views">Vulkan spec</a>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_images">7.3. Images</h3>
+<h3 id="_images">6.3. Images</h3>
 <div class="paragraph">
-<p>Images are represented by <code>VkImage</code> handles and created by calling <code>vkCreateImage</code>.  Like buffers, <code>VkMemoryFlags</code> is passed to <code>vkCreateImage</code> allowing an application to specify how the memory will be used and where the it should reside.  The syntax and behavior of <code>vkCreateImage</code> and <code>VkImageCreateInfo</code> in V-EZ are nearly identical to Vulkan, see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#resources-images">Vulkan spec</a> for more information.</p>
+<p>Images are represented by <code>VkImage</code> handles and created by calling <code>vezCreateImage</code>.  Like buffers, <code>VezMemoryFlags</code> is passed to <code>vezCreateImage</code> allowing an application to specify how the memory will be used and where the it should reside.  The syntax and behavior of <code>vezCreateImage</code> and <code>VezImageCreateInfo</code> in V-EZ are nearly identical to Vulkan, see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#resources-images">Vulkan spec</a> for more information.</p>
 </div>
 <div class="paragraph">
-<p>As with buffers, if the <strong>queueFamilyIndexCount</strong> in <code>VkImageCreateInfo</code> is set to 0, then V-EZ assumes the image will be used with all available queue families.</p>
+<p>As with buffers, if the <strong>queueFamilyIndexCount</strong> in <code>VezImageCreateInfo</code> is set to 0, then V-EZ assumes the image will be used with all available queue families.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_image_views">7.4. Image Views</h3>
+<h3 id="_image_views">6.4. Image Views</h3>
 <div class="paragraph">
 <p>See the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#resources-image-views">Vulkan spec</a> for more information on image views.  The behavior and syntax in V-EZ is nearly identical to Vulkan.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_framebuffers">7.5. Framebuffers</h3>
+<h3 id="_framebuffers">6.5. Framebuffers</h3>
 <div class="paragraph">
-<p>In Vulkan, an application must specify an array of <code>VkImageView</code> attachments, a <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#renderpass-compatibility">compatible</a> Render Pass, and the dimensions when creating a framebuffer.  V-EZ simplifies this to only requiring the array of attachments and the dimensions.  Render passes are never explicitly created in V-EZ (see <a href="#_render_passes">Render Passes</a>), and therefore are not required when creating a framebuffer.</p>
+<p>In Vulkan, an application must specify an array of <code>VkImageView</code> attachments, a <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#renderpass-compatibility">compatible</a> Render Pass, and the dimensions when creating a framebuffer.  V-EZ simplifies this to only requiring the array of attachments and the dimensions.  Render passes are never explicitly created by applications V-EZ (see <a href="#_render_passes">Render Passes</a>), and therefore are not required when creating a framebuffer.</p>
 </div>
 <div class="paragraph">
-<p>The coding listing below demonstrates creating a simple framebuffer from a color and depth image. Note that the usage parameter for the color image has the VK_IMAGE_USAGE_TRANSFER_SRC_BIT set.  This is required for any image presented to a window when calling <code>vkQueuePresent</code>.</p>
+<p>The coding listing below demonstrates creating a simple framebuffer from a color and depth image. Note that the usage parameter for the color image has the VK_IMAGE_USAGE_TRANSFER_SRC_BIT set.  This is required for any image presented to a window when calling <code>vezQueuePresent</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span><span class="comment">// Create the color image.</span>
-<span class="line-numbers"> 2</span>VkImageCreateInfo imageCreateInfo = {};
+<span class="line-numbers"> 2</span>VezImageCreateInfo imageCreateInfo = {};
 <span class="line-numbers"> 3</span>imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
 <span class="line-numbers"> 4</span>imageCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
 <span class="line-numbers"> 5</span>imageCreateInfo.extent = { width, height, <span class="integer">1</span> };
@@ -1620,10 +1627,10 @@ table.CodeRay td.code>pre{padding:0}
 <span class="line-numbers">10</span>imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 <span class="line-numbers">11</span>
 <span class="line-numbers">12</span>VkImage colorImage = VK_NULL_HANDLE;
-<span class="line-numbers">13</span>vkCreateImage(device, VK_MEMORY_GPU_ONLY, &amp;imageCreateInfo, &amp;colorImage);
+<span class="line-numbers">13</span>vezCreateImage(device, VEZ_MEMORY_GPU_ONLY, &amp;imageCreateInfo, &amp;colorImage);
 <span class="line-numbers">14</span>
 <span class="line-numbers">15</span><span class="comment">// Create the image view.</span>
-<span class="line-numbers">16</span>VkImageViewCreateInfo imageViewCreateInfo = {};
+<span class="line-numbers">16</span>VezImageViewCreateInfo imageViewCreateInfo = {};
 <span class="line-numbers">17</span>imageViewCreateInfo.image = colorImage;
 <span class="line-numbers">18</span>imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 <span class="line-numbers">19</span>imageViewCreateInfo.format = imageCreateInfo.format;
@@ -1631,7 +1638,7 @@ table.CodeRay td.code>pre{padding:0}
 <span class="line-numbers">21</span>imageViewCreateInfo.subresourceRange.levelCount = <span class="integer">1</span>;
 <span class="line-numbers">22</span>
 <span class="line-numbers">23</span>VkImageView colorImageView = VK_NULL_HANDLE;
-<span class="line-numbers">24</span>vkCreateImageView(device, &amp;imageViewCreateInfo, &amp;colorImageView);
+<span class="line-numbers">24</span>vezCreateImageView(device, &amp;imageViewCreateInfo, &amp;colorImageView);
 <span class="line-numbers">25</span>
 <span class="line-numbers">26</span><span class="comment">// Create the depth image attachment.</span>
 <span class="line-numbers">27</span>imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -1644,7 +1651,7 @@ table.CodeRay td.code>pre{padding:0}
 <span class="line-numbers">34</span>imageCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 <span class="line-numbers">35</span>
 <span class="line-numbers">36</span>VkImage depthImage = VK_NULL_HANDLE;
-<span class="line-numbers">37</span>vkCreateImage(device, VK_MEMORY_GPU_ONLY, &amp;imageCreateInfo, &amp;depthImage);
+<span class="line-numbers">37</span>vezCreateImage(device, VEZ_MEMORY_GPU_ONLY, &amp;imageCreateInfo, &amp;depthImage);
 <span class="line-numbers">38</span>
 <span class="line-numbers">39</span><span class="comment">// Create the image view.</span>
 <span class="line-numbers">40</span>imageViewCreateInfo.image = depthImage;
@@ -1654,40 +1661,40 @@ table.CodeRay td.code>pre{padding:0}
 <span class="line-numbers">44</span>imageViewCreateInfo.subresourceRange.levelCount = <span class="integer">1</span>;
 <span class="line-numbers">45</span>
 <span class="line-numbers">46</span>VkImageView depthImageView = VK_NULL_HANDLE;
-<span class="line-numbers">47</span>vkCreateImageView(device, &amp;imageViewCreateInfo, &amp;depthImageView);
+<span class="line-numbers">47</span>vezCreateImageView(device, &amp;imageViewCreateInfo, &amp;depthImageView);
 <span class="line-numbers">48</span>
 <span class="line-numbers">49</span><span class="comment">// Create the framebuffer.</span>
 <span class="line-numbers">50</span>std::array&lt;VkImageView, <span class="integer">2</span>&gt; attachments = { colorImageView, depthImageView };
-<span class="line-numbers">51</span>VkFramebufferCreateInfo framebufferCreateInfo = {};
+<span class="line-numbers">51</span>VezFramebufferCreateInfo framebufferCreateInfo = {};
 <span class="line-numbers">52</span>framebufferCreateInfo.attachmentCount = <span class="keyword">static_cast</span>&lt;uint32_t&gt;(attachments.size());
 <span class="line-numbers">53</span>framebufferCreateInfo.pAttachments = attachments.data();
 <span class="line-numbers">54</span>framebufferCreateInfo.width = width;
 <span class="line-numbers">55</span>framebufferCreateInfo.height = height;
 <span class="line-numbers">56</span>framebufferCreateInfo.depth = <span class="integer">1</span>;
-<span class="line-numbers">57</span>VkFramebuffer framebuffer = VK_NULL_HANDLE;
-<span class="line-numbers">58</span>vkCreateFramebuffer(device, &amp;framebufferCreateInfo, &amp;framebuffer);</code></pre>
+<span class="line-numbers">57</span>VezFramebuffer framebuffer = VK_NULL_HANDLE;
+<span class="line-numbers">58</span>vezCreateFramebuffer(device, &amp;framebufferCreateInfo, &amp;framebuffer);</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Framebuffers are destroyed by calling <code>vkDestroyFramebuffer</code>.</p>
+<p>Framebuffers are destroyed by calling <code>vezDestroyFramebuffer</code>.</p>
 </div>
 <div class="sect3">
-<h4 id="_multisampled_framebuffers">7.5.1. Multisampled Framebuffers</h4>
+<h4 id="_multisampled_framebuffers">6.5.1. Multisampled Framebuffers</h4>
 <div class="paragraph">
-<p>An application may create a multisampled framebuffer by setting <code>VkImageCreateInfo::samples</code> to the appropriate value when creating the color and depth stencil attachments.  Then the multisample state block must be set appropriately to enable multisampled rendering (see <a href="#_graphics_state">Graphics State</a>).</p>
+<p>An application may create a multisampled framebuffer by setting <code>VezImageCreateInfo::samples</code> to the appropriate value when creating the color and depth stencil attachments.  Then the multisample state block must be set appropriately to enable multisampled rendering (see <a href="#_graphics_state">Graphics State</a>).</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_framebuffers_with_no_attachments">7.5.2. Framebuffers With No Attachments</h4>
+<h4 id="_framebuffers_with_no_attachments">6.5.2. Framebuffers With No Attachments</h4>
 <div class="paragraph">
-<p>As described in the Vulkan specification, framebuffers with no attachments but valid dimensions may still be created. To create a framebuffer with no attachments in V-EZ, simply set <code>VkFramebufferCreateInfo::pAttachments</code> to null and <code>VkFramebufferCreateInfo::attachmentCount</code> to 0.  Then set appropriate values for width, height, depth and samples.</p>
+<p>As described in the Vulkan specification, framebuffers with no attachments but valid dimensions may still be created. To create a framebuffer with no attachments in V-EZ, simply set <code>VezFramebufferCreateInfo::pAttachments</code> to null and <code>VezFramebufferCreateInfo::attachmentCount</code> to 0.  Then set appropriate values for width, height, depth and samples.</p>
 </div>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_samplers">8. Samplers</h2>
+<h2 id="_samplers">7. Samplers</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Sampler creation and usage in V-EZ is identical to Vulkan.  For more information, see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#samplers">Vulkan spec</a>.</p>
@@ -1695,60 +1702,60 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 </div>
 <div class="sect1">
-<h2 id="_command_buffers">9. Command Buffers</h2>
+<h2 id="_command_buffers">8. Command Buffers</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The primary differences between Vulkan and V-EZ with respect to command buffers are the removal of command pools and secondary command buffers in V-EZ. An application need no longer manage individual command pools across threads. Only <code>VkCommandBuffer</code> handles are exposed to applications in V-EZ. Furthermore, V-EZ allows an applications to call <code>vkBeginCommandBuffer</code> on a <code>VkCommandBuffer</code> handle after it has already been submitted to a queue but before it has completed execution. In V-EZ, <code>VkCommandBuffer</code> are light-weight handles compared to Vulkan.</p>
+<p>The primary differences between Vulkan and V-EZ with respect to command buffers are the removal of command pools and secondary command buffers in V-EZ. An application need no longer manage individual command pools across threads. Only <code>VezCommandBuffer</code> handles are created by an applications in V-EZ.</p>
 </div>
 <div class="paragraph">
-<p>A secondary difference is with respect to pipeline barriers. As previously stated in <a href="#_synchronization">Synchronization</a>, V-EZ does not expose pipeline barriers. Within a command buffer, and between command buffer submissions, pipeline barriers are handled automatically. An application is no longer responsible for managing this level of synchronization.</p>
+<p>A secondary difference is with respect to pipeline barriers. As previously stated in <a href="#_synchronization">Synchronization</a>, V-EZ does not expose pipeline barriers. Within a command buffer, and between command buffer submissions, pipeline barriers are inserted automatically. An application is no longer responsible for managing this level of synchronization.</p>
 </div>
 <div class="paragraph">
 <p>Other aspects of command buffers, such as state persistence within a command buffer, is identical to Vulkan. Existing Vulkan command buffer commands are also present, along with additional ones (see <a href="#_resource_binding">Resource Binding</a>).</p>
 </div>
 <div class="sect2">
-<h3 id="_allocation_and_management">9.1. Allocation and Management</h3>
+<h3 id="_allocation_and_management">8.1. Allocation and Management</h3>
 <div class="paragraph">
-<p>To create a command buffer an application calls <code>vkAllocateCommandBuffers</code>. The intended <strong>queue</strong> the command buffer will be used on must be specified. The <strong>level</strong> must also be specified and behaves indentically to Vulkan (see <a href="https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkCommandBufferLevel.html">VkCOmmandBufferLevel</a>).</p>
+<p>To create a command buffer an application calls <code>vezAllocateCommandBuffers</code>. The intended <strong>queue</strong> the command buffer will be used on must be specified.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span>VkQueue graphicsQueue = VK_NULL_HANDLE;
-<span class="line-numbers">2</span>vkGetDeviceGraphicsQueue(device, <span class="integer">0</span>, &amp;graphicsQueue);
+<span class="line-numbers">2</span>vezGetDeviceGraphicsQueue(device, <span class="integer">0</span>, &amp;graphicsQueue);
 <span class="line-numbers">3</span>
-<span class="line-numbers">4</span>VkCommandBufferAllocateInfo allocInfo = {};
+<span class="line-numbers">4</span>VezCommandBufferAllocateInfo allocInfo = {};
 <span class="line-numbers">5</span>allocInfo.queue = graphicsQueue;
 <span class="line-numbers">6</span>allocInfo.commandBufferCount = <span class="integer">1</span>;
-<span class="line-numbers">7</span>VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
-<span class="line-numbers">8</span>VkResult result = vkAllocateCommandBuffers(device, &amp;allocInfo, &amp;commandBuffer);</code></pre>
+<span class="line-numbers">7</span>VezCommandBuffer commandBuffer = VK_NULL_HANDLE;
+<span class="line-numbers">8</span>VkResult result = vezAllocateCommandBuffers(device, &amp;allocInfo, &amp;commandBuffer);</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>A command buffer must be destroyed by calling <code>vkFreeCommandBuffers</code>.</p>
+<p>A command buffer must be destroyed by calling <code>vezFreeCommandBuffers</code>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_recording">9.2. Recording</h3>
+<h3 id="_recording">8.2. Recording</h3>
 <div class="paragraph">
-<p>An application may begin recording commands to a <code>VkCommandBuffer</code> handle by calling <code>vkBeginCommandBuffer</code>. The only required parameter is <code>VkCommandBufferUsageFlags</code> which gives hints to the driver about how it will be used. See the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkCommandBufferUsageFlagBits.html">Vulkan spec</a> for more details. An application ends recording by calling <code>VkEndCommandBuffer</code>.</p>
+<p>An application may begin recording commands to a <code>VezCommandBuffer</code> handle by calling <code>vezBeginCommandBuffer</code>. The only required parameter is <code>VkCommandBufferUsageFlags</code> which gives hints to the driver about how it will be used. See the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkCommandBufferUsageFlagBits.html">Vulkan spec</a> for more details. An application ends recording by calling <code>vezEndCommandBuffer</code>.</p>
 </div>
 <div class="paragraph">
-<p>In contrast to Vulkan where an application must wait for a <code>VkCommandBuffer</code> handle to not be in use before recording, that is not the case with V-EZ.  V-EZ allows a <code>VkCommandBuffer</code> handle to be submitted to a Queue then immediately begin recording a new command stream.  Command buffers in V-EZ are treated like transient resources in this respect.</p>
+<p>Like Vulkan, an application must wait for a previously submitted <code>VezCommandBuffer</code> object handle to not be in use before re-recording. Applications should track queue submissions with fences and query the fence status, or wait, before re-recording commands. See fences under <a href="#_synchronization">Synchronization</a>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_graphics_state">9.3. Graphics State</h3>
+<h3 id="_graphics_state">8.3. Graphics State</h3>
 <div class="paragraph">
 <p>As described in <a href="#_pipelines">Pipelines</a>, V-EZ removes all graphics state specification from pipeline creation. In V-EZ, graphics state is set dynamically while recording a command buffer. Furthermore, all available <a href="https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkDynamicState.html">dynamic states</a> from Vulkan are enabled by default and their corresponding command buffer functions made available in V-EZ. States are not required to be set within a render pass. The following is a list of states available to be set.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VkPipelineInputAssemblyState {
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VezInputAssemblyState {
 <span class="line-numbers"> 2</span>    VkPrimitiveTopology topology;
 <span class="line-numbers"> 3</span>    VkBool32 primitiveRestartEnable;
-<span class="line-numbers"> 4</span>} VkPipelineInputAssemblyState;
+<span class="line-numbers"> 4</span>} VezInputAssemblyState;
 <span class="line-numbers"> 5</span>
-<span class="line-numbers"> 6</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VkPipelineRasterizationState {
+<span class="line-numbers"> 6</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VezRasterizationState {
 <span class="line-numbers"> 7</span>    VkBool32 depthClampEnable;
 <span class="line-numbers"> 8</span>    VkBool32 rasterizerDiscardEnable;
 <span class="line-numbers"> 9</span>    VkPolygonMode polygonMode;
@@ -1758,25 +1765,25 @@ table.CodeRay td.code>pre{padding:0}
 <span class="line-numbers">13</span>    <span class="predefined-type">float</span> depthBiasConstantFactor;
 <span class="line-numbers">14</span>    <span class="predefined-type">float</span> depthBiasClamp;
 <span class="line-numbers">15</span>    <span class="predefined-type">float</span> depthBiasSlopeFactor;
-<span class="line-numbers">16</span>} VkPipelineRasterizationState;
+<span class="line-numbers">16</span>} VezRasterizationState;
 <span class="line-numbers">17</span>
-<span class="line-numbers">18</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VkPipelineMultisampleState {
+<span class="line-numbers">18</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VezMultisampleState {
 <span class="line-numbers">19</span>    VkSampleCountFlagBits rasterizationSamples;
 <span class="line-numbers">20</span>    VkBool32 sampleShadingEnable;
 <span class="line-numbers">21</span>    <span class="predefined-type">float</span> minSampleShading;
 <span class="line-numbers">22</span>    <span class="directive">const</span> VkSampleMask* pSampleMask;
 <span class="line-numbers">23</span>    VkBool32 alphaToCoverageEnable;
 <span class="line-numbers">24</span>    VkBool32 alphaToOneEnable;
-<span class="line-numbers">25</span>} VkPipelineMultisampleStateCreateInfo;
+<span class="line-numbers">25</span>} VezMultisampleStateCreateInfo;
 <span class="line-numbers">26</span>
-<span class="line-numbers">27</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VkStencilOpState {
+<span class="line-numbers">27</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VezStencilOpState {
 <span class="line-numbers">28</span>    VkStencilOp failOp;
 <span class="line-numbers">29</span>    VkStencilOp passOp;
 <span class="line-numbers">30</span>    VkStencilOp depthFailOp;
 <span class="line-numbers">31</span>    VkCompareOp compareOp;
-<span class="line-numbers">32</span>} VkStencilOpState;
+<span class="line-numbers">32</span>} VezStencilOpState;
 <span class="line-numbers">33</span>
-<span class="line-numbers">34</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VkPipelineDepthStencilState {
+<span class="line-numbers">34</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VezDepthStencilState {
 <span class="line-numbers">35</span>    VkBool32 depthTestEnable;
 <span class="line-numbers">36</span>    VkBool32 depthWriteEnable;
 <span class="line-numbers">37</span>    VkCompareOp depthCompareOp;
@@ -1784,9 +1791,9 @@ table.CodeRay td.code>pre{padding:0}
 <span class="line-numbers">39</span>    VkBool32 stencilTestEnable;
 <span class="line-numbers">40</span>    VkStencilOpState front;
 <span class="line-numbers">41</span>    VkStencilOpState back;
-<span class="line-numbers">42</span>} VkPipelineDepthStencilState;
+<span class="line-numbers">42</span>} VezDepthStencilState;
 <span class="line-numbers">43</span>
-<span class="line-numbers">44</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VkPipelineColorBlendAttachmentState {
+<span class="line-numbers">44</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VezColorBlendAttachmentState {
 <span class="line-numbers">45</span>    VkBool32 blendEnable;
 <span class="line-numbers">46</span>    VkBlendFactor srcColorBlendFactor;
 <span class="line-numbers">47</span>    VkBlendFactor dstColorBlendFactor;
@@ -1795,21 +1802,21 @@ table.CodeRay td.code>pre{padding:0}
 <span class="line-numbers">50</span>    VkBlendFactor dstAlphaBlendFactor;
 <span class="line-numbers">51</span>    VkBlendOp alphaBlendOp;
 <span class="line-numbers">52</span>    VkColorComponentFlags colorWriteMask;
-<span class="line-numbers">53</span>} VkPipelineColorBlendAttachmentState;
+<span class="line-numbers">53</span>} VezColorBlendAttachmentState;
 <span class="line-numbers">54</span>
-<span class="line-numbers">55</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VkPipelineColorBlendState {
+<span class="line-numbers">55</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VezColorBlendState {
 <span class="line-numbers">56</span>    VkBool32 logicOpEnable;
 <span class="line-numbers">57</span>    VkLogicOp logicOp;
 <span class="line-numbers">58</span>    uint32_t attachmentCount;
 <span class="line-numbers">59</span>    <span class="directive">const</span> VkPipelineColorBlendAttachmentState* pAttachments;
-<span class="line-numbers">60</span>} VkPipelineColorBlendState;</code></pre>
+<span class="line-numbers">60</span>} VezColorBlendState;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>An application is not required to set these, as V-EZ sets default values when an application calls <code>vkBeginCommandBuffer</code>. The following tables list the default values for each state.</p>
+<p>An application is not required to set these, as V-EZ sets default values when an application calls <code>vezBeginCommandBuffer</code>. The following tables list the default values for each state.</p>
 </div>
 <table class="tableblock frame-all grid-all">
-<caption class="title">VkPipelineInputAssemblyState: Default values</caption>
+<caption class="title">VezInputAssemblyState: Default values</caption>
 <colgroup>
 <col>
 <col>
@@ -1835,7 +1842,7 @@ table.CodeRay td.code>pre{padding:0}
 <p><br></p>
 </div>
 <table class="tableblock frame-all grid-all">
-<caption class="title">VkPipelineRasterizationState: Default values</caption>
+<caption class="title">VezRasterizationState: Default values</caption>
 <colgroup>
 <col>
 <col>
@@ -1889,7 +1896,7 @@ table.CodeRay td.code>pre{padding:0}
 <p><br></p>
 </div>
 <table class="tableblock frame-all grid-all">
-<caption class="title">VkPipelineMultisampleState: Default values</caption>
+<caption class="title">VezMultisampleState: Default values</caption>
 <colgroup>
 <col>
 <col>
@@ -1931,7 +1938,7 @@ table.CodeRay td.code>pre{padding:0}
 <p><br></p>
 </div>
 <table class="tableblock frame-all grid-all">
-<caption class="title">VkPipelineDepthStencilState: Default values</caption>
+<caption class="title">VezDepthStencilState: Default values</caption>
 <colgroup>
 <col>
 <col>
@@ -1977,7 +1984,7 @@ table.CodeRay td.code>pre{padding:0}
 <p><br></p>
 </div>
 <table class="tableblock frame-all grid-all">
-<caption class="title">VkPipelineColorBlendState: Default values</caption>
+<caption class="title">VezColorBlendState: Default values</caption>
 <colgroup>
 <col>
 <col>
@@ -2015,37 +2022,37 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>vkBeginCommandBuffer(commandBuffer, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>vezBeginCommandBuffer(commandBuffer, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 <span class="line-numbers"> 2</span>
 <span class="line-numbers"> 3</span>VkViewport viewport = { <span class="float">0</span><span class="float">.0f</span>, <span class="float">0</span><span class="float">.0f</span>, width, height, <span class="float">0</span><span class="float">.0f</span>, <span class="float">1</span><span class="float">.0f</span> };
-<span class="line-numbers"> 4</span>vkCmdSetViewport(commandBuffer, <span class="integer">0</span>, <span class="integer">1</span>, &amp;viewport);
-<span class="line-numbers"> 5</span>vkCmdSetViewportState(commandBuffer, <span class="integer">1</span>);
+<span class="line-numbers"> 4</span>vezCmdSetViewport(commandBuffer, <span class="integer">0</span>, <span class="integer">1</span>, &amp;viewport);
+<span class="line-numbers"> 5</span>vezCmdSetViewportState(commandBuffer, <span class="integer">1</span>);
 <span class="line-numbers"> 6</span>
-<span class="line-numbers"> 7</span>VkPipelineInputAssemblyState inputAssemblyState = {};
+<span class="line-numbers"> 7</span>VezInputAssemblyState inputAssemblyState = {};
 <span class="line-numbers"> 8</span>inputAssemblyState.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
 <span class="line-numbers"> 9</span>inputAssemblyState.primitiveRestartEnable = VK_FALSE;
-<span class="line-numbers">10</span>vkCmdSetInputAssemblyState(commandBuffer, &amp;inputAssemblyState);
+<span class="line-numbers">10</span>vezCmdSetInputAssemblyState(commandBuffer, &amp;inputAssemblyState);
 <span class="line-numbers">11</span>
-<span class="line-numbers">12</span>VkPipelineRasterizationState rasterizationState = {};
+<span class="line-numbers">12</span>VezRasterizationState rasterizationState = {};
 <span class="line-numbers">13</span>rasterizationState.polygonMode = VK_POLGYON_MODE_FILL;
 <span class="line-numbers">14</span>rasterizationState.cullMode = VK_CULL_MODE_BACK_BIT;
 <span class="line-numbers">15</span>rasterizationState.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-<span class="line-numbers">16</span>vkCmdSetRasterizationState(commandBuffer, &amp;rasterizationState);
+<span class="line-numbers">16</span>vezCmdSetRasterizationState(commandBuffer, &amp;rasterizationState);
 <span class="line-numbers">17</span>
-<span class="line-numbers">18</span>VkPipelineDepthStencilState depthStencilState = {};
+<span class="line-numbers">18</span>VezDepthStencilState depthStencilState = {};
 <span class="line-numbers">19</span>depthStencilState.depthTestEnable = VK_TRUE;
 <span class="line-numbers">20</span>depthStencilState.depthWriteEnable = VK_FALSE;
 <span class="line-numbers">21</span>depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-<span class="line-numbers">22</span>vkCmdSetDepthStencilState(commandBuffer, &amp;depthStencilState);
+<span class="line-numbers">22</span>vezCmdSetDepthStencilState(commandBuffer, &amp;depthStencilState);
 <span class="line-numbers">23</span>
 <span class="line-numbers">24</span><span class="comment">// Draw commands</span>
 <span class="line-numbers">25</span>
-<span class="line-numbers">26</span>vkEndCommandBuffer(commandBuffer);</code></pre>
+<span class="line-numbers">26</span>vezEndCommandBuffer(commandBuffer);</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_resource_binding">9.4. Resource Binding</h3>
+<h3 id="_resource_binding">8.4. Resource Binding</h3>
 <div class="paragraph">
 <p>In Vulkan descriptor sets are required for binding resources to different bindings for use in a pipeline.  The complexities of descriptor set layouts, descriptor pools and updating descriptor set objects has been abstracted away in V-EZ.  Instead a simplified interface of explicitly binding <em>buffers</em>, <em>bufferViews</em>, and <em>images</em> to set and binding indices during command buffer recording is exposed. These bindings are persistent only with a command buffer, but maintain persistence across pipeline bindings.</p>
 </div>
@@ -2054,16 +2061,26 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="directive">void</span> vkCmdBindBuffer(VkCommandBuffer commandBuffer, VkBuffer buffer, uint32_t set, uint32_t binding, uint32_t arrayElement)
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="directive">void</span> vezCmdBindBuffer(VezCommandBuffer commandBuffer, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range, uint32_t set, uint32_t binding, uint32_t arrayElement)
 
-<span class="directive">void</span> vkCmdBindBufferRange(VkCommandBuffer commandBuffer, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range, uint32_t set, uint32_t binding, uint32_t arrayElement)
+<span class="directive">void</span> vezCmdBindBufferView(VezCommandBuffer commandBuffer, VkBufferView bufferView, uint32_t set, uint32_t binding, uint32_t arrayElement)
 
-<span class="directive">void</span> vkCmdBindBufferView(VkCommandBuffer commandBuffer, VkBufferView bufferView, uint32_t set, uint32_t binding, uint32_t arrayElement)
+<span class="directive">void</span> vezCmdBindImageView(VezCommandBuffer commandBuffer, VkImageView imageView, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);
 
-<span class="directive">void</span> vkCmdBindImageView(VkCommandBuffer commandBuffer, VkImageView imageView, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);
-
-<span class="directive">void</span> vkCmdBindSampler(VkCommandBuffer commandBuffer, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);</code></pre>
+<span class="directive">void</span> vezCmdBindSampler(VezCommandBuffer commandBuffer, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The preprocessor macro <code>VK_WHOLE_SIZE</code> may be passed to the <code>range</code> parameter of <code>vezCmdBindBuffer</code> when an application desires to bind the entire buffer and not a sub range.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p><code>vkCmdBindImageView</code> allows an application to specify a sampler alongside the image view.  When sampler is VK_NULL_HANDLE, the binding represents a <em>sampled image</em> or <strong>texture2D</strong> in GLSL.  When sample is not VK_NULL_HANDLE, it represents a <em>combined image sampler</em> or 'sampler2D' in GLSL.  See <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#descriptorsets-types">13.1.3 Sampled Image</a> in the Vulkan spec for more details.</p>
@@ -2072,7 +2089,7 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 </div>
 <div class="sect1">
-<h2 id="_render_passes">10. Render Passes</h2>
+<h2 id="_render_passes">9. Render Passes</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Render passes in Vulkan are used to encapsulate all draw commands.  No draw command may occur outside of a render pass.  Render passes allow an application to define a sequence of dependent stages within an application&#8217;s rendering pipeline that should be synchronized and may access the same framebuffer attachments. Desktop applications may not benefit as much from this feature as mobile applications, however use of render passes is still encouraged as AMD&#8217;s driver can make specific optimizations under many circumstances.</p>
@@ -2106,15 +2123,15 @@ table.CodeRay td.code>pre{padding:0}
 <p>These tasks are handled automatically by V-EZ, and in some cases inferred from the SPIR-V of bound pipeline shader stages.  To learn more about render passes and their use cases, please see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#renderpass">Vulkan spec</a>.</p>
 </div>
 <div class="sect2">
-<h3 id="_begin_a_render_pass">10.1. Begin A Render Pass</h3>
+<h3 id="_begin_a_render_pass">9.1. Begin A Render Pass</h3>
 <div class="paragraph">
-<p>To begin a render pass, an application may call <code>vkCmdBeginRenderPass</code>.  The <code>VkRenderPassBeginInfo</code> structure requires a target framebuffer to be specified, an array of <code>VkAttachmentReference</code> structures which define load operations, store operations and clear values. The code listing below demonstrates beginning a render pass with two attachments, namely a single color attachment and a depth stencil attachment.  Both attachments are cleared and any values written by the fragment shader stage stored.</p>
+<p>To begin a render pass, an application may call <code>vkCmdBeginRenderPass</code>.  The <code>VezRenderPassBeginInfo</code> structure requires a target framebuffer to be specified, an array of <code>VezAttachmentReference</code> structures which define load operations, store operations and clear values. The code listing below demonstrates beginning a render pass with two attachments, namely a single color attachment and a depth stencil attachment.  Both attachments are cleared and any values written by the fragment shader stage stored.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span><span class="comment">// Clear the framebuffer's color and depth attachments (set clear color to red).</span>
 <span class="line-numbers"> 2</span><span class="comment">// Always store the fragment stage results.</span>
-<span class="line-numbers"> 3</span>std::array&lt;VkAttachmentReference, <span class="integer">2</span>&gt; attachmentReferences = {};
+<span class="line-numbers"> 3</span>std::array&lt;VezAttachmentReference, <span class="integer">2</span>&gt; attachmentReferences = {};
 <span class="line-numbers"> 4</span>attachmentReferences[<span class="integer">0</span>].clearValue.color = { <span class="float">0</span><span class="float">.3f</span>, <span class="float">0</span><span class="float">.3f</span>, <span class="float">0</span><span class="float">.3f</span>, <span class="float">0</span><span class="float">.0f</span> };
 <span class="line-numbers"> 5</span>attachmentReferences[<span class="integer">0</span>].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 <span class="line-numbers"> 6</span>attachmentReferences[<span class="integer">0</span>].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -2123,31 +2140,31 @@ table.CodeRay td.code>pre{padding:0}
 <span class="line-numbers"> 9</span>attachmentReferences[<span class="integer">1</span>].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 <span class="line-numbers">10</span>
 <span class="line-numbers">11</span><span class="comment">// Begin a render pass.</span>
-<span class="line-numbers">12</span>VkRenderPassBeginInfo beginInfo = {};
+<span class="line-numbers">12</span>VezRenderPassBeginInfo beginInfo = {};
 <span class="line-numbers">13</span>beginInfo.framebuffer = framebuffer;
 <span class="line-numbers">14</span>beginInfo.attachmentCount = <span class="keyword">static_cast</span>&lt;uint32_t&gt;(attachmentReferences.size());
 <span class="line-numbers">15</span>beginInfo.pAttachments = attachmentReferences.data();
-<span class="line-numbers">16</span>vkCmdBeginRenderPass(commandBuffer, &amp;beginInfo);</code></pre>
+<span class="line-numbers">16</span>vezCmdBeginRenderPass(commandBuffer, &amp;beginInfo);</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_next_subpass">10.2. Next Subpass</h3>
+<h3 id="_next_subpass">9.2. Next Subpass</h3>
 <div class="paragraph">
-<p>By default, calling vkCmdBeginRenderPass starts the first subpass.  To transition to a proceeding one, an application may call <code>vkCmdNextSubpass</code>.  No parameters are required except the command buffer the call is being recorded to.</p>
+<p>By default, calling vkCmdBeginRenderPass starts the first subpass.  To transition to a proceeding one, an application may call <code>vezCmdNextSubpass</code>.  No parameters are required except the command buffer the call is being recorded to.</p>
 </div>
 <div class="paragraph">
 <p>As previously stated, V-EZ determines which framebuffer attachments are written to within each subpass based on the pipeline objects that are bound and draw calls made.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_end_a_render_pass">10.3. End A Render Pass</h3>
+<h3 id="_end_a_render_pass">9.3. End A Render Pass</h3>
 <div class="paragraph">
-<p>To end a render pass, call <code>vkCmdEndRenderPass</code>.</p>
+<p>To end a render pass, call <code>vezCmdEndRenderPass</code>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_input_attachments">10.4. Input Attachments</h3>
+<h3 id="_input_attachments">9.4. Input Attachments</h3>
 <div class="paragraph">
 <p>Vulkan allows framebuffer attachments to be used as inputs or outputs within a render pass.  One subpass may write to a color attachment while a proceeding subpass may read from it.  V-EZ infers this information from the bound pipeline shader stages, specifically the GLSL <code>subpassInput</code> uniform type (see 13.1.11. Input Attachment in the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html">Vulkan spec</a> for more details.  In the code snippet below, the first subpass outputs to two attachments for color and surface normals.</p>
 </div>
@@ -2196,45 +2213,45 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 </div>
 <div class="sect1">
-<h2 id="_updating_memory">11. Updating Memory</h2>
+<h2 id="_updating_memory">10. Updating Memory</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Since V-EZ does not explicitly expose underlying memory handles as in Vulkan, applications update buffer and image data using the <code>VkBuffer</code> and <code>VkImage</code> handles directly.</p>
 </div>
 <div class="sect2">
-<h3 id="_map_and_unmap">11.1. Map and Unmap</h3>
+<h3 id="_map_and_unmap">10.1. Map and Unmap</h3>
 <div class="paragraph">
-<p>V-EZ exposes map and unmap operations for <code>VkBuffer</code> handles only.  An application must ensure that the target <code>VkBuffer</code> handle was created with the correct <code>VkMemoryFlags</code>.  The <strong>VK_MEMORY_GPU_ONLY</strong> is the only enumeration value which cannot be mapped.</p>
+<p>V-EZ exposes map and unmap operations for <code>VkBuffer</code> handles only.  An application must ensure that the target <code>VkBuffer</code> handle was created with the correct <code>VezMemoryFlags</code>.  The <strong>VEZ_MEMORY_GPU_ONLY</strong> is the only enumeration value which cannot be mapped.</p>
 </div>
 <div class="paragraph">
-<p>To map and unmap a buffer, an application calls <code>VkMapBuffer</code> and <code>vkUnmapBuffer</code>.  Care must be taken to call <code>vkFlushMappedBufferRanges</code> to guarantee writes by the host are made available to the device.  The behavior remains nearly indentical to Vulkan&#8217;s <code>vkMapMemory</code> function.  See the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#memory-device-hostaccess">Vulkan spec</a> for more details.</p>
+<p>To map and unmap a buffer, an application calls <code>VezMapBuffer</code> and <code>vezUnmapBuffer</code>.  Care must be taken to call <code>vezFlushMappedBufferRanges</code> to guarantee writes by the host are made available to the device.  The behavior remains nearly indentical to Vulkan&#8217;s <code>vkMapMemory</code> function.  See the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#memory-device-hostaccess">Vulkan spec</a> for more details.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_utility_functions">11.2. Utility Functions</h3>
+<h3 id="_utility_functions">10.2. Utility Functions</h3>
 <div class="paragraph">
 <p>V-EZ simplifies host to device data transfers by providing two utility functions. Both are synchronous function calls on the host and block the calling thread until completion.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>VkResult vkBufferSubData(VkDevice device, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize size, <span class="directive">const</span> <span class="directive">void</span>* pData);
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>VkResult vezBufferSubData(VkDevice device, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize size, <span class="directive">const</span> <span class="directive">void</span>* pData);
 <span class="line-numbers"> 2</span>
-<span class="line-numbers"> 3</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VkImageSubDataInfo {
+<span class="line-numbers"> 3</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VezImageSubDataInfo {
 <span class="line-numbers"> 4</span>    uint32_t dataRowLength;
 <span class="line-numbers"> 5</span>    uint32_t dataImageHeight;
-<span class="line-numbers"> 6</span>    VkImageSubresourceLayers imageSubresource;
+<span class="line-numbers"> 6</span>    VezImageSubresourceLayers imageSubresource;
 <span class="line-numbers"> 7</span>    VkOffset3D imageOffset;
 <span class="line-numbers"> 8</span>    VkExtent3D imageExtent;
-<span class="line-numbers"> 9</span>} VkImageSubDataInfo;
+<span class="line-numbers"> 9</span>} VezImageSubDataInfo;
 <span class="line-numbers">10</span>
-<span class="line-numbers">11</span>VkResult vkImageSubData(VkDevice device, VkImage image, <span class="directive">const</span> VkImageSubDataInfo* pSubDataInfo, <span class="directive">const</span> <span class="directive">void</span>* pData);</code></pre>
+<span class="line-numbers">11</span>VkResult vezImageSubData(VkDevice device, VkImage image, <span class="directive">const</span> VezImageSubDataInfo* pSubDataInfo, <span class="directive">const</span> <span class="directive">void</span>* pData);</code></pre>
 </div>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_glsl_guide">12. GLSL Guide</h2>
+<h2 id="_glsl_guide">11. GLSL Guide</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p><em>TODO</em></p>
@@ -2244,7 +2261,7 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-03-20 09:56:36 DST
+Last updated 2018-04-21 11:33:58 Central Daylight Time
 </div>
 </div>
 </body>

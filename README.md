@@ -1,8 +1,6 @@
 # V-EZ
 
-V-EZ is a light-weight middleware layer for the Vulkan API targeting ISVs in the Professional Workstation Graphics space. The required low-level knowledge of GPU hardware and behavior in Vulkan is much greater than previous graphics APIs.  V-EZ attempts to bridge that gap by augmenting the Vulkan API to lower the barrier to entry and allowing for traditional usage and semantics that Professional CAD ISV developers are used to.
-
-V-EZ is not aimed at game developers.
+V-EZ is a cross-platform (Windows and Linux) wrapper intended to alleviate the inherent complexity and application responsibility of using the Vulkan API. V-EZ attempts to bridge the gap between traditional graphics APIs and Vulkan by providing similar semantics to Vulkan while lowering the barrier to entry and providing an easier to use API. V-EZ is aimed to ISVs in the professional graphics workspace, 
 
 <img src="https://github.com/GPUOpen-LibrariesAndSDKs/V-EZ/blob/master/Docs/img/VulkanAPI.PNG" />
 
@@ -13,9 +11,11 @@ V-EZ is not aimed at game developers.
 The documentation for V-EZ can be found [here](https://gpuopen-librariesandsdks.github.io/V-EZ/)
 ## Prerequisites
 
-* Windows&reg; 10 (Linux release coming soon)
-* Visual Studio&reg; 2015 or later
-* LunarG Vulkan SDK 1.1.70 (Vulkan 1.1 support coming soon)
+* Windows or Linux
+* Visual Studio&reg; 2015 and later
+* GCC 7.1 and later
+* CMake 3.8 and later
+* LunarG Vulkan SDK 1.1.70
 
 ## Hardware Support
 

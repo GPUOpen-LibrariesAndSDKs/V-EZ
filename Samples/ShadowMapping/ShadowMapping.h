@@ -32,7 +32,7 @@
 
 typedef struct PipelineDesc
 {
-    VkPipeline pipeline = VK_NULL_HANDLE;
+    VezPipeline pipeline = VK_NULL_HANDLE;
     std::vector<VkShaderModule> shaderModules;
 } PipelineDesc;
 
@@ -64,13 +64,13 @@ private:
     PipelineDesc m_scenePassPipeline;
     VkImage m_depthImage = VK_NULL_HANDLE;
     VkImageView m_depthImageView = VK_NULL_HANDLE;
-    VkFramebuffer m_depthFramebuffer = VK_NULL_HANDLE;
+    VezFramebuffer m_depthFramebuffer = VK_NULL_HANDLE;
     VkSampler m_sampler = VK_NULL_HANDLE;
     VkBuffer m_cameraMatrices = VK_NULL_HANDLE;
     VkBuffer m_lightMatrices = VK_NULL_HANDLE;
     Model m_model;
     VkQueue m_graphicsQueue = VK_NULL_HANDLE;
-    VkCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
-    glm::vec3 m_cameraRotation;
+    VezCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
+    glm::vec3 m_cameraRotation = glm::vec3(0.0f);
     float m_cameraZoom = 1.0f;
 };

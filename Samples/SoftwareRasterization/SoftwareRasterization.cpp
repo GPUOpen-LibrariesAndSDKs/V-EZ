@@ -26,8 +26,9 @@
 #include <fstream>
 #include <array>
 #include <chrono>
+#include <cmath>
+#include <stb_image.h>
 #include "SoftwareRasterization.h"
-#include <FreeImage.h>
 
 #define FATAL(msg) { std::cout << msg << "\n"; AppBase::Exit(); return; }
 
@@ -39,7 +40,7 @@ struct UniformBuffer
 };
 
 SoftwareRasterization::SoftwareRasterization()
-    : AppBase("SoftwareRasterization Sample", 800, 600, 0, false)
+    : AppBase("SoftwareRasterization Sample", 800, 600, 0, true, {}, false)
 {
 
 }
@@ -57,19 +58,19 @@ void SoftwareRasterization::Cleanup()
 {    
     auto device = AppBase::GetDevice();
 
-    vkDestroyBuffer(device, m_uniformBuffer);
+    vezDestroyBuffer(device, m_uniformBuffer);
 
-    vkDestroyPipeline(device, m_computePipeline.pipeline);
+    vezDestroyPipeline(device, m_computePipeline.pipeline);
     for (auto shaderModule : m_computePipeline.shaderModules)
-        vkDestroyShaderModule(device, shaderModule);
+        vezDestroyShaderModule(device, shaderModule);
     
-    vkFreeCommandBuffers(device, 1, &m_commandBuffer);
+    vezFreeCommandBuffers(device, 1, &m_commandBuffer);
 }
 
 void SoftwareRasterization::Draw()
 {
     // Submit the command buffer to the graphics queue.
-    VkSubmitInfo submitInfo = {};
+    VezSubmitInfo submitInfo = {};
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &m_commandBuffer;
 
@@ -77,27 +78,34 @@ void SoftwareRasterization::Draw()
     VkSemaphore semaphore = VK_NULL_HANDLE;
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = &semaphore;
-    if (vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, nullptr) != VK_SUCCESS)
+    if (vezQueueSubmit(m_graphicsQueue, 1, &submitInfo, nullptr) != VK_SUCCESS)
         FATAL("vkQueueSubmit failed");
 
     // Present the swapchain framebuffer to the window.
-    VkPresentInfo presentInfo = { m_colorOutput.image, 1, &semaphore, 0, nullptr };
-    if (vkQueuePresent(m_graphicsQueue, &presentInfo) != VK_SUCCESS)
-        FATAL("vkQueuePresentKHR failed");
+    VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    auto swapchain = AppBase::GetSwapchain();
+    auto srcImage = AppBase::GetColorAttachment();
 
-    // Destroy the semaphore.
-    vkDestroySemaphore(AppBase::GetDevice(), semaphore);
+    VezPresentInfo presentInfo = {};
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = &semaphore;
+    presentInfo.pWaitDstStageMask = &waitDstStageMask;
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = &swapchain;
+    presentInfo.pImages = &m_colorOutput.image;
+    if (vezQueuePresent(m_graphicsQueue, &presentInfo) != VK_SUCCESS)
+        FATAL("vezQueuePresentKHR failed");
 }
 
 void SoftwareRasterization::OnResize(int width, int height)
 {
-    vkDeviceWaitIdle(AppBase::GetDevice());
+    vezDeviceWaitIdle(AppBase::GetDevice());
 
     // Recreate color output.
     CreateColorOutput();
 
     // Recreate command buffer.
-    vkFreeCommandBuffers(AppBase::GetDevice(), 1, &m_commandBuffer);
+    vezFreeCommandBuffers(AppBase::GetDevice(), 1, &m_commandBuffer);
     CreateCommandBuffer();
 }
 
@@ -114,7 +122,7 @@ void SoftwareRasterization::Update(float timeElapsed)
 
     // Calculate appropriate matrices for the current frame.
     UniformBuffer ub = {};
-    ub.view = glm::translate(glm::vec3(0.0f, 0.0f, -2.5f)) * glm::rotate(sin(elapsedTime * 0.001f) * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    ub.view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -2.5f)) * glm::rotate(glm::mat4(1.0f), sin(elapsedTime * 0.001f) * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     ub.projection = glm::perspective(glm::radians(65.0f), width / static_cast<float>(height), 0.1f, 10.0f);
     ub.projection[1][1] *= -1.0f;
     ub.width = static_cast<uint32_t>(width);
@@ -122,12 +130,12 @@ void SoftwareRasterization::Update(float timeElapsed)
 
     // Update the memory via map and unmap since it was created as HOST_VISIBLE (i.e. VK_MEMORY_USAGE_CPU_TO_GPU).
     void* data = nullptr;
-    auto result = vkMapBuffer(AppBase::GetDevice(), m_uniformBuffer, 0, sizeof(UniformBuffer), &data);
+    auto result = vezMapBuffer(AppBase::GetDevice(), m_uniformBuffer, 0, sizeof(UniformBuffer), &data);
     if (result != VK_SUCCESS)
         FATAL("vkMapBuffer failed");
 
     memcpy(data, &ub, sizeof(UniformBuffer));
-    vkUnmapBuffer(AppBase::GetDevice(), m_uniformBuffer);
+    vezUnmapBuffer(AppBase::GetDevice(), m_uniformBuffer);
 }
 
 void SoftwareRasterization::CreateColorOutput()
@@ -135,36 +143,40 @@ void SoftwareRasterization::CreateColorOutput()
     // Free previous allocations.
     if (m_colorOutput.imageView)
     {
-        vkDestroyImageView(AppBase::GetDevice(), m_colorOutput.imageView);
-        vkDestroyImage(AppBase::GetDevice(), m_colorOutput.image);
+        vezDestroyImageView(AppBase::GetDevice(), m_colorOutput.imageView);
+        vezDestroyImage(AppBase::GetDevice(), m_colorOutput.image);
     }
 
     // Get the current window dimension.
     int width, height;
     AppBase::GetWindowSize(&width, &height);
 
+    // Match the swapchain's image format.
+    VkSurfaceFormatKHR swapchainFormat = {};
+    vezGetSwapchainSurfaceFormat(AppBase::GetSwapchain(), &swapchainFormat);
+
     // Create the color image for the m_framebuffer.
-    VkImageCreateInfo imageCreateInfo = {};
+    VezImageCreateInfo imageCreateInfo = {};
     imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+    imageCreateInfo.format = swapchainFormat.format;
     imageCreateInfo.extent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1 };
     imageCreateInfo.mipLevels = 1;
     imageCreateInfo.arrayLayers = 1;
     imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-    imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-    imageCreateInfo.usage = VK_IMAGE_USAGE_GENERAL_BIT;// TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
-    auto result = vkCreateImage(AppBase::GetDevice(), VK_MEMORY_GPU_ONLY, &imageCreateInfo, &m_colorOutput.image);
+    imageCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
+    imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+    auto result = vezCreateImage(AppBase::GetDevice(), VEZ_MEMORY_GPU_ONLY, &imageCreateInfo, &m_colorOutput.image);
     if (result != VK_SUCCESS)
         FATAL("vkCreateImage failed");
 
     // Create the image view for binding the texture as a resource.
-    VkImageViewCreateInfo imageViewCreateInfo = {};
+    VezImageViewCreateInfo imageViewCreateInfo = {};
     imageViewCreateInfo.image = m_colorOutput.image;
     imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     imageViewCreateInfo.format = imageCreateInfo.format;
     imageViewCreateInfo.subresourceRange.layerCount = 1;
     imageViewCreateInfo.subresourceRange.levelCount = 1;
-    result = vkCreateImageView(AppBase::GetDevice(), &imageViewCreateInfo, &m_colorOutput.imageView);
+    result = vezCreateImageView(AppBase::GetDevice(), &imageViewCreateInfo, &m_colorOutput.imageView);
     if (result != VK_SUCCESS)
         FATAL("vkCreateImageView failed");
 }
@@ -172,77 +184,68 @@ void SoftwareRasterization::CreateColorOutput()
 void SoftwareRasterization::CreateTexture()
 {
     // Load image from disk.
-    FreeImage_Initialise();
-    FIBITMAP* bitmap = FreeImage_Load(FIF_JPEG, "../../Samples/Data/Textures/texture.jpg");
-    if (!bitmap)
-        FATAL("Failed to load texture.jpg");
-
-    // Ensure format is 8-bit RGBA.
-    FIBITMAP* temp = FreeImage_ConvertTo32Bits(bitmap);
-    FreeImage_Unload(bitmap);
-    bitmap = temp;
+    int width, height, channels;
+    stbi_set_flip_vertically_on_load(1);
+    auto pixelData = stbi_load("../../Samples/Data/Textures/texture.jpg", &width, &height, &channels, 4);
 
     // Create the AppBase::GetDevice() side image.
-    VkImageCreateInfo imageCreateInfo = {};
+    VezImageCreateInfo imageCreateInfo = {};
     imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
     imageCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
-    imageCreateInfo.extent = { FreeImage_GetWidth(bitmap), FreeImage_GetHeight(bitmap), 1 };
+    imageCreateInfo.extent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1 };
     imageCreateInfo.mipLevels = 1;
     imageCreateInfo.arrayLayers = 1;
     imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-    auto result = vkCreateImage(AppBase::GetDevice(), VK_MEMORY_GPU_ONLY, &imageCreateInfo, &m_image);
+    auto result = vezCreateImage(AppBase::GetDevice(), VEZ_MEMORY_GPU_ONLY, &imageCreateInfo, &m_image);
     if (result != VK_SUCCESS)
-        FATAL("vkCreateImage failed");
+        FATAL("vezCreateImage failed");
 
     // Upload the host side data.
-    VkImageSubDataInfo subDataInfo = {};
+    VezImageSubDataInfo subDataInfo = {};
     subDataInfo.imageSubresource.mipLevel = 0;
     subDataInfo.imageSubresource.baseArrayLayer = 0;
     subDataInfo.imageSubresource.layerCount = 1;
     subDataInfo.imageOffset = { 0, 0, 0 };
-    subDataInfo.imageExtent = { FreeImage_GetWidth(bitmap), FreeImage_GetHeight(bitmap), 1 };
-    result = vkImageSubData(AppBase::GetDevice(), m_image, &subDataInfo, FreeImage_GetBits(bitmap));
+    subDataInfo.imageExtent = { imageCreateInfo.extent.width, imageCreateInfo.extent.height, 1 };
+    result = vezImageSubData(AppBase::GetDevice(), m_image, &subDataInfo, reinterpret_cast<const void*>(pixelData));
     if (result != VK_SUCCESS)
-        FATAL("vkImageSubData failed");
+        FATAL("vezImageSubData failed");
 
-    // Destroy the FreeImage handle.
-    FreeImage_Unload(bitmap);
-    FreeImage_DeInitialise();
+    // Destroy the pixel data.
+    stbi_image_free(pixelData);
 
     // Create the image view for binding the texture as a resource.
-    VkImageViewCreateInfo imageViewCreateInfo = {};
+    VezImageViewCreateInfo imageViewCreateInfo = {};
     imageViewCreateInfo.image = m_image;
     imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     imageViewCreateInfo.format = imageCreateInfo.format;
-    imageViewCreateInfo.components = { VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_A };
     imageViewCreateInfo.subresourceRange.layerCount = 1;
     imageViewCreateInfo.subresourceRange.levelCount = 1;
-    result = vkCreateImageView(AppBase::GetDevice(), &imageViewCreateInfo, &m_imageView);
+    result = vezCreateImageView(AppBase::GetDevice(), &imageViewCreateInfo, &m_imageView);
     if (result != VK_SUCCESS)
-        FATAL("vkCreateImageView failed");
+        FATAL("vezCreateImageView failed");
 
-    // Create sampler.
-    VkSamplerCreateInfo createInfo = {};
+    VezSamplerCreateInfo createInfo = {};
     createInfo.magFilter = VK_FILTER_LINEAR;
     createInfo.minFilter = VK_FILTER_LINEAR;
     createInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
     createInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     createInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     createInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-    result = vkCreateSampler(AppBase::GetDevice(), &createInfo, &m_sampler);
+    result = vezCreateSampler(AppBase::GetDevice(), &createInfo, &m_sampler);
     if (result != VK_SUCCESS)
-        FATAL("vkCreateSampler failed");
+        FATAL("vezCreateSampler failed");
 }
 
 void SoftwareRasterization::CreateUniformBuffer()
 {
     // Create a buffer for storing per frame matrices.
-    VkBufferCreateInfo createInfo = {};
+    VezBufferCreateInfo createInfo = {};
     createInfo.size = sizeof(UniformBuffer);
     createInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-    if (vkCreateBuffer(AppBase::GetDevice(), VK_MEMORY_CPU_TO_GPU, &createInfo, &m_uniformBuffer) != VK_SUCCESS)
+    if (vezCreateBuffer(AppBase::GetDevice(), VEZ_MEMORY_CPU_TO_GPU, &createInfo, &m_uniformBuffer) != VK_SUCCESS)
         FATAL("vkCreateBuffer failed for uniform buffer");
 }
 
@@ -260,17 +263,17 @@ void SoftwareRasterization::CreatePipeline()
 void SoftwareRasterization::CreateCommandBuffer()
 {
     // Get the graphics queue handle.
-    vkGetDeviceGraphicsQueue(AppBase::GetDevice(), 0, &m_graphicsQueue);
+    vezGetDeviceGraphicsQueue(AppBase::GetDevice(), 0, &m_graphicsQueue);
 
     // Create a command buffer handle.
-    VkCommandBufferAllocateInfo allocInfo = {};
+    VezCommandBufferAllocateInfo allocInfo = {};
     allocInfo.queue = m_graphicsQueue;
     allocInfo.commandBufferCount = 1;
-    if (vkAllocateCommandBuffers(AppBase::GetDevice(), &allocInfo, &m_commandBuffer) != VK_SUCCESS)
+    if (vezAllocateCommandBuffers(AppBase::GetDevice(), &allocInfo, &m_commandBuffer) != VK_SUCCESS)
         FATAL("vkAllocateCommandBuffers failed");
 
     // Begin command buffer recording.
-    if (vkBeginCommandBuffer(m_commandBuffer, VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT) != VK_SUCCESS)
+    if (vezBeginCommandBuffer(m_commandBuffer, VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT) != VK_SUCCESS)
         FATAL("vkBeginCommandBuffer failed");
 
     // Get the current window dimensions.
@@ -279,23 +282,23 @@ void SoftwareRasterization::CreateCommandBuffer()
     
     // Clear the color attachment.
     VkClearColorValue clearColor = {};
-    VkImageSubresourceRange range = {};
+    VezImageSubresourceRange range = {};
     range.layerCount = 1;
     range.levelCount = 1;
-    vkCmdClearColorImage(m_commandBuffer, m_colorOutput.image, &clearColor, 1, &range);
+    vezCmdClearColorImage(m_commandBuffer, m_colorOutput.image, &clearColor, 1, &range);
 
     // Bind the compute pipeline and resouces.
-    vkCmdBindPipeline(m_commandBuffer, m_computePipeline.pipeline);
-    vkCmdBindBuffer(m_commandBuffer, m_uniformBuffer, 0, 0, 0);
-    vkCmdBindImageView(m_commandBuffer, m_imageView, m_sampler, 0, 1, 0);
-    vkCmdBindImageView(m_commandBuffer, m_colorOutput.imageView, VK_NULL_HANDLE, 0, 2, 0);
+    vezCmdBindPipeline(m_commandBuffer, m_computePipeline.pipeline);
+    vezCmdBindBuffer(m_commandBuffer, m_uniformBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
+    vezCmdBindImageView(m_commandBuffer, m_imageView, m_sampler, 0, 1, 0);
+    vezCmdBindImageView(m_commandBuffer, m_colorOutput.imageView, VK_NULL_HANDLE, 0, 2, 0);
 
     // Dispatch compute to rasterize N simulated primitives.
-    auto groupCountX = static_cast<uint32_t>(std::ceilf(width / 8.0f));
-    auto groupCountY = static_cast<uint32_t>(std::ceilf(height / 8.0f));
-    vkCmdDispatch(m_commandBuffer, groupCountX, groupCountY, 1U);
+    auto groupCountX = static_cast<uint32_t>(ceilf(width / 8.0f));
+    auto groupCountY = static_cast<uint32_t>(ceilf(height / 8.0f));
+    vezCmdDispatch(m_commandBuffer, groupCountX, groupCountY, 1U);
 
     // End command buffer recording.
-    if (vkEndCommandBuffer(m_commandBuffer) != VK_SUCCESS)
+    if (vezEndCommandBuffer(m_commandBuffer) != VK_SUCCESS)
         FATAL("vkEndCommandBuffer failed");
 }

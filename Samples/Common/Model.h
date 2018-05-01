@@ -29,11 +29,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
-#ifndef VKEZ_NO_PROTOTYPES
 #include <VEZ.h>
-#else
-#include "VulkanEZ_Loader.h"
-#endif
 
 class Model
 {
@@ -56,7 +52,7 @@ public:
 
     bool LoadFromFile(const std::string& filename, VkDevice device);    
 
-    void Draw(VkCommandBuffer commandBuffer, uint32_t instanceCount = 1);
+    void Draw(VezCommandBuffer commandBuffer, uint32_t instanceCount = 1);
 
 private:
     struct Part
@@ -73,6 +69,6 @@ private:
     VkBuffer m_indexBuffer = VK_NULL_HANDLE;
     uint32_t m_vertexCount = 0;
     uint32_t m_indexCount = 0;
-    VkVertexInputFormat m_vertexInputFormat = VK_NULL_HANDLE;
+    VezVertexInputFormat m_vertexInputFormat = VK_NULL_HANDLE;
     BBox m_bbox;
 };

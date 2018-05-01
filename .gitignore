@@ -1,0 +1,6 @@
+Build/
+Bin/
+*.vcxproj
+*.vcxproj.filters
+*.cmake
+CMakeFiles/

@@ -27,14 +27,11 @@
 #include <array>
 #include <vector>
 #include <map>
-#include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
-#include <VEZ.h>
 #include "AppBase.h"
 
 static std::map<GLFWwindow*, AppBase*> appBaseInstances;
 
-static void SetWindowCenter(GLFWwindow* window)
+void SetWindowCenter(GLFWwindow* window)
 {
     // Get window position and size
     int posX, posY;
@@ -92,7 +89,7 @@ static void SetWindowCenter(GLFWwindow* window)
         glfwSetWindowPos(window, owner_x + (owner_width >> 1) - width, owner_y + (owner_height >> 1) - height);
 }
 
-static void WindowSizeCallback(GLFWwindow* window, int width, int height)
+void AppBase::WindowSizeCallback(GLFWwindow* window, int width, int height)
 {
     auto itr = appBaseInstances.find(window);
     if (itr != appBaseInstances.end())
@@ -109,7 +106,7 @@ static void WindowSizeCallback(GLFWwindow* window, int width, int height)
     }
 }
 
-static void CursorPosCallback(GLFWwindow* window, double x, double y)
+void AppBase::CursorPosCallback(GLFWwindow* window, double x, double y)
 {
     auto itr = appBaseInstances.find(window);
     if (itr != appBaseInstances.end())
@@ -118,7 +115,7 @@ static void CursorPosCallback(GLFWwindow* window, double x, double y)
     }
 }
 
-static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+void AppBase::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
     auto itr = appBaseInstances.find(window);
     if (itr != appBaseInstances.end())
@@ -137,7 +134,7 @@ static void MouseButtonCallback(GLFWwindow* window, int button, int action, int 
     }
 }
 
-static void MouseScrollCallback(GLFWwindow* window, double x, double y)
+void AppBase::MouseScrollCallback(GLFWwindow* window, double x, double y)
 {
     auto itr = appBaseInstances.find(window);
     if (itr != appBaseInstances.end())
@@ -146,7 +143,7 @@ static void MouseScrollCallback(GLFWwindow* window, double x, double y)
     }
 }
 
-static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void AppBase::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     auto itr = appBaseInstances.find(window);
     if (itr != appBaseInstances.end())
@@ -162,13 +159,16 @@ static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, i
     }
 }
 
-AppBase::AppBase(const char* name, int width, int height, int physicalDeviceIndex, bool manageFramebuffer, VkSampleCountFlagBits sampleCountFlag)
+AppBase::AppBase(const char* name, int width, int height, int physicalDeviceIndex, bool enableValidationLayers, const std::vector<std::string>& deviceExtensions
+    , bool manageFramebuffer, VkSampleCountFlagBits sampleCountFlag)
     : m_name(name)
     , m_width(width)
     , m_height(height)
     , m_physicalDeviceIndex(physicalDeviceIndex)
+    , m_enableValidationLayers(enableValidationLayers)
     , m_manageFramebuffer(manageFramebuffer)
     , m_sampleCountFlag(sampleCountFlag)
+    , m_deviceExtensions(deviceExtensions)
 {
     
 }
@@ -190,30 +190,40 @@ AppBase::~AppBase()
 
 int AppBase::Run()
 {
-#ifdef VKEZ_NO_PROTOTYPES
-    // Initialize VulkanEZ library.
-    if (InitVulkanEZ() != VK_SUCCESS)
+    // Enumerate all available instance layers.
     {
-        std::cout << "InitVulkanEZ failed\n";
+        uint32_t layerCount = 0;
+        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+        std::vector<VkLayerProperties> properties;
+        vkEnumerateInstanceLayerProperties(&layerCount, properties.data());
+
+        std::cout << "Instance Layers:\n";
+        for (auto prop : properties)
+        {
+            std::cout << prop.layerName << "\n";
+        }
+        std::cout << "\n";
+    }
+    // Use glfw to check for Vulkan support.
+    glfwInit();
+    if (glfwVulkanSupported() == GLFW_FALSE)
+    {
+        std::cout << "No Vulkan supported found on system!\n";
         return -1;
     }
-#endif
 
-    // Initialize a VulkanEZ instance and enable the standard set of LunarG validation layers.
-#ifdef _DEBUG
-    std::vector<const char*> enabledLayers = { "VK_LAYER_LUNARG_standard_validation" };
-    std::vector<const char*> enabledExtensions = { VK_EXT_DEBUG_REPORT_EXTENSION_NAME  };
-#else
-    std::vector<const char*> enabledLayers = { };
-    std::vector<const char*> enabledExtensions = {};
-#endif
-    VkApplicationInfo appInfo = { m_name.c_str(), VEZ_MAKE_VERSION(1, 0, 0), "", VEZ_MAKE_VERSION(0, 0, 0) };
-    VkInstanceCreateInfo createInfo = {
-        &appInfo,
-        static_cast<uint32_t>(enabledLayers.size()), enabledLayers.data(),
-        static_cast<uint32_t>(enabledExtensions.size()), enabledExtensions.data()
-    };
-    auto result = vkCreateInstance(&createInfo, &m_instance);
+    // Initialize a Vulkan instance with the validation layers enabled and extensions required by glfw.
+    uint32_t instanceExtensionCount = 0U;
+    auto instanceExtensions = glfwGetRequiredInstanceExtensions(&instanceExtensionCount);
+
+    std::vector<const char*> instanceLayers;
+    if (m_enableValidationLayers)
+        instanceLayers.push_back("VK_LAYER_LUNARG_standard_validation");
+    
+    VezApplicationInfo appInfo = { nullptr, m_name.c_str(), VK_MAKE_VERSION(1, 0, 0), "", VK_MAKE_VERSION(0, 0, 0) };
+    VezInstanceCreateInfo createInfo = { nullptr, &appInfo, static_cast<uint32_t>(instanceLayers.size()), instanceLayers.data(), instanceExtensionCount, instanceExtensions };
+    auto result = vezCreateInstance(&createInfo, &m_instance);
     if (result != VK_SUCCESS)
     {
         std::cout << "vkCreateInstance failed result=" << result << "\n";
@@ -222,7 +232,7 @@ int AppBase::Run()
 
     // Enumerate all attached physical devices.
     uint32_t physicalDeviceCount = 0;
-    vkEnumeratePhysicalDevices(m_instance, &physicalDeviceCount, nullptr);
+    vezEnumeratePhysicalDevices(m_instance, &physicalDeviceCount, nullptr);
     if (physicalDeviceCount == 0)
     {
         std::cout << "No vulkan physical devices found\n";
@@ -230,63 +240,57 @@ int AppBase::Run()
     }
 
     std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
-    vkEnumeratePhysicalDevices(m_instance, &physicalDeviceCount, physicalDevices.data());
+    vezEnumeratePhysicalDevices(m_instance, &physicalDeviceCount, physicalDevices.data());
+
+    for (auto pd : physicalDevices)
+    {
+        VkPhysicalDeviceProperties properties = {};
+        vezGetPhysicalDeviceProperties(pd, &properties);
+        std::cout << properties.deviceName << "\n";
+    }
 
     // Select the physical device.
     m_physicalDevice = physicalDevices[m_physicalDeviceIndex];
 
-    // Display physical device properties to the console.
+    // Get the physical device information.
     VkPhysicalDeviceProperties properties = {};
-    vkGetPhysicalDeviceProperties(m_physicalDevice, &properties);
-    
-    auto deviceTypeToString = [](VkPhysicalDeviceType type) -> std::string {
-        switch (type)
-        {
-        case VK_PHYSICAL_DEVICE_TYPE_OTHER: return "OTHER";
-        case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU: return "INTEGRATED_GPU";
-        case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU: return "DISCRETE_GPU";
-        case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU: return "VIRTUAL_GPU";
-        case VK_PHYSICAL_DEVICE_TYPE_CPU: return "CPU";
-        default: return "UNKNOWN";
-        }
-    };
-
-    std::cout << "Name: " << properties.deviceName << "\n";
-    std::cout << "Type: " << deviceTypeToString(properties.deviceType) << "\n";
+    vezGetPhysicalDeviceProperties(m_physicalDevice, &properties);
+    std::cout << "Selected device: " << properties.deviceName << "\n";
 
     // Initialize a window using GLFW and hint no graphics API should be used on the backend.
-    glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     m_window = glfwCreateWindow(m_width, m_height, m_name.c_str(), nullptr, nullptr);
     SetWindowCenter(m_window);
 
     // Create a surface from the GLFW window handle.
-    VkSurfaceCreateInfo surfaceCreateInfo = {};
-    surfaceCreateInfo.hinstance = GetModuleHandle(nullptr);
-    surfaceCreateInfo.hwnd = glfwGetWin32Window(m_window);
-    result = vkCreateSurface(m_instance, &surfaceCreateInfo, &m_surface);
+    result = glfwCreateWindowSurface(m_instance, m_window, nullptr, &m_surface);
     if (result != VK_SUCCESS)
     {
         std::cout << "vkCreateSurface failed!\n";
         return -1;
     }
 
-    // Specify swapchain surface properties.
-    VkSwapchainCreateInfo swapchainCreateInfo = {};
-    swapchainCreateInfo.surface = m_surface;
-    swapchainCreateInfo.imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-    swapchainCreateInfo.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-
-    // Create the Vulkan device handle (no extensions enabled).
-    std::array<const char*, 1> deviceExtensions = {
-        "VK_EXT_shader_subgroup_ballot"
-    };
-
-    VkDeviceCreateInfo deviceCreateInfo = { static_cast<uint32_t>(deviceExtensions.size()), deviceExtensions.data(), &swapchainCreateInfo };
-    result = vkCreateDevice(m_physicalDevice, &deviceCreateInfo, &m_device);
+    // Create the Vulkan device handle.
+    std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+    for (auto i = 0U; i < m_deviceExtensions.size(); ++i)
+        deviceExtensions.push_back(m_deviceExtensions[i].c_str());
+           
+    VezDeviceCreateInfo deviceCreateInfo = { nullptr, 0, nullptr, static_cast<uint32_t>(deviceExtensions.size()), deviceExtensions.data() };
+    result = vezCreateDevice(m_physicalDevice, &deviceCreateInfo, &m_device);
     if (result != VK_SUCCESS)
     {
-        std::cout << "vkCreateDevice failed\n";
+        std::cout << "vezCreateDevice failed\n";
+        return -1;
+    }
+
+    // Create the swapchain.
+    VezSwapchainCreateInfo swapchainCreateInfo = {};
+    swapchainCreateInfo.surface = m_surface;
+    swapchainCreateInfo.format = { VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+    result = vezCreateSwapchain(m_device, &swapchainCreateInfo, &m_swapchain);
+    if (result != VK_SUCCESS)
+    {
+        std::cout << "vezCreateSwapchain failed\n";
         return -1;
     }
 
@@ -346,26 +350,35 @@ int AppBase::Run()
     }
 
     // Wait for all device operations to complete.
-    vkDeviceWaitIdle(m_device);
+    vezDeviceWaitIdle(m_device);
     
     // Call application's Cleanup method.
     Cleanup();
     
     // Destroy framebuffer.
-    vkDestroyImageView(m_device, m_framebuffer.depthStencilImageView);
-    vkDestroyImageView(m_device, m_framebuffer.colorImageView);
-    vkDestroyImage(m_device, m_framebuffer.depthStencilImage);
-    vkDestroyImage(m_device, m_framebuffer.colorImage);
-    vkDestroyFramebuffer(m_device, m_framebuffer.handle);
+    if (m_manageFramebuffer)
+    {
+        if (m_framebuffer.handle)
+        {
+            vezDestroyFramebuffer(m_device, m_framebuffer.handle);
+            vezDestroyImageView(m_device, m_framebuffer.colorImageView);
+            vezDestroyImageView(m_device, m_framebuffer.depthStencilImageView);
+            vezDestroyImage(m_device, m_framebuffer.colorImage);
+            vezDestroyImage(m_device, m_framebuffer.depthStencilImage);
+        }
+    }
+
+    // Destroy the swapchain.
+    vezDestroySwapchain(m_device, m_swapchain);
 
     // Destroy device.
-    vkDestroyDevice(m_device);
+    vezDestroyDevice(m_device);
 
     // Destroy surface.
-    vkDestroySurface(m_instance, m_surface);
+    vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 
     // Destroy instance.
-    vkDestroyInstance(m_instance);
+    vezDestroyInstance(m_instance);
 
     // Return success.
     return 0;
@@ -389,16 +402,28 @@ void AppBase::Exit()
     {
         if (m_framebuffer.handle)
         {
-            vkDestroyFramebuffer(m_device, m_framebuffer.handle);
-            vkDestroyImageView(m_device, m_framebuffer.colorImageView);
-            vkDestroyImageView(m_device, m_framebuffer.depthStencilImageView);
-            vkDestroyImage(m_device, m_framebuffer.colorImage);
-            vkDestroyImage(m_device, m_framebuffer.depthStencilImage);
+            vezDestroyFramebuffer(m_device, m_framebuffer.handle);
+            vezDestroyImageView(m_device, m_framebuffer.colorImageView);
+            vezDestroyImageView(m_device, m_framebuffer.depthStencilImageView);
+            vezDestroyImage(m_device, m_framebuffer.colorImage);
+            vezDestroyImage(m_device, m_framebuffer.depthStencilImage);
         }
     }
 
+    // Destroy the swapchain.
+    vezDestroySwapchain(m_device, m_swapchain);
+
     // Destroy device.
-    vkDestroyDevice(m_device);
+    vezDestroyDevice(m_device);
+
+    // Destroy surface.
+    vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+
+    // Destroy instance.
+    vezDestroyInstance(m_instance);
+
+    // Destroy AppBase instance.
+    delete this;
 
     // Force exit the process.
     exit(-1);
@@ -420,45 +445,49 @@ void AppBase::CreateFramebuffer()
     // Free previous allocations.
     if (m_framebuffer.handle)
     {
-        vkDestroyFramebuffer(m_device, m_framebuffer.handle);
-        vkDestroyImageView(m_device, m_framebuffer.colorImageView);
-        vkDestroyImageView(m_device, m_framebuffer.depthStencilImageView);
-        vkDestroyImage(m_device, m_framebuffer.colorImage);
-        vkDestroyImage(m_device, m_framebuffer.depthStencilImage);
+        vezDestroyFramebuffer(m_device, m_framebuffer.handle);
+        vezDestroyImageView(m_device, m_framebuffer.colorImageView);
+        vezDestroyImageView(m_device, m_framebuffer.depthStencilImageView);
+        vezDestroyImage(m_device, m_framebuffer.colorImage);
+        vezDestroyImage(m_device, m_framebuffer.depthStencilImage);
     }
 
     // Get the current window dimension.
     int width, height;
     glfwGetWindowSize(m_window, &width, &height);
 
+    // Get the swapchain's current surface format.
+    VkSurfaceFormatKHR swapchainFormat = {};
+    vezGetSwapchainSurfaceFormat(m_swapchain, &swapchainFormat);
+
     // Create the color image for the m_framebuffer.
-    VkImageCreateInfo imageCreateInfo = {};
+    VezImageCreateInfo imageCreateInfo = {};
     imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+    imageCreateInfo.format = swapchainFormat.format;
     imageCreateInfo.extent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1 };
     imageCreateInfo.mipLevels = 1;
     imageCreateInfo.arrayLayers = 1;
     imageCreateInfo.samples = m_sampleCountFlag;
     imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-    auto result = vkCreateImage(m_device, VK_MEMORY_GPU_ONLY, &imageCreateInfo, &m_framebuffer.colorImage);
+    auto result = vezCreateImage(m_device, VEZ_MEMORY_GPU_ONLY, &imageCreateInfo, &m_framebuffer.colorImage);
     if (result != VK_SUCCESS)
     {
-        std::cout << __FUNCTION__ << " vkCreateImage failed (" << result << ")\n";
+        std::cout <<" vkCreateImage failed (" << result << ")\n";
         return;
     }
 
     // Create the image view for binding the texture as a resource.
-    VkImageViewCreateInfo imageViewCreateInfo = {};
+    VezImageViewCreateInfo imageViewCreateInfo = {};
     imageViewCreateInfo.image = m_framebuffer.colorImage;
     imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     imageViewCreateInfo.format = imageCreateInfo.format;
     imageViewCreateInfo.subresourceRange.layerCount = 1;
     imageViewCreateInfo.subresourceRange.levelCount = 1;
-    result = vkCreateImageView(m_device, &imageViewCreateInfo, &m_framebuffer.colorImageView);
+    result = vezCreateImageView(m_device, &imageViewCreateInfo, &m_framebuffer.colorImageView);
     if (result != VK_SUCCESS)
     {
-        std::cout << __FUNCTION__ << " vkCreateImageView failed (" << result << ")\n";
+        std::cout << " vkCreateImageView failed (" << result << ")\n";
         return;
     }
 
@@ -471,10 +500,10 @@ void AppBase::CreateFramebuffer()
     imageCreateInfo.samples = m_sampleCountFlag;
     imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-    result = vkCreateImage(m_device, VK_MEMORY_GPU_ONLY, &imageCreateInfo, &m_framebuffer.depthStencilImage);
+    result = vezCreateImage(m_device, VEZ_MEMORY_GPU_ONLY, &imageCreateInfo, &m_framebuffer.depthStencilImage);
     if (result != VK_SUCCESS)
     {
-        std::cout << __FUNCTION__ << " vkCreateImage failed (" << result << ")\n";
+        std::cout << " vkCreateImage failed (" << result << ")\n";
         return;
     }
 
@@ -484,25 +513,25 @@ void AppBase::CreateFramebuffer()
     imageViewCreateInfo.format = imageCreateInfo.format;
     imageViewCreateInfo.subresourceRange.layerCount = 1;
     imageViewCreateInfo.subresourceRange.levelCount = 1;
-    result = vkCreateImageView(m_device, &imageViewCreateInfo, &m_framebuffer.depthStencilImageView);
+    result = vezCreateImageView(m_device, &imageViewCreateInfo, &m_framebuffer.depthStencilImageView);
     if (result != VK_SUCCESS)
     {
-        std::cout << __FUNCTION__ << " vkCreateImageView failed (" << result << ")\n";
+        std::cout << " vkCreateImageView failed (" << result << ")\n";
         return;
     }
 
     // Create the m_framebuffer.
     std::array<VkImageView, 2> attachments = { m_framebuffer.colorImageView, m_framebuffer.depthStencilImageView };
-    VkFramebufferCreateInfo framebufferCreateInfo = {};
+    VezFramebufferCreateInfo framebufferCreateInfo = {};
     framebufferCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
     framebufferCreateInfo.pAttachments = attachments.data();
     framebufferCreateInfo.width = width;
     framebufferCreateInfo.height = height;
     framebufferCreateInfo.layers = 1;
-    result = vkCreateFramebuffer(m_device, &framebufferCreateInfo, &m_framebuffer.handle);
+    result = vezCreateFramebuffer(m_device, &framebufferCreateInfo, &m_framebuffer.handle);
     if (result != VK_SUCCESS)
     {
-        std::cout << __FUNCTION__ << " vkCreateFramebuffer failed (" << result << ")\n";
+        std::cout << "vkCreateFramebuffer failed (" << result << ")\n";
         return;
     }
 }
@@ -510,7 +539,7 @@ void AppBase::CreateFramebuffer()
 VkShaderModule AppBase::CreateShaderModule(const std::string& filename, const std::string& entryPoint, VkShaderStageFlagBits stage)
 {
     // Load the GLSL shader code from disk.
-    std::ifstream filestream(filename.c_str());
+    std::ifstream filestream(filename.c_str(), std::ios::in | std::ios::binary);
     if (!filestream.good())
     {
         std::cout << "Failed to open " << filename << "\n";
@@ -521,41 +550,43 @@ VkShaderModule AppBase::CreateShaderModule(const std::string& filename, const st
     filestream.close();
 
     // Create the shader module.
-    VkShaderModuleCreateInfo createInfo = {};
+    VezShaderModuleCreateInfo createInfo = {};
     createInfo.stage = stage;
     createInfo.codeSize = static_cast<uint32_t>(code.size());
-    createInfo.pGLSLSource = code.c_str();
+    if (filename.find(".spv") != std::string::npos)
+        createInfo.pCode = reinterpret_cast<const uint32_t*>(code.c_str());
+    else
+        createInfo.pGLSLSource = code.c_str();
     createInfo.pEntryPoint = entryPoint.c_str();
 
     VkShaderModule shaderModule = VK_NULL_HANDLE;
-    auto result = vkCreateShaderModule(m_device, &createInfo, &shaderModule);
-    if (result != VK_SUCCESS)
+    auto result = vezCreateShaderModule(m_device, &createInfo, &shaderModule);
+    if (result != VK_SUCCESS && shaderModule != VK_NULL_HANDLE)
     {
         // If shader module creation failed but error is from GLSL compilation, get the error log.
-        if (result == VK_ERROR_GLSL_COMPILE_FAILED)
-        {
-            uint32_t infoLogSize = 0;
-            vkGetShaderModuleInfoLog(shaderModule, &infoLogSize, nullptr);
+        uint32_t infoLogSize = 0;
+        vezGetShaderModuleInfoLog(shaderModule, &infoLogSize, nullptr);
 
-            std::string infoLog(infoLogSize, '\0');
-            vkGetShaderModuleInfoLog(shaderModule, &infoLogSize, &infoLog[0]);
+        std::string infoLog(infoLogSize, '\0');
+        vezGetShaderModuleInfoLog(shaderModule, &infoLogSize, &infoLog[0]);
 
-            vkDestroyShaderModule(m_device, shaderModule);
+        vezDestroyShaderModule(m_device, shaderModule);
 
-            std::cout << infoLog << "\n";
-            return VK_NULL_HANDLE;
-        }
-
+        std::cout << infoLog << "\n";
         return VK_NULL_HANDLE;
     }
 
     return shaderModule;
 }
 
-bool AppBase::CreatePipeline(const std::vector<PipelineShaderInfo>& pipelineShaderInfo, VkPipeline* pPipeline, std::vector<VkShaderModule>* shaderModules)
+bool AppBase::CreatePipeline(const std::vector<PipelineShaderInfo>& pipelineShaderInfo, VezPipeline* pPipeline, std::vector<VkShaderModule>* shaderModules)
 {
+    VkSpecializationMapEntry mapEntry = { 0, 0, sizeof(float) };
+    float data = 0.25f;
+    VkSpecializationInfo specializationInfo = { 1, &mapEntry, sizeof(float), &data };
+
     // Create shader modules.
-    std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfo(pipelineShaderInfo.size());
+    std::vector<VezPipelineShaderStageCreateInfo> shaderStageCreateInfo(pipelineShaderInfo.size());
     for (auto i = 0U; i < pipelineShaderInfo.size(); ++i)
     {
         auto filename = std::get<0>(pipelineShaderInfo[i]);
@@ -569,6 +600,11 @@ bool AppBase::CreatePipeline(const std::vector<PipelineShaderInfo>& pipelineShad
 
         shaderStageCreateInfo[i].module = shaderModule;
         shaderStageCreateInfo[i].pEntryPoint = "main";
+        shaderStageCreateInfo[i].pSpecializationInfo = nullptr;
+
+        if (stage == VK_SHADER_STAGE_FRAGMENT_BIT)
+            shaderStageCreateInfo[i].pSpecializationInfo = &specializationInfo;
+
         shaderModules->push_back(shaderModule);
     }
 
@@ -578,9 +614,9 @@ bool AppBase::CreatePipeline(const std::vector<PipelineShaderInfo>& pipelineShad
     // Create the graphics pipeline or compute pipeline.
     if (isComputePipeline)
     {
-        VkComputePipelineCreateInfo pipelineCreateInfo = {};
+        VezComputePipelineCreateInfo pipelineCreateInfo = {};
         pipelineCreateInfo.pStage = shaderStageCreateInfo.data();
-        if (vkCreateComputePipeline(m_device, &pipelineCreateInfo, pPipeline) != VK_SUCCESS)
+        if (vezCreateComputePipeline(m_device, &pipelineCreateInfo, pPipeline) != VK_SUCCESS)
         {
             std::cout << "vkCreateComputePipeline failed\n";
             return false;
@@ -588,10 +624,10 @@ bool AppBase::CreatePipeline(const std::vector<PipelineShaderInfo>& pipelineShad
     }
     else
     {
-        VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};
+        VezGraphicsPipelineCreateInfo pipelineCreateInfo = {};
         pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStageCreateInfo.size());
         pipelineCreateInfo.pStages = shaderStageCreateInfo.data();
-        if (vkCreateGraphicsPipeline(m_device, &pipelineCreateInfo, pPipeline) != VK_SUCCESS)
+        if (vezCreateGraphicsPipeline(m_device, &pipelineCreateInfo, pPipeline) != VK_SUCCESS)
         {
             std::cout << "vkCreateGraphicsPipeline failed\n";
             return false;

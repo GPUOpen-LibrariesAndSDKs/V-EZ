@@ -26,17 +26,17 @@
 
 #include <string>
 #include <tuple>
-#ifndef VKEZ_NO_PROTOTYPES
+#include <vector>
 #include <VEZ.h>
-#else
-#include "VulkanEZ_Loader.h"
-#endif
 #include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 
 class AppBase
 {
 public:
-    AppBase(const char* name, int width, int height, int physicalDeviceIndex = 0, bool manageFramebuffer = true, VkSampleCountFlagBits sampleCountFlag = VK_SAMPLE_COUNT_1_BIT);
+    AppBase(const char* name, int width, int height, int physicalDeviceIndex = 0, bool enableValidationLayers = true,
+        const std::vector<std::string>& deviceExtensions = {}, bool manageFramebuffer = true, VkSampleCountFlagBits sampleCountFlag = VK_SAMPLE_COUNT_1_BIT);
+
     virtual ~AppBase();
 
     int Run();
@@ -60,7 +60,8 @@ protected:
 
     VkPhysicalDevice GetPhysicalDevice() const { return m_physicalDevice; }
     VkDevice GetDevice() const { return m_device; }
-    VkFramebuffer GetFramebuffer() { return m_framebuffer.handle; }
+    VezSwapchain GetSwapchain() { return m_swapchain; }
+    VezFramebuffer GetFramebuffer() { return m_framebuffer.handle; }
     VkImage GetColorAttachment() { return m_framebuffer.colorImage; }
     VkImageView GetColorAttachmentView() { return m_framebuffer.colorImageView; }
     GLFWwindow* GetWindow() const { return m_window; }
@@ -70,32 +71,35 @@ protected:
 
     typedef std::tuple<std::string, VkShaderStageFlagBits> PipelineShaderInfo;
     VkShaderModule CreateShaderModule(const std::string& filename, const std::string& entryPoint, VkShaderStageFlagBits stage);    
-    bool CreatePipeline(const std::vector<PipelineShaderInfo>& pipelineShaderInfo, VkPipeline* pPipeline, std::vector<VkShaderModule>* shaderModules);
+    bool CreatePipeline(const std::vector<PipelineShaderInfo>& pipelineShaderInfo, VezPipeline* pPipeline, std::vector<VkShaderModule>* shaderModules);
 
 private:
-    friend void WindowSizeCallback(GLFWwindow* window, int width, int height);
-    friend void CursorPosCallback(GLFWwindow* window, double x, double y);
-    friend void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-    friend void MouseScrollCallback(GLFWwindow* window, double x, double y);
-    friend void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    static void WindowSizeCallback(GLFWwindow* window, int width, int height);
+    static void CursorPosCallback(GLFWwindow* window, double x, double y);
+    static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+    static void MouseScrollCallback(GLFWwindow* window, double x, double y);
+    static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
     std::string m_name;
     int m_width = 0, m_height = 0;
     int m_physicalDeviceIndex = 0;
+    bool m_enableValidationLayers = false;
     bool m_manageFramebuffer = false;
     VkSampleCountFlagBits m_sampleCountFlag = VK_SAMPLE_COUNT_1_BIT;
+    std::vector<std::string> m_deviceExtensions;
     GLFWwindow* m_window = nullptr;
     VkInstance m_instance = VK_NULL_HANDLE;
     VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
-    VkSurface m_surface = VK_NULL_HANDLE;
+    VkSurfaceKHR m_surface = VK_NULL_HANDLE;
     VkDevice m_device = VK_NULL_HANDLE;
+    VezSwapchain m_swapchain = VK_NULL_HANDLE;
 
     struct {
         VkImage colorImage = VK_NULL_HANDLE;
         VkImageView colorImageView = VK_NULL_HANDLE;
         VkImage depthStencilImage = VK_NULL_HANDLE;
         VkImageView depthStencilImageView = VK_NULL_HANDLE;
-        VkFramebuffer handle = VK_NULL_HANDLE;
+        VezFramebuffer handle = VK_NULL_HANDLE;
     } m_framebuffer;
 
     bool m_quitSignaled = false;

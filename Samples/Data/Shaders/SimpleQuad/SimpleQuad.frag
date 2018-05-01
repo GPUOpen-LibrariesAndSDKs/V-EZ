@@ -8,16 +8,20 @@ layout(location = 0) in VS_OUT
     vec2 texCoord;
 } ps_in;
 
+layout(binding = 1) uniform sampler2D texSampler;
+
+/*
+layout(constant_id = 0) const float scale = 1.0f;
+
 layout(push_constant) uniform PushConstants
 {
     vec3 blendColor;
 } pushConstants;
-
-layout(binding = 1) uniform sampler2D texSampler;
+*/
 
 layout(location = 0) out vec4 outColor;
 
 void main()
 {
-    outColor = vec4(texture(texSampler, ps_in.texCoord).rgb * pushConstants.blendColor, 1.0f);
+    outColor = texture(texSampler, ps_in.texCoord);
 }

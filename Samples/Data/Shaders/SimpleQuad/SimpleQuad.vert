@@ -6,7 +6,7 @@ layout(binding = 0) uniform UniformBufferObject
     mat4 model;
     mat4 view;
     mat4 proj;
-} ubo;
+};
 
 layout(location = 0) in vec3 in_Position;
 layout(location = 1) in vec3 in_Normal;
@@ -25,8 +25,18 @@ out gl_PerVertex{
 
 void main()
 {
+    /*
+    vec3 verts[3] = { 
+        vec3(-0.5f, -0.5f, 0.0f),
+        vec3(-0.5f, 0.5f, 0.0f),
+        vec3(0.5f, -0.5f, 0.0f)        
+    };
+
+    gl_Position = vec4(verts[gl_VertexIndex], 1.0f);
+    */
+
     vs_out.pos = in_Position;
     vs_out.normal = in_Normal;
-    vs_out.texCoord = in_TexCoord;
-    gl_Position = ubo.proj * ubo.view * ubo.model * vec4(in_Position, 1.0f);
+    vs_out.texCoord = in_TexCoord;    
+    gl_Position = proj * view * model * vec4(in_Position, 1.0f);
 }

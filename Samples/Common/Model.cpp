@@ -37,13 +37,13 @@ void Model::Destroy()
 {
     if (m_vertexBuffer)
     {
-        vkDestroyBuffer(m_device, m_vertexBuffer);
+        vezDestroyBuffer(m_device, m_vertexBuffer);
         m_vertexBuffer = VK_NULL_HANDLE;
     }
 
     if (m_indexBuffer)
     {
-        vkDestroyBuffer(m_device, m_indexBuffer);
+        vezDestroyBuffer(m_device, m_indexBuffer);
         m_indexBuffer = VK_NULL_HANDLE;
     }
 }
@@ -150,40 +150,40 @@ bool Model::LoadFromFile(const std::string& filename, VkDevice device)
     }
 
     // Allocate a buffer for the vertices and upload the host data.
-    VkBufferCreateInfo bufferCreateInfo = {};
+    VezBufferCreateInfo bufferCreateInfo = {};
     bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
     bufferCreateInfo.size = sizeof(float) * vertices.size();
-    auto result = vkCreateBuffer(device, VK_MEMORY_GPU_ONLY, &bufferCreateInfo, &m_vertexBuffer);
+    auto result = vezCreateBuffer(device, VEZ_MEMORY_GPU_ONLY, &bufferCreateInfo, &m_vertexBuffer);
     if (result != VK_SUCCESS)
         return false;
 
-    result = vkBufferSubData(device, m_vertexBuffer, 0, bufferCreateInfo.size, static_cast<const void*>(vertices.data()));
+    result = vezBufferSubData(device, m_vertexBuffer, 0, bufferCreateInfo.size, static_cast<const void*>(vertices.data()));
     if (result != VK_SUCCESS)
         return false;
 #if 1
     // Allocate a buffer for the indices and upload the host data.
     bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
     bufferCreateInfo.size = sizeof(float) * indices.size();
-    result = vkCreateBuffer(device, VK_MEMORY_GPU_ONLY, &bufferCreateInfo, &m_indexBuffer);
+    result = vezCreateBuffer(device, VEZ_MEMORY_GPU_ONLY, &bufferCreateInfo, &m_indexBuffer);
     if (result != VK_SUCCESS)
         return false;
 
-    result = vkBufferSubData(device, m_indexBuffer, 0, bufferCreateInfo.size, static_cast<const void*>(indices.data()));
+    result = vezBufferSubData(device, m_indexBuffer, 0, bufferCreateInfo.size, static_cast<const void*>(indices.data()));
     if (result != VK_SUCCESS)
         return false;
 #endif
     // Create VulkanEZ vertex input format.
     VkVertexInputBindingDescription bindingDesc = { 0, sizeof(float) * 6, VK_VERTEX_INPUT_RATE_VERTEX };
     std::array<VkVertexInputAttributeDescription, 2> attribDesc = {
-        VkVertexInputAttributeDescription{ 0, 0, 0, VK_FORMAT_R32G32B32_SFLOAT },
-        VkVertexInputAttributeDescription{ 1, 0, sizeof(float) * 3, VK_FORMAT_R32G32B32_SFLOAT }
+        VkVertexInputAttributeDescription{ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0 },
+        VkVertexInputAttributeDescription{ 1, 0, VK_FORMAT_R32G32B32_SFLOAT, sizeof(float) * 3 }
     };
-    VkVertexInputFormatCreateInfo vertexInputFormatCreateInfo = {};
+    VezVertexInputFormatCreateInfo vertexInputFormatCreateInfo = {};
     vertexInputFormatCreateInfo.vertexBindingDescriptionCount = 1;
     vertexInputFormatCreateInfo.pVertexBindingDescriptions = &bindingDesc;
     vertexInputFormatCreateInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attribDesc.size());
     vertexInputFormatCreateInfo.pVertexAttributeDescriptions = attribDesc.data();
-    result = vkCreateVertexInputFormat(device, &vertexInputFormatCreateInfo, &m_vertexInputFormat);
+    result = vezCreateVertexInputFormat(device, &vertexInputFormatCreateInfo, &m_vertexInputFormat);
     if (result != VK_SUCCESS)
         return false;
 
@@ -191,15 +191,15 @@ bool Model::LoadFromFile(const std::string& filename, VkDevice device)
     return true;
 }
 
-void Model::Draw(VkCommandBuffer commandBuffer, uint32_t instanceCount)
+void Model::Draw(VezCommandBuffer commandBuffer, uint32_t instanceCount)
 {
     // Bind the vertex and index buffers.
     VkDeviceSize offset = 0;
-    vkCmdBindVertexBuffers(commandBuffer, 0, 1, &m_vertexBuffer, &offset);
-    vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    vezCmdBindVertexBuffers(commandBuffer, 0, 1, &m_vertexBuffer, &offset);
+    vezCmdBindIndexBuffer(commandBuffer, m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
     // Set the vertex input format.
-    vkCmdSetVertexInputFormat(commandBuffer, m_vertexInputFormat);
+    vezCmdSetVertexInputFormat(commandBuffer, m_vertexInputFormat);
 
 #if 0
     // Draw each part.
@@ -207,7 +207,7 @@ void Model::Draw(VkCommandBuffer commandBuffer, uint32_t instanceCount)
         vkCmdDrawIndexed(commandBuffer, part.indexCount, instanceCount, part.indexBase, 0, 0);
 #else
     // Draw the entire model in one call.
-    vkCmdDrawIndexed(commandBuffer, m_indexCount, 1, 0, 0, 0);
-    //vkCmdDraw(commandBuffer, m_vertexCount, 1, 0, 0);
+    vezCmdDrawIndexed(commandBuffer, m_indexCount, 1, 0, 0, 0);
+    //vezCmdDraw(commandBuffer, m_vertexCount, 1, 0, 0);
 #endif
 }

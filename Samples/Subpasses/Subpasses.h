@@ -33,7 +33,7 @@
 
 typedef struct PipelineDesc
 {
-    VkPipeline pipeline = VK_NULL_HANDLE;
+    VezPipeline pipeline = VK_NULL_HANDLE;
     std::vector<VkShaderModule> shaderModules;
 } PipelineDesc;
 
@@ -67,7 +67,7 @@ private:
     VkBuffer m_uniformBuffer = VK_NULL_HANDLE;
     PipelineDesc m_subPass0Pipeline;
     PipelineDesc m_subPass1Pipeline;
-    VkCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
+    VezCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
 
     struct FramebufferAttachment {
         VkImage image;
@@ -76,6 +76,6 @@ private:
     
     struct {
         std::array<FramebufferAttachment, 5> attachments;
-        VkFramebuffer handle = VK_NULL_HANDLE;
+        VezFramebuffer handle = VK_NULL_HANDLE;
     } m_framebuffer;
 };

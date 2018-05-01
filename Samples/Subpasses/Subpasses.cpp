@@ -27,7 +27,7 @@
 #include <array>
 #include <chrono>
 #include "Subpasses.h"
-#include <FreeImage.h>
+#include <stb_image.h>
 
 #define FATAL(msg) { std::cout << msg << "\n"; AppBase::Exit(); return; }
 
@@ -66,35 +66,35 @@ void Subpasses::Cleanup()
 {    
     auto device = AppBase::GetDevice();
 
-    vkDestroyFramebuffer(AppBase::GetDevice(), m_framebuffer.handle);
+    vezDestroyFramebuffer(AppBase::GetDevice(), m_framebuffer.handle);
     for (auto attachment : m_framebuffer.attachments)
     {
-        vkDestroyImageView(AppBase::GetDevice(), attachment.imageView);
-        vkDestroyImage(AppBase::GetDevice(), attachment.image);
+        vezDestroyImageView(AppBase::GetDevice(), attachment.imageView);
+        vezDestroyImage(AppBase::GetDevice(), attachment.image);
     }
 
-    vkDestroyBuffer(device, m_vertexBuffer);
-    vkDestroyBuffer(device, m_indexBuffer);
-    vkDestroyImageView(device, m_imageView);
-    vkDestroyImage(device, m_image);
-    vkDestroySampler(device, m_sampler);
-    vkDestroyBuffer(device, m_uniformBuffer);
+    vezDestroyBuffer(device, m_vertexBuffer);
+    vezDestroyBuffer(device, m_indexBuffer);
+    vezDestroyImageView(device, m_imageView);
+    vezDestroyImage(device, m_image);
+    vezDestroySampler(device, m_sampler);
+    vezDestroyBuffer(device, m_uniformBuffer);
 
-    vkDestroyPipeline(device, m_subPass0Pipeline.pipeline);
+    vezDestroyPipeline(device, m_subPass0Pipeline.pipeline);
     for (auto shaderModule : m_subPass0Pipeline.shaderModules)
-        vkDestroyShaderModule(device, shaderModule);
+        vezDestroyShaderModule(device, shaderModule);
     
-    vkDestroyPipeline(device, m_subPass1Pipeline.pipeline);
+    vezDestroyPipeline(device, m_subPass1Pipeline.pipeline);
     for (auto shaderModule : m_subPass1Pipeline.shaderModules)
-        vkDestroyShaderModule(device, shaderModule);
+        vezDestroyShaderModule(device, shaderModule);
 
-    vkFreeCommandBuffers(device, 1, &m_commandBuffer);
+    vezFreeCommandBuffers(device, 1, &m_commandBuffer);
 }
 
 void Subpasses::Draw()
 {
     // Submit the command buffer to the graphics queue.
-    VkSubmitInfo submitInfo = {};
+    VezSubmitInfo submitInfo = {};
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &m_commandBuffer;
 
@@ -102,16 +102,23 @@ void Subpasses::Draw()
     VkSemaphore semaphore = VK_NULL_HANDLE;
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = &semaphore;
-    if (vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, nullptr) != VK_SUCCESS)
+    if (vezQueueSubmit(m_graphicsQueue, 1, &submitInfo, nullptr) != VK_SUCCESS)
         FATAL("vkQueueSubmit failed");
 
     // Present the swapchain framebuffer to the window.
-    VkPresentInfo presentInfo = { m_framebuffer.attachments[0].image, 1, &semaphore, 0, nullptr };
-    if (vkQueuePresent(m_graphicsQueue, &presentInfo) != VK_SUCCESS)
-        FATAL("vkQueuePresentKHR failed");
+    VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    auto swapchain = AppBase::GetSwapchain();
+    auto srcImage = AppBase::GetColorAttachment();
 
-    // Destroy the semaphore.
-    vkDestroySemaphore(AppBase::GetDevice(), semaphore);
+    VezPresentInfo presentInfo = {};
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = &semaphore;
+    presentInfo.pWaitDstStageMask = &waitDstStageMask;
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = &swapchain;
+    presentInfo.pImages = &m_framebuffer.attachments[0].image;
+    if (vezQueuePresent(m_graphicsQueue, &presentInfo) != VK_SUCCESS)
+        FATAL("vezQueuePresentKHR failed");
 }
 
 void Subpasses::OnResize(int width, int height)
@@ -120,7 +127,7 @@ void Subpasses::OnResize(int width, int height)
     CreateFramebuffer();
 
     // Re-create command buffer.
-    vkFreeCommandBuffers(AppBase::GetDevice(), 1, &m_commandBuffer);
+    vezFreeCommandBuffers(AppBase::GetDevice(), 1, &m_commandBuffer);
     CreateCommandBuffer();
 }
 
@@ -137,19 +144,19 @@ void Subpasses::Update(float timeElapsed)
 
     // Calculate appropriate matrices for the current frame.
     UniformBuffer ub = {};
-    ub.model = glm::rotate(elapsedTime * glm::radians(0.01f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ub.model = glm::rotate(glm::mat4(1.0f), elapsedTime * glm::radians(0.01f), glm::vec3(0.0f, 0.0f, 1.0f));
     ub.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     ub.projection = glm::perspective(glm::radians(45.0f), width / static_cast<float>(height), 0.1f, 10.0f);
     ub.projection[1][1] *= -1.0f;
 
     // Update the memory via map and unmap since it was created as HOST_VISIBLE (i.e. VK_MEMORY_USAGE_CPU_TO_GPU).
     void* data = nullptr;
-    auto result = vkMapBuffer(AppBase::GetDevice(), m_uniformBuffer, 0, sizeof(UniformBuffer), &data);
+    auto result = vezMapBuffer(AppBase::GetDevice(), m_uniformBuffer, 0, sizeof(UniformBuffer), &data);
     if (result != VK_SUCCESS)
         FATAL("vkMapBuffer failed");
 
     memcpy(data, &ub, sizeof(UniformBuffer));
-    vkUnmapBuffer(AppBase::GetDevice(), m_uniformBuffer);
+    vezUnmapBuffer(AppBase::GetDevice(), m_uniformBuffer);
 }
 
 void Subpasses::CreateQuad()
@@ -163,15 +170,15 @@ void Subpasses::CreateQuad()
     };
 
     // Create the device side vertex buffer.
-    VkBufferCreateInfo bufferCreateInfo = {};
+    VezBufferCreateInfo bufferCreateInfo = {};
     bufferCreateInfo.size = sizeof(vertices);
     bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-    auto result = vkCreateBuffer(AppBase::GetDevice(), VK_MEMORY_GPU_ONLY, &bufferCreateInfo, &m_vertexBuffer);
+    auto result = vezCreateBuffer(AppBase::GetDevice(), VEZ_MEMORY_GPU_ONLY, &bufferCreateInfo, &m_vertexBuffer);
     if (result != VK_SUCCESS)
         FATAL("vkCreateBuffer failed for vertex buffer");
 
     // Upload the host side data.
-    result = vkBufferSubData(AppBase::GetDevice(), m_vertexBuffer, 0, sizeof(vertices), static_cast<void*>(vertices));
+    result = vezBufferSubData(AppBase::GetDevice(), m_vertexBuffer, 0, sizeof(vertices), static_cast<void*>(vertices));
     if (result != VK_SUCCESS)
         FATAL("vkBufferSubData failed for vertex buffer");
 
@@ -184,12 +191,12 @@ void Subpasses::CreateQuad()
     // Create the device side index buffer.
     bufferCreateInfo.size = sizeof(indices);
     bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-    result = vkCreateBuffer(AppBase::GetDevice(), VK_MEMORY_GPU_ONLY, &bufferCreateInfo, &m_indexBuffer);
+    result = vezCreateBuffer(AppBase::GetDevice(), VEZ_MEMORY_GPU_ONLY, &bufferCreateInfo, &m_indexBuffer);
     if (result != VK_SUCCESS)
         FATAL("vkCreateBuffer failed for index buffer");
 
     // Upload the host side data.
-    result = vkBufferSubData(AppBase::GetDevice(), m_indexBuffer, 0, sizeof(indices), static_cast<void*>(indices));
+    result = vezBufferSubData(AppBase::GetDevice(), m_indexBuffer, 0, sizeof(indices), static_cast<void*>(indices));
     if (result != VK_SUCCESS)
         FATAL("vkBufferSubData failed for index buffer");
 }
@@ -197,68 +204,59 @@ void Subpasses::CreateQuad()
 void Subpasses::CreateTexture()
 {
     // Load image from disk.
-    FreeImage_Initialise();
-    FIBITMAP* bitmap = FreeImage_Load(FIF_JPEG, "../../Samples/Data/Textures/texture.jpg");
-    if (!bitmap)
-        FATAL("Failed to load texture.jpg");
-
-    // Ensure format is 8-bit RGBA.
-    FIBITMAP* temp = FreeImage_ConvertTo32Bits(bitmap);
-    FreeImage_Unload(bitmap);
-    bitmap = temp;
+    int width, height, channels;
+    auto pixelData = stbi_load("../../Samples/Data/Textures/texture.jpg", &width, &height, &channels, 4);
 
     // Create the AppBase::GetDevice() side image.
-    VkImageCreateInfo imageCreateInfo = {};
+    VezImageCreateInfo imageCreateInfo = {};
     imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
     imageCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
-    imageCreateInfo.extent = { FreeImage_GetWidth(bitmap), FreeImage_GetHeight(bitmap), 1 };
+    imageCreateInfo.extent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1 };
     imageCreateInfo.mipLevels = 1;
     imageCreateInfo.arrayLayers = 1;
     imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-    auto result = vkCreateImage(AppBase::GetDevice(), VK_MEMORY_GPU_ONLY, &imageCreateInfo, &m_image);
+    auto result = vezCreateImage(AppBase::GetDevice(), VEZ_MEMORY_GPU_ONLY, &imageCreateInfo, &m_image);
     if (result != VK_SUCCESS)
-        FATAL("vkCreateImage failed");
+        FATAL("vezCreateImage failed");
 
     // Upload the host side data.
-    VkImageSubDataInfo subDataInfo = {};
+    VezImageSubDataInfo subDataInfo = {};
     subDataInfo.imageSubresource.mipLevel = 0;
     subDataInfo.imageSubresource.baseArrayLayer = 0;
     subDataInfo.imageSubresource.layerCount = 1;
     subDataInfo.imageOffset = { 0, 0, 0 };
-    subDataInfo.imageExtent = { FreeImage_GetWidth(bitmap), FreeImage_GetHeight(bitmap), 1 };
-    result = vkImageSubData(AppBase::GetDevice(), m_image, &subDataInfo, FreeImage_GetBits(bitmap));
+    subDataInfo.imageExtent = { imageCreateInfo.extent.width, imageCreateInfo.extent.height, 1 };
+    result = vezImageSubData(AppBase::GetDevice(), m_image, &subDataInfo, reinterpret_cast<const void*>(pixelData));
     if (result != VK_SUCCESS)
-        FATAL("vkImageSubData failed");
+        FATAL("vezImageSubData failed");
 
-    // Destroy the FreeImage handle.
-    FreeImage_Unload(bitmap);
-    FreeImage_DeInitialise();
+    // Destroy the pixel data.
+    stbi_image_free(pixelData);
 
     // Create the image view for binding the texture as a resource.
-    VkImageViewCreateInfo imageViewCreateInfo = {};
+    VezImageViewCreateInfo imageViewCreateInfo = {};
     imageViewCreateInfo.image = m_image;
     imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     imageViewCreateInfo.format = imageCreateInfo.format;
-    imageViewCreateInfo.components = { VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_A };
     imageViewCreateInfo.subresourceRange.layerCount = 1;
     imageViewCreateInfo.subresourceRange.levelCount = 1;
-    result = vkCreateImageView(AppBase::GetDevice(), &imageViewCreateInfo, &m_imageView);
+    result = vezCreateImageView(AppBase::GetDevice(), &imageViewCreateInfo, &m_imageView);
     if (result != VK_SUCCESS)
-        FATAL("vkCreateImageView failed");
+        FATAL("vezCreateImageView failed");
 }
 
 void Subpasses::CreateSampler()
 {
-    VkSamplerCreateInfo createInfo = {};
+    VezSamplerCreateInfo createInfo = {};
     createInfo.magFilter = VK_FILTER_LINEAR;
     createInfo.minFilter = VK_FILTER_LINEAR;
     createInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
     createInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     createInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     createInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-    auto result = vkCreateSampler(AppBase::GetDevice(), &createInfo, &m_sampler);
+    auto result = vezCreateSampler(AppBase::GetDevice(), &createInfo, &m_sampler);
     if (result != VK_SUCCESS)
         FATAL("vkCreateSampler failed");
 }
@@ -266,10 +264,10 @@ void Subpasses::CreateSampler()
 void Subpasses::CreateUniformBuffer()
 {
     // Create a buffer for storing per frame matrices.
-    VkBufferCreateInfo createInfo = {};
+    VezBufferCreateInfo createInfo = {};
     createInfo.size = sizeof(UniformBuffer);
     createInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-    if (vkCreateBuffer(AppBase::GetDevice(), VK_MEMORY_CPU_TO_GPU, &createInfo, &m_uniformBuffer) != VK_SUCCESS)
+    if (vezCreateBuffer(AppBase::GetDevice(), VEZ_MEMORY_CPU_TO_GPU, &createInfo, &m_uniformBuffer) != VK_SUCCESS)
         FATAL("vkCreateBuffer failed for uniform buffer");
 }
 
@@ -278,11 +276,11 @@ void Subpasses::CreateFramebuffer()
     // Free previous allocations.
     if (m_framebuffer.handle)
     {
-        vkDestroyFramebuffer(AppBase::GetDevice(), m_framebuffer.handle);
+        vezDestroyFramebuffer(AppBase::GetDevice(), m_framebuffer.handle);
         for (auto attachment : m_framebuffer.attachments)
         {
-            vkDestroyImageView(AppBase::GetDevice(), attachment.imageView);
-            vkDestroyImage(AppBase::GetDevice(), attachment.image);
+            vezDestroyImageView(AppBase::GetDevice(), attachment.imageView);
+            vezDestroyImage(AppBase::GetDevice(), attachment.image);
         }
     }
 
@@ -290,11 +288,15 @@ void Subpasses::CreateFramebuffer()
     int width, height;
     AppBase::GetWindowSize(&width, &height);
 
+    // Match swapchain's image format.
+    VkSurfaceFormatKHR swapchainFormat = {};
+    vezGetSwapchainSurfaceFormat(AppBase::GetSwapchain(), &swapchainFormat);
+
     for (auto i = 0U; i < m_framebuffer.attachments.size(); ++i)
     {
         // The very last attachment is the depth stencil format.
         auto& attachment = m_framebuffer.attachments[i];
-        VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
+        VkFormat format = swapchainFormat.format;
         VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
         if (i == m_framebuffer.attachments.size() - 1)
         {
@@ -303,7 +305,7 @@ void Subpasses::CreateFramebuffer()
         }
 
         // Create the color image for the m_framebuffer.
-        VkImageCreateInfo imageCreateInfo = {};
+        VezImageCreateInfo imageCreateInfo = {};
         imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
         imageCreateInfo.format = format;
         imageCreateInfo.extent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1 };
@@ -312,18 +314,18 @@ void Subpasses::CreateFramebuffer()
         imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
         imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
         imageCreateInfo.usage = usage;
-        auto result = vkCreateImage(AppBase::GetDevice(), VK_MEMORY_GPU_ONLY, &imageCreateInfo, &attachment.image);
+        auto result = vezCreateImage(AppBase::GetDevice(), VEZ_MEMORY_GPU_ONLY, &imageCreateInfo, &attachment.image);
         if (result != VK_SUCCESS)
             FATAL("vkCreateImage failed");
 
         // Create the image view for binding the texture as a resource.
-        VkImageViewCreateInfo imageViewCreateInfo = {};
+        VezImageViewCreateInfo imageViewCreateInfo = {};
         imageViewCreateInfo.image = attachment.image;
         imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
         imageViewCreateInfo.format = imageCreateInfo.format;
         imageViewCreateInfo.subresourceRange.layerCount = 1;
         imageViewCreateInfo.subresourceRange.levelCount = 1;
-        result = vkCreateImageView(AppBase::GetDevice(), &imageViewCreateInfo, &attachment.imageView);
+        result = vezCreateImageView(AppBase::GetDevice(), &imageViewCreateInfo, &attachment.imageView);
         if (result != VK_SUCCESS)
             FATAL("vkCreateImageView failed");
     }
@@ -333,13 +335,13 @@ void Subpasses::CreateFramebuffer()
     for (auto& attachment : m_framebuffer.attachments)
         attachments.push_back(attachment.imageView);
 
-    VkFramebufferCreateInfo framebufferCreateInfo = {};
+    VezFramebufferCreateInfo framebufferCreateInfo = {};
     framebufferCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
     framebufferCreateInfo.pAttachments = attachments.data();
     framebufferCreateInfo.width = width;
     framebufferCreateInfo.height = height;
     framebufferCreateInfo.layers = 1;
-    auto result = vkCreateFramebuffer(AppBase::GetDevice(), &framebufferCreateInfo, &m_framebuffer.handle);
+    auto result = vezCreateFramebuffer(AppBase::GetDevice(), &framebufferCreateInfo, &m_framebuffer.handle);
     if (result != VK_SUCCESS)
         FATAL("vkCreateFramebuffer failed");
 }
@@ -362,17 +364,17 @@ void Subpasses::CreatePipeline()
 void Subpasses::CreateCommandBuffer()
 {
     // Get the graphics queue handle.
-    vkGetDeviceGraphicsQueue(AppBase::GetDevice(), 0, &m_graphicsQueue);
+    vezGetDeviceGraphicsQueue(AppBase::GetDevice(), 0, &m_graphicsQueue);
 
     // Create a command buffer handle.
-    VkCommandBufferAllocateInfo allocInfo = {};
+    VezCommandBufferAllocateInfo allocInfo = {};
     allocInfo.queue = m_graphicsQueue;
     allocInfo.commandBufferCount = 1;
-    if (vkAllocateCommandBuffers(AppBase::GetDevice(), &allocInfo, &m_commandBuffer) != VK_SUCCESS)
+    if (vezAllocateCommandBuffers(AppBase::GetDevice(), &allocInfo, &m_commandBuffer) != VK_SUCCESS)
         FATAL("vkAllocateCommandBuffers failed");
 
     // Begin command buffer recording.
-    if (vkBeginCommandBuffer(m_commandBuffer, VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT) != VK_SUCCESS)
+    if (vezBeginCommandBuffer(m_commandBuffer, VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT) != VK_SUCCESS)
         FATAL("vkBeginCommandBuffer failed");
 
     // Set the viewport state and dimensions.
@@ -380,12 +382,12 @@ void Subpasses::CreateCommandBuffer()
     AppBase::GetWindowSize(&width, &height);
     VkViewport viewport = { 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
     VkRect2D scissor = { { 0, 0 },{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) } };
-    vkCmdSetViewport(m_commandBuffer, 0, 1, &viewport);
-    vkCmdSetScissor(m_commandBuffer, 0, 1, &scissor);
-    vkCmdSetViewportState(m_commandBuffer, 1);
+    vezCmdSetViewport(m_commandBuffer, 0, 1, &viewport);
+    vezCmdSetScissor(m_commandBuffer, 0, 1, &scissor);
+    vezCmdSetViewportState(m_commandBuffer, 1);
 
     // Define clear values for the framebuffer attachments.
-    std::array<VkAttachmentReference, 5> attachmentReferences = { {
+    std::array<VezAttachmentReference, 5> attachmentReferences = { {
         { VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, { 0.0f, 0.0f, 0.0f, 0.0f } },
         { VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, { 0.0f, 0.0f, 0.0f, 0.0f } },
         { VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, { 0.0f, 0.0f, 0.0f, 0.0f } },
@@ -396,56 +398,56 @@ void Subpasses::CreateCommandBuffer()
     // Begin a new render pass.
     // First subpass renders the spinning quad and stores each color channel in a separate framebuffer attachment (attachments [1:3]).
     // See SubpassesMrt.frag.
-    VkRenderPassBeginInfo beginInfo = {};
+    VezRenderPassBeginInfo beginInfo = {};
     beginInfo.framebuffer = m_framebuffer.handle;
     beginInfo.attachmentCount = static_cast<uint32_t>(attachmentReferences.size());
     beginInfo.pAttachments = attachmentReferences.data();
-    vkCmdBeginRenderPass(m_commandBuffer, &beginInfo);
+    vezCmdBeginRenderPass(m_commandBuffer, &beginInfo);
  
     // Bind the pipeline and associated resources.
-    vkCmdBindPipeline(m_commandBuffer, m_subPass0Pipeline.pipeline);
-    vkCmdBindBuffer(m_commandBuffer, m_uniformBuffer, 0, 0, 0);
-    vkCmdBindImageView(m_commandBuffer, m_imageView, m_sampler, 0, 1, 0);
+    vezCmdBindPipeline(m_commandBuffer, m_subPass0Pipeline.pipeline);
+    vezCmdBindBuffer(m_commandBuffer, m_uniformBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
+    vezCmdBindImageView(m_commandBuffer, m_imageView, m_sampler, 0, 1, 0);
 
     // Set depth stencil state.
-    VkPipelineDepthStencilState depthStencilState = {};
+    VezPipelineDepthStencilState depthStencilState = {};
     depthStencilState.depthTestEnable = VK_TRUE;
     depthStencilState.depthWriteEnable = VK_TRUE;
     depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-    vkCmdSetDepthStencilState(m_commandBuffer, &depthStencilState);
+    vezCmdSetDepthStencilState(m_commandBuffer, &depthStencilState);
 
     // Bind the vertex buffer and index buffers.
     VkDeviceSize offset = 0;
-    vkCmdBindVertexBuffers(m_commandBuffer, 0, 1, &m_vertexBuffer, &offset);
-    vkCmdBindIndexBuffer(m_commandBuffer, m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    vezCmdBindVertexBuffers(m_commandBuffer, 0, 1, &m_vertexBuffer, &offset);
+    vezCmdBindIndexBuffer(m_commandBuffer, m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
     // Draw the quad.
-    vkCmdDrawIndexed(m_commandBuffer, 6, 1, 0, 0, 0);
+    vezCmdDrawIndexed(m_commandBuffer, 6, 1, 0, 0, 0);
 
     // Begin the second subpass where the previous color attachment channels are combined into the final color output (attachment 0).
     // See SubapssesCombined.frag.
-    vkCmdNextSubpass(m_commandBuffer);
+    vezCmdNextSubpass(m_commandBuffer);
 
     // Bind the pipeline.
-    vkCmdBindPipeline(m_commandBuffer, m_subPass1Pipeline.pipeline);
+    vezCmdBindPipeline(m_commandBuffer, m_subPass1Pipeline.pipeline);
     
     // Disable depth test and write.
     depthStencilState.depthTestEnable = VK_FALSE;
     depthStencilState.depthWriteEnable = VK_FALSE;
-    vkCmdSetDepthStencilState(m_commandBuffer, &depthStencilState);
+    vezCmdSetDepthStencilState(m_commandBuffer, &depthStencilState);
 
     // Set primitive topology to triangel strip.
-    VkPipelineInputAssemblyState inputAssemblyState = {};
+    VezInputAssemblyState inputAssemblyState = {};
     inputAssemblyState.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
-    vkCmdSetInputAssemblyState(m_commandBuffer, &inputAssemblyState);
+    vezCmdSetInputAssemblyState(m_commandBuffer, &inputAssemblyState);
 
     // Draw a fullscreen quad (does not use bound vertex or index buffers).
-    vkCmdDraw(m_commandBuffer, 4, 1, 0, 0);
+    vezCmdDraw(m_commandBuffer, 4, 1, 0, 0);
 
     // End the render pass.
-    vkCmdEndRenderPass(m_commandBuffer);
+    vezCmdEndRenderPass(m_commandBuffer);
 
     // End command buffer recording.
-    if (vkEndCommandBuffer(m_commandBuffer) != VK_SUCCESS)
+    if (vezEndCommandBuffer(m_commandBuffer) != VK_SUCCESS)
         FATAL("vkEndCommandBuffer failed");
 }

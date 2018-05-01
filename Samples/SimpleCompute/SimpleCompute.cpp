@@ -55,28 +55,28 @@ void SimpleCompute::Cleanup()
 {    
     auto device = AppBase::GetDevice();
 
-    vkDestroyBuffer(device, m_vertexBuffer);
-    vkDestroyBuffer(device, m_uniformBuffer);
+    vezDestroyBuffer(device, m_vertexBuffer);
+    vezDestroyBuffer(device, m_uniformBuffer);
 
-    vkDestroyPipeline(device, m_computePipeline.pipeline);
+    vezDestroyPipeline(device, m_computePipeline.pipeline);
     for (auto shaderModule : m_computePipeline.shaderModules)
-        vkDestroyShaderModule(device, shaderModule);
+        vezDestroyShaderModule(device, shaderModule);
     
-    vkDestroyPipeline(device, m_graphicsPipeline.pipeline);
+    vezDestroyPipeline(device, m_graphicsPipeline.pipeline);
     for (auto shaderModule : m_graphicsPipeline.shaderModules)
-        vkDestroyShaderModule(device, shaderModule);
+        vezDestroyShaderModule(device, shaderModule);
 
-    vkFreeCommandBuffers(device, 1, &m_commandBuffer);
+    vezFreeCommandBuffers(device, 1, &m_commandBuffer);
 }
 
 void SimpleCompute::Draw()
 {
     // Begin command buffer recording.
-    vkBeginCommandBuffer(m_commandBuffer, VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
+    vezBeginCommandBuffer(m_commandBuffer, VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
 
     // Dispatch compute pipeline.
-    vkCmdBindPipeline(m_commandBuffer, m_computePipeline.pipeline);
-    vkCmdBindBuffer(m_commandBuffer, m_vertexBuffer, 0, 0, 0);
+    vezCmdBindPipeline(m_commandBuffer, m_computePipeline.pipeline);
+    vezCmdBindBuffer(m_commandBuffer, m_vertexBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
     
     struct
     {
@@ -86,10 +86,10 @@ void SimpleCompute::Draw()
 
     pushConstants.vertexCount = static_cast<int>(m_vertexCount);
     pushConstants.theta = m_elapsedTime * 0.5f;
-    vkCmdPushConstants(m_commandBuffer, 0, sizeof(pushConstants), reinterpret_cast<const void*>(&pushConstants));
+    vezCmdPushConstants(m_commandBuffer, 0, sizeof(pushConstants), reinterpret_cast<const void*>(&pushConstants));
 
     auto groupCountX = static_cast<uint32_t>(ceilf(m_vertexCount / 64.0f));
-    vkCmdDispatch(m_commandBuffer, groupCountX, 1, 1);
+    vezCmdDispatch(m_commandBuffer, groupCountX, 1, 1);
 
     // Get the window dimensions.
     int width, height;
@@ -98,19 +98,19 @@ void SimpleCompute::Draw()
     // Update the ubo.
     float aspect = width / static_cast<float>(height);
     UniformBuffer ub = {};
-    ub.view = glm::mat4();
+    ub.view = glm::mat4(1.0f);
     ub.projection = glm::ortho(-aspect, aspect, -1.0f, 1.0f);
-    vkCmdUpdateBuffer(m_commandBuffer, m_uniformBuffer, 0, sizeof(UniformBuffer), reinterpret_cast<const void*>(&ub));
+    vezCmdUpdateBuffer(m_commandBuffer, m_uniformBuffer, 0, sizeof(UniformBuffer), reinterpret_cast<const void*>(&ub));
 
     // Set the viewport and scissor states.
     VkViewport viewport = { 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
     VkRect2D scissor = { { 0, 0 },{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) } };
-    vkCmdSetViewport(m_commandBuffer, 0, 1, &viewport);
-    vkCmdSetScissor(m_commandBuffer, 0, 1, &scissor);
-    vkCmdSetViewportState(m_commandBuffer, 1);
+    vezCmdSetViewport(m_commandBuffer, 0, 1, &viewport);
+    vezCmdSetScissor(m_commandBuffer, 0, 1, &scissor);
+    vezCmdSetViewportState(m_commandBuffer, 1);
 
     // Define clear values for the swapchain's color and depth attachments.
-    std::array<VkAttachmentReference, 2> attachmentReferences = {};
+    std::array<VezAttachmentReference, 2> attachmentReferences = {};
     attachmentReferences[0].clearValue.color = { 0.3f, 0.3f, 0.3f, 0.0f };
     attachmentReferences[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     attachmentReferences[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -119,36 +119,36 @@ void SimpleCompute::Draw()
     attachmentReferences[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
     // Begin a render pass.
-    VkRenderPassBeginInfo beginInfo = {};
+    VezRenderPassBeginInfo beginInfo = {};
     beginInfo.framebuffer = AppBase::GetFramebuffer();
     beginInfo.attachmentCount = static_cast<uint32_t>(attachmentReferences.size());
     beginInfo.pAttachments = attachmentReferences.data();
-    vkCmdBeginRenderPass(m_commandBuffer, &beginInfo);
+    vezCmdBeginRenderPass(m_commandBuffer, &beginInfo);
 
     // Set the primitive topology to points.
-    VkPipelineInputAssemblyState inputState = {};
+    VezInputAssemblyState inputState = {};
     inputState.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
-    vkCmdSetInputAssemblyState(m_commandBuffer, &inputState);
+    vezCmdSetInputAssemblyState(m_commandBuffer, &inputState);
 
     // Bind the pipeline and associated resources.
-    vkCmdBindPipeline(m_commandBuffer, m_graphicsPipeline.pipeline);
-    vkCmdBindBuffer(m_commandBuffer, m_uniformBuffer, 0, 0, 0);
+    vezCmdBindPipeline(m_commandBuffer, m_graphicsPipeline.pipeline);
+    vezCmdBindBuffer(m_commandBuffer, m_uniformBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
 
     // Bind the vertex buffer.
     VkDeviceSize offset = 0;
-    vkCmdBindVertexBuffers(m_commandBuffer, 0, 1, &m_vertexBuffer, &offset);
+    vezCmdBindVertexBuffers(m_commandBuffer, 0, 1, &m_vertexBuffer, &offset);
 
     // Draw the vertices.
-    vkCmdDraw(m_commandBuffer, m_vertexCount, 1, 0, 0);
+    vezCmdDraw(m_commandBuffer, m_vertexCount, 1, 0, 0);
 
     // End the render pass.
-    vkCmdEndRenderPass(m_commandBuffer);
+    vezCmdEndRenderPass(m_commandBuffer);
 
     // End command buffer recording.
-    vkEndCommandBuffer(m_commandBuffer);
+    vezEndCommandBuffer(m_commandBuffer);
 
     // Submit the command buffer to the graphics queue.
-    VkSubmitInfo submitInfo = {};
+    VezSubmitInfo submitInfo = {};
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &m_commandBuffer;
 
@@ -156,22 +156,32 @@ void SimpleCompute::Draw()
     VkSemaphore semaphore = VK_NULL_HANDLE;
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = &semaphore;
-    if (vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, nullptr) != VK_SUCCESS)
+    if (vezQueueSubmit(m_graphicsQueue, 1, &submitInfo, nullptr) != VK_SUCCESS)
         FATAL("vkQueueSubmit failed");
 
     // Present the swapchain framebuffer to the window.
-    VkPresentInfo presentInfo = { AppBase::GetColorAttachment(), 1, &semaphore, 0, nullptr };
-    if (vkQueuePresent(m_graphicsQueue, &presentInfo) != VK_SUCCESS)
-        FATAL("vkQueuePresentKHR failed");
+    VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    auto swapchain = AppBase::GetSwapchain();
+    auto srcImage = AppBase::GetColorAttachment();
 
-    // Destroy the semaphore.
-    vkDestroySemaphore(AppBase::GetDevice(), semaphore);
+    VezPresentInfo presentInfo = {};
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = &semaphore;
+    presentInfo.pWaitDstStageMask = &waitDstStageMask;
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = &swapchain;
+    presentInfo.pImages = &srcImage;
+    if (vezQueuePresent(m_graphicsQueue, &presentInfo) != VK_SUCCESS)
+        FATAL("vezQueuePresentKHR failed");
+
+    // Wait for device to be idle so command buffer can be re-recorded.
+    vkDeviceWaitIdle(AppBase::GetDevice());
 }
 
 void SimpleCompute::OnResize(int width, int height)
 {
     // Re-create command buffer.
-    vkFreeCommandBuffers(AppBase::GetDevice(), 1, &m_commandBuffer);
+    vezFreeCommandBuffers(AppBase::GetDevice(), 1, &m_commandBuffer);
     CreateCommandBuffer();
 }
 
@@ -196,15 +206,15 @@ void SimpleCompute::CreateVertices()
     }
 
     // Create the device side vertex buffer.
-    VkBufferCreateInfo bufferCreateInfo = {};
+    VezBufferCreateInfo bufferCreateInfo = {};
     bufferCreateInfo.size = sizeof(glm::vec4) * vertices.size();
     bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-    auto result = vkCreateBuffer(AppBase::GetDevice(), VK_MEMORY_GPU_ONLY, &bufferCreateInfo, &m_vertexBuffer);
+    auto result = vezCreateBuffer(AppBase::GetDevice(), VEZ_MEMORY_GPU_ONLY, &bufferCreateInfo, &m_vertexBuffer);
     if (result != VK_SUCCESS)
         FATAL("vkCreateBuffer failed for vertex buffer");
 
     // Upload the host side data.
-    result = vkBufferSubData(AppBase::GetDevice(), m_vertexBuffer, 0, sizeof(glm::vec4) * vertices.size(), reinterpret_cast<const void*>(vertices.data()));
+    result = vezBufferSubData(AppBase::GetDevice(), m_vertexBuffer, 0, sizeof(glm::vec4) * vertices.size(), reinterpret_cast<const void*>(vertices.data()));
     if (result != VK_SUCCESS)
         FATAL("vkBufferSubData failed for vertex buffer");
 }
@@ -212,10 +222,10 @@ void SimpleCompute::CreateVertices()
 void SimpleCompute::CreateUniformBuffer()
 {
     // Create a buffer for storing per frame matrices.
-    VkBufferCreateInfo createInfo = {};
+    VezBufferCreateInfo createInfo = {};
     createInfo.size = sizeof(UniformBuffer);
     createInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-    if (vkCreateBuffer(AppBase::GetDevice(), VK_MEMORY_CPU_TO_GPU, &createInfo, &m_uniformBuffer) != VK_SUCCESS)
+    if (vezCreateBuffer(AppBase::GetDevice(), VEZ_MEMORY_CPU_TO_GPU, &createInfo, &m_uniformBuffer) != VK_SUCCESS)
         FATAL("vkCreateBuffer failed for uniform buffer");
 }
 
@@ -242,12 +252,12 @@ void SimpleCompute::CreatePipelines()
 void SimpleCompute::CreateCommandBuffer()
 {
     // Get the graphics queue handle.
-    vkGetDeviceGraphicsQueue(AppBase::GetDevice(), 0, &m_graphicsQueue);
+    vezGetDeviceGraphicsQueue(AppBase::GetDevice(), 0, &m_graphicsQueue);
 
     // Create a command buffer handle.
-    VkCommandBufferAllocateInfo allocInfo = {};
+    VezCommandBufferAllocateInfo allocInfo = {};
     allocInfo.queue = m_graphicsQueue;
     allocInfo.commandBufferCount = 1;
-    if (vkAllocateCommandBuffers(AppBase::GetDevice(), &allocInfo, &m_commandBuffer) != VK_SUCCESS)
+    if (vezAllocateCommandBuffers(AppBase::GetDevice(), &allocInfo, &m_commandBuffer) != VK_SUCCESS)
         FATAL("vkAllocateCommandBuffers failed");
 }

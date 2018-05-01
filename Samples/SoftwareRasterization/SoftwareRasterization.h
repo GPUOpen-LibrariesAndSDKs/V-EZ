@@ -32,7 +32,7 @@
 
 typedef struct PipelineDesc
 {
-    VkPipeline pipeline = VK_NULL_HANDLE;
+    VezPipeline pipeline = VK_NULL_HANDLE;
     std::vector<VkShaderModule> shaderModules;
 } PipelineDesc;
 
@@ -67,5 +67,5 @@ private:
     VkSampler m_sampler = VK_NULL_HANDLE;
     VkBuffer m_uniformBuffer = VK_NULL_HANDLE;
     PipelineDesc m_computePipeline;
-    VkCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
+    VezCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
 };
