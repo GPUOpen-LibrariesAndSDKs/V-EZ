@@ -11,9 +11,10 @@ V-EZ is a cross-platform (Windows and Linux) wrapper intended to alleviate the i
 The documentation for V-EZ can be found [here](https://gpuopen-librariesandsdks.github.io/V-EZ/)
 ## Prerequisites
 
-* Windows or Linux
+* Windows 7, 8.1, 10 64-bit
+* Linux 64-bit (tested on Fedora, Ubuntu)
 * Visual Studio&reg; 2015 and later
-* GCC 7.1 and later
+* GCC 4.9 and later
 * CMake 3.8 and later
 * LunarG Vulkan SDK 1.1.70
 
