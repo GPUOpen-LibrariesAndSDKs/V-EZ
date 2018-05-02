@@ -21,3 +21,22 @@ The documentation for V-EZ can be found [here](https://gpuopen-librariesandsdks.
 ## Hardware Support
 
 V-EZ is not hardware vendor specific and should work on non-AMD hardware.
+
+## Build Instructions
+
+### Windows
+
+* Generate Visual Studio 2015 Solution
+
+cmake -G "Visual Studio 14 2015 Win64"
+
+### Linux
+
+* Generate the Makefile and build
+
+mkdir Build
+cd Build
+cmake -DCMAKE_BUILD_TYPE=(Release|Debug) ../
+make
+
+
