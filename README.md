@@ -14,7 +14,7 @@ The documentation for V-EZ can be found [here](https://gpuopen-librariesandsdks.
 * Windows 7, 8.1, 10 64-bit
 * Linux 64-bit (tested on Fedora, Ubuntu)
 * Visual Studio&reg; 2015 and later
-* GCC 4.9 and later
+* GCC 6 and later
 * CMake 3.8 and later
 * LunarG Vulkan SDK 1.1.70
 
@@ -35,8 +35,11 @@ cmake -G "Visual Studio 14 2015 Win64"
 * Generate the Makefile and build
 
 mkdir Build
+
 cd Build
+
 cmake -DCMAKE_BUILD_TYPE=(Release|Debug) ../
+
 make
 
 
