@@ -834,20 +834,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="sect2">
 <h3 id="_surfaces">Surfaces</h3>
 <div class="paragraph">
-<p>Vulkan implements support for different window systems by implementing extensions for each platform. An application must define the correct preprocessor macro depending on the platform (see <a href="#_preprocessor_macros">Preprocessor Macros</a>), then call that platform specific function set. V-EZ simplifies this interface down to a single function <code>vezCreateSurface</code> with <code>VezSurfaceCreateInfo</code> containing the necessary parameters for each platform. The code snippet below demonstrates creating a <code>VkSurface</code> object under Windows with an application that uses the GLFW library.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span>VezSurfaceCreateInfo createInfo = {};
-<span class="line-numbers">2</span>createInfo.hinstance = GetModuleHandle(<span class="predefined-constant">nullptr</span>);
-<span class="line-numbers">3</span>createInfo.hwnd = glfwGetWin32Window(window);
-<span class="line-numbers">4</span>
-<span class="line-numbers">5</span>VkSurfaceKHR surface = VK_NULL_HANDLE;
-<span class="line-numbers">6</span>VkResult result = vezCreateSurface(instance, &amp;createInfo, &amp;surface);</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>If an application is rendering to a platform window handle, it is important to create the <code>VkSurface</code> object before selecting a physical device since surface format, and presentation support, must be validated with the physical device chosen.</p>
+<p>V-EZ does not abstract or wrap creation of surfaces in Vulkan.  Applications must use the platform specific WSI Vulkan extensions to create the surface. See the <a href="https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/html/vkspec.html#wsi">Vulkan spec</a> for details.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1231,6 +1218,9 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 </div>
 <div class="paragraph">
 <p>An application may obtain semaphore objects when calling <code>vkQueueSubmit</code> or <code>vkQueuePresent</code>.  In both cases, the semaphores are set to be signaled when either operation completes and may be passed as wait semaphores to a proceeding queue submission or present operation.  In V-EZ, semaphores are never explicitly destroyed by the application, rather once they are passed as wait semaphores to a proceeding queue operation, the application no longer maintains ownership. See the previous code listing in <a href="#_queue_presentation">Queue Presentation</a>.</p>
+</div>
+<div class="paragraph">
+<p>The only exception to this behavior is if a semaphore created by VEZ is then passed as a wait semaphore to a native Vulkan queue submission.  In this case, the application must call vezDestroySemaphore once the native Vulkan queue submission completes and the semaphore has been waited on.</p>
 </div>
 </div>
 <div class="sect2">
