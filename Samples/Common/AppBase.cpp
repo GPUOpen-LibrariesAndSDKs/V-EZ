@@ -191,20 +191,22 @@ AppBase::~AppBase()
 int AppBase::Run()
 {
     // Enumerate all available instance layers.
+    uint32_t layerCount = 0;
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+    std::vector<VkLayerProperties> layerProperties(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, layerProperties.data());
+
+    bool standardValidationFound = false;
+    for (auto prop : layerProperties)
     {
-        uint32_t layerCount = 0;
-        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-
-        std::vector<VkLayerProperties> properties;
-        vkEnumerateInstanceLayerProperties(&layerCount, properties.data());
-
-        std::cout << "Instance Layers:\n";
-        for (auto prop : properties)
+        if (std::string(prop.layerName) == "VK_LAYER_LUNARG_standard_validation")
         {
-            std::cout << prop.layerName << "\n";
+            standardValidationFound = true;
+            break;
         }
-        std::cout << "\n";
     }
+
     // Use glfw to check for Vulkan support.
     glfwInit();
     if (glfwVulkanSupported() == GLFW_FALSE)
@@ -218,7 +220,7 @@ int AppBase::Run()
     auto instanceExtensions = glfwGetRequiredInstanceExtensions(&instanceExtensionCount);
 
     std::vector<const char*> instanceLayers;
-    if (m_enableValidationLayers)
+    if (m_enableValidationLayers && standardValidationFound)
         instanceLayers.push_back("VK_LAYER_LUNARG_standard_validation");
     
     VezApplicationInfo appInfo = { nullptr, m_name.c_str(), VK_MAKE_VERSION(1, 0, 0), "", VK_MAKE_VERSION(0, 0, 0) };

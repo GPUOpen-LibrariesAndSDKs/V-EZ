@@ -47,6 +47,24 @@ VezPipeline pipeline = VK_NULL_HANDLE;
 VkQueue graphicsQueue = VK_NULL_HANDLE;
 std::array<VezCommandBuffer, WINDOW_COUNT> commandBuffers;
 
+bool StandardValidationPresent()
+{
+    uint32_t layerCount = 0;
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+    std::vector<VkLayerProperties> layerProperties(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, layerProperties.data());
+
+    bool standardValidationFound = false;
+    for (auto prop : layerProperties)
+    {
+        if (std::string(prop.layerName) == "VK_LAYER_LUNARG_standard_validation")
+            return true;
+    }
+
+    return false;
+}
+
 void InitializeVEZ()
 {
     // Get required GLFW layer extensions.
@@ -55,8 +73,13 @@ void InitializeVEZ()
     auto instanceExtensions = glfwGetRequiredInstanceExtensions(&instanceExtensionCount);
 
     // Initialize an instance.
-    std::vector<const char*> enabledLayers = { "VK_LAYER_LUNARG_standard_validation" };
-    std::vector<const char*> enabledExtensions = { VK_EXT_DEBUG_REPORT_EXTENSION_NAME };
+    std::vector<const char*> enabledLayers = {};
+    std::vector<const char*> enabledExtensions = {};
+    if (StandardValidationPresent())
+    {
+        enabledLayers.push_back("VK_LAYER_LUNARG_standard_validation");
+        enabledExtensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+    }
 
     for (auto i = 0U; i < instanceExtensionCount; ++i)
         enabledExtensions.push_back(instanceExtensions[i]);
