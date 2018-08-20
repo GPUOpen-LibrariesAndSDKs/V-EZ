@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 Advanced Micro Devices, Inc. All rights reserved.
+// Copyright (c) 2018 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,9 +18,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//
-// @author Sean O'Connell (Sean.OConnell@amd.com)
 //
 #include <iostream>
 #include <fstream>
@@ -57,6 +54,13 @@ void SoftwareRasterization::Initialize()
 void SoftwareRasterization::Cleanup()
 {    
     auto device = AppBase::GetDevice();
+
+    vezDestroyImageView(device, m_colorOutput.imageView);
+    vezDestroyImage(device, m_colorOutput.image);
+    
+    vezDestroyImageView(device, m_imageView);
+    vezDestroyImage(device, m_image);
+    vezDestroySampler(device, m_sampler);
 
     vezDestroyBuffer(device, m_uniformBuffer);
 
@@ -99,8 +103,6 @@ void SoftwareRasterization::Draw()
 
 void SoftwareRasterization::OnResize(int width, int height)
 {
-    vezDeviceWaitIdle(AppBase::GetDevice());
-
     // Recreate color output.
     CreateColorOutput();
 

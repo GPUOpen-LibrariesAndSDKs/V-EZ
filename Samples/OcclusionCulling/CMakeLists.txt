@@ -32,8 +32,9 @@ add_executable(OcclusionCulling ${COMMON_SOURCES} ${SOURCES})
 target_link_libraries(OcclusionCulling
     PRIVATE assimp
     PRIVATE glfw
-    PRIVATE vulkan
-    PRIVATE VEZ)
+    PRIVATE Vulkan::Vulkan
+    PRIVATE VEZ
+)
 
 target_compile_features(OcclusionCulling PRIVATE cxx_std_14)
 

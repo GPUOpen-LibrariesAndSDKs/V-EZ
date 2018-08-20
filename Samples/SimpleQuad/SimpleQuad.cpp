@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 Advanced Micro Devices, Inc. All rights reserved.
+// Copyright (c) 2018 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,9 +18,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//
-// @author Sean O'Connell (Sean.OConnell@amd.com)
 //
 #include <iostream>
 #include <fstream>
@@ -46,7 +43,7 @@ struct UniformBuffer
 };
 
 SimpleQuad::SimpleQuad()
-    : AppBase("SimpleQuad Sample", 500, 400, 0, true)
+    : AppBase("SimpleQuad Sample", 500, 400, 0, false)
 {
     
 }
@@ -118,7 +115,6 @@ void SimpleQuad::OnResize(int width, int height)
 
 void SimpleQuad::Update(float timeElapsed)
 {
-    #if 1
     // Get the current window dimensions.
     int width, height;
     AppBase::GetWindowSize(&width, &height);
@@ -143,7 +139,6 @@ void SimpleQuad::Update(float timeElapsed)
 
     memcpy(data, &ub, sizeof(UniformBuffer));
     vezUnmapBuffer(AppBase::GetDevice(), m_uniformBuffer);
-    #endif
 }
 
 void SimpleQuad::CreateQuad()
@@ -317,8 +312,8 @@ void SimpleQuad::CreateCommandBuffer()
     vezCmdBindImageView(m_commandBuffer, m_imageView, m_sampler, 0, 1, 0);
 
     // Set push constants.
-    //float blendColor[3] = { 1.0f, 1.0f, 1.0f };
-    //vezCmdPushConstants(m_commandBuffer, 0, sizeof(float) * 3, &blendColor[0]);
+    float blendColor[3] = { 1.0f, 1.0f, 1.0f };
+    vezCmdPushConstants(m_commandBuffer, 0, sizeof(float) * 3, &blendColor[0]);
 
     // Set depth stencil state.
     VezPipelineDepthStencilState depthStencilState = {};

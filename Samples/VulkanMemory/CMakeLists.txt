@@ -31,8 +31,9 @@ add_executable(VulkanMemory ${COMMON_SOURCES} ${SOURCES})
 
 target_link_libraries(VulkanMemory
     PRIVATE glfw
-    PRIVATE vulkan
-    PRIVATE VEZ${LIB_SUFFIX})
+    PRIVATE Vulkan::Vulkan
+    PRIVATE VEZ
+)
 
 target_compile_features(VulkanMemory PRIVATE cxx_std_14)
 

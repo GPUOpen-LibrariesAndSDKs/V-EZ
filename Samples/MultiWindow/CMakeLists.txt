@@ -29,8 +29,9 @@ add_executable(MultiWindow ${SOURCES})
 
 target_link_libraries(MultiWindow
     PRIVATE glfw
-    PRIVATE vulkan
-    PRIVATE VEZ)
+    PRIVATE Vulkan::Vulkan
+    PRIVATE VEZ
+)
 
 target_compile_features(MultiWindow PRIVATE cxx_std_14)
 

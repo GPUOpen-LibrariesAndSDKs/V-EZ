@@ -10,15 +10,6 @@ layout(location = 0) in VS_OUT
 
 layout(binding = 1) uniform sampler2D texSampler;
 
-/*
-layout(constant_id = 0) const float scale = 1.0f;
-
-layout(push_constant) uniform PushConstants
-{
-    vec3 blendColor;
-} pushConstants;
-*/
-
 layout(location = 0) out vec4 outColor;
 
 void main()

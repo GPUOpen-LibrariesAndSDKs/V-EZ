@@ -31,8 +31,9 @@ add_executable(Subpasses ${COMMON_SOURCES} ${SOURCES})
 
 target_link_libraries(Subpasses
     PRIVATE glfw
-    PRIVATE vulkan
-    PRIVATE VEZ)
+    PRIVATE Vulkan::Vulkan
+    PRIVATE VEZ
+)
 
 target_compile_features(Subpasses PRIVATE cxx_std_14)
 

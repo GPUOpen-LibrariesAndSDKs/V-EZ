@@ -31,8 +31,9 @@ add_executable(SimpleQuad ${COMMON_SOURCES} ${SOURCES})
 
 target_link_libraries(SimpleQuad
     PRIVATE glfw
-    PRIVATE vulkan
-    PRIVATE VEZ${LIB_SUFFIX})
+    PRIVATE Vulkan::Vulkan
+    PRIVATE VEZ
+)
 
 target_compile_features(SimpleQuad PRIVATE cxx_std_14)
 

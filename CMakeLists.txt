@@ -22,8 +22,15 @@
 # #######################################################################################################################
 
 cmake_minimum_required(VERSION 3.8)
-project(VEZ_Samples VERSION 1.1.0 LANGUAGES CXX)
+project(VEZ VERSION 1.1.0 LANGUAGES CXX)
 
+find_package(Vulkan REQUIRED)
+
+add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
+
+option(VEZ_COMPILE_SAMPLES "Compile sample demos" ON)
+
+set(VEZ_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 set(OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Bin/x86_64")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}")
@@ -35,39 +42,21 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_DIRECTORY}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_DIRECTORY}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_DIRECTORY}")
 
-set(LIB_SUFFIX "")
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+    
+include(External/SPIRV-Cross.cmake)
+set_target_properties(spirv-cross-core PROPERTIES FOLDER External/SPIRV-Cross)
+set_target_properties(spirv-cross-glsl PROPERTIES FOLDER External/SPIRV-Cross)
 
-if(WIN32)
-    set(PLATFORM_LIB win64)
-    file(COPY ./Samples/3rdParty/Assimp/bin/win64/assimp-vc140-mt.dll DESTINATION ${OUTPUT_DIRECTORY})
-    file(COPY ./Lib/win64/VEZ.dll DESTINATION ${OUTPUT_DIRECTORY})
-elseif(UNIX)
-    set(PLATFORM_LIB linux64)
-    file(COPY Lib/linux64/libVEZ.so DESTINATION ${OUTPUT_DIRECTORY})
-endif(WIN32)
+include(External/glslang.cmake)
+set_target_properties(glslang PROPERTIES FOLDER External/glslang)
+set_target_properties(OGLCompiler PROPERTIES FOLDER External/glslang)
+set_target_properties(OSDependent PROPERTIES FOLDER External/glslang)
+set_target_properties(SPIRV PROPERTIES FOLDER External/glslang)
+set_target_properties(SPVRemapper PROPERTIES FOLDER External/glslang)
 
-include_directories(
-    ./Include
-    ./Samples/3rdParty/assimp/include
-    ./Samples/3rdParty/glfw/include
-    ./Samples/3rdParty/glm/include
-    ./Samples/3rdParty/stb/include
-    ./Samples/3rdParty/vulkan/include
-)
+add_subdirectory(Source)
 
-link_directories(
-    ./Lib/${PLATFORM_LIB}
-    ./Samples/3rdParty/assimp/lib/${PLATFORM_LIB}
-    ./Samples/3rdParty/glfw/lib/${PLATFORM_LIB}
-    ./Samples/3rdParty/vulkan/lib/${PLATFORM_LIB}
-)
-
-add_subdirectory(Samples/MultiWindow)
-add_subdirectory(Samples/OcclusionCulling)
-add_subdirectory(Samples/ShadowMapping)
-add_subdirectory(Samples/SimpleCompute)
-add_subdirectory(Samples/SimpleQuad)
-add_subdirectory(Samples/SoftwareRasterization)
-add_subdirectory(Samples/Subpasses)
-add_subdirectory(Samples/VulkanMemory)
-
+if(VEZ_COMPILE_SAMPLES)
+    add_subdirectory(Samples)
+endif()

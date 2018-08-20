@@ -25,16 +25,6 @@ out gl_PerVertex{
 
 void main()
 {
-    /*
-    vec3 verts[3] = { 
-        vec3(-0.5f, -0.5f, 0.0f),
-        vec3(-0.5f, 0.5f, 0.0f),
-        vec3(0.5f, -0.5f, 0.0f)        
-    };
-
-    gl_Position = vec4(verts[gl_VertexIndex], 1.0f);
-    */
-
     vs_out.pos = in_Position;
     vs_out.normal = in_Normal;
     vs_out.texCoord = in_TexCoord;    

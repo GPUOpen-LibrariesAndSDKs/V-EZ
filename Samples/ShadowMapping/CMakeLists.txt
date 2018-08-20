@@ -32,8 +32,9 @@ add_executable(ShadowMapping ${COMMON_SOURCES} ${SOURCES})
 target_link_libraries(ShadowMapping
     PRIVATE assimp
     PRIVATE glfw
-    PRIVATE vulkan
-    PRIVATE VEZ)
+    PRIVATE Vulkan::Vulkan
+    PRIVATE VEZ
+)
 
 target_compile_features(ShadowMapping PRIVATE cxx_std_14)
 

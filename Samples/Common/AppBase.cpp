@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 Advanced Micro Devices, Inc. All rights reserved.
+// Copyright (c) 2018 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,9 +18,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//
-// @author Sean O'Connell (Sean.OConnell@amd.com)
 //
 #include <iostream>
 #include <fstream>
@@ -583,10 +580,6 @@ VkShaderModule AppBase::CreateShaderModule(const std::string& filename, const st
 
 bool AppBase::CreatePipeline(const std::vector<PipelineShaderInfo>& pipelineShaderInfo, VezPipeline* pPipeline, std::vector<VkShaderModule>* shaderModules)
 {
-    VkSpecializationMapEntry mapEntry = { 0, 0, sizeof(float) };
-    float data = 0.25f;
-    VkSpecializationInfo specializationInfo = { 1, &mapEntry, sizeof(float), &data };
-
     // Create shader modules.
     std::vector<VezPipelineShaderStageCreateInfo> shaderStageCreateInfo(pipelineShaderInfo.size());
     for (auto i = 0U; i < pipelineShaderInfo.size(); ++i)
@@ -603,9 +596,6 @@ bool AppBase::CreatePipeline(const std::vector<PipelineShaderInfo>& pipelineShad
         shaderStageCreateInfo[i].module = shaderModule;
         shaderStageCreateInfo[i].pEntryPoint = "main";
         shaderStageCreateInfo[i].pSpecializationInfo = nullptr;
-
-        if (stage == VK_SHADER_STAGE_FRAGMENT_BIT)
-            shaderStageCreateInfo[i].pSpecializationInfo = &specializationInfo;
 
         shaderModules->push_back(shaderModule);
     }
