@@ -26,6 +26,8 @@ project(VEZ VERSION 1.1.0 LANGUAGES CXX)
 
 find_package(Vulkan REQUIRED)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
 
 option(VEZ_COMPILE_SAMPLES "Compile sample demos" ON)
