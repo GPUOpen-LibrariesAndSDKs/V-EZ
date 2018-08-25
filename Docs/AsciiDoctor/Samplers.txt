@@ -1,0 +1,2 @@
+== Samplers
+Sampler creation and usage in V-EZ is identical to Vulkan.  For more information, see the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#samplers[Vulkan spec].

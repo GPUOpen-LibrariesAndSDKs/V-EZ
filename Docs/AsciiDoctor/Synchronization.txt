@@ -1,0 +1,35 @@
+== Synchronization
+In contrast to Vulkan, the application's responsibilities for resource access synchronization is partially alleviated by V-EZ.  Namely, https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-pipeline-barriers[Pipeline Barriers] and https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-memory-barriers[Memory Barriers] are no longer explicitly required by the application, but handled by V-EZ.  Additionally, fences and semaphores are not explicitly created by the application but requested when calling `VkQueueSubmit` or `vkQueuePresent` as previously described in <<Queue Submission>>.
+
+=== Fences
+As described in the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-fences[Vulkan spec], fences are a synchronization primitive that can be used between a queue and the host. In Vulkan, a fence is either signaled, after the execution of a queue submission, or unsignaled after being reset. In V-EZ, fences are never reset.  Once a fence is requested, its status may be queried via `vezGetFenceStatus` or waited on with `vezWaitForFences`. An application must call `vezDestroyFence` when the object is no longer used.
+
+[source,c++,linenums]
+----
+// Submit a command buffer to a queue and request a fence object for the submission.
+VkFence fence = VK_NULL_HANDLE;
+
+VezSubmitInfo submitInfo = {};
+submitInfo.commandBufferCount = 1;
+submitInfo.pCommandBuffers = &commandBuffer;
+vezQueueSubmit(queue, 1, &submitInfo, &fence);
+
+// Wait until the queue submission has finished executing.
+vezWaitForFences(device, 1, &fence, VK_TRUE, ~0);
+
+// Destroy the fence.
+vezDestroyFence(device, fence);
+----
+
+=== Semaphores
+Semaphores are a synchronization primitive used to insert dependencies between queue submissions within the same queue or between different queues.  Like fences, semaphores can be signaled or unsignaled.  For a more detailed explanation of semaphores, see the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-semaphores[Vulkan spec].
+
+An application may obtain semaphore objects when calling `vkQueueSubmit` or `vkQueuePresent`.  In both cases, the semaphores are set to be signaled when either operation completes and may be passed as wait semaphores to a proceeding queue submission or present operation.  In V-EZ, semaphores are never explicitly destroyed by the application, rather once they are passed as wait semaphores to a proceeding queue operation, the application no longer maintains ownership. See the previous code listing in <<Queue Presentation>>.
+
+The only exception to this behavior is if a semaphore created by VEZ is then passed as a wait semaphore to a native Vulkan queue submission.  In this case, the application must call vezDestroySemaphore once the native Vulkan queue submission completes and the semaphore has been waited on.
+
+=== Events
+Events in V-EZ have identical behavior and operation as in Vulkan.  See the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-events[Vulkan spec] for more information.
+
+=== Wait Idle Operations
+Wait idle operations in V-EZ have identical behavior and operation as in Vulkan.  See the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-wait-idle[Vulkan spec] for more information.

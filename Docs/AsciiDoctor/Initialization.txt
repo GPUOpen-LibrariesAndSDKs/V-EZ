@@ -1,0 +1,239 @@
+== Initialization
+This section describes how an application initializes V-EZ, enumerates devices attached to the system and creates one or more handles to those devices for use.
+
+=== Preprocessor Macros
+An application must first define which windowing platform is being used with V-EZ. To faciliate this, existing preprocessor macros from the Vulkan API are used. One of these should be defined before including `V-EZ.h` in the application's source code.
+
+- VK_USE_PLATFORM_WIN32_KHR
+- VK_USE_PLATFORM_MACOS_MVK
+- VK_USE_PLATFORM_XLIB_KHR
+- VK_USE_PLATFORM_XCB_KHR
+- VK_USE_PLATFORM_WAYLAND_KHR
+
+
+=== Instances
+The next step to using V-EZ is to create a `VkInstance` object by calling `vezCreateInstance` with appropriate parameter values set in `VezInstanceCreateInfo` and `VezApplicationInfo`. These structures allow an application to pass information about itself to V-EZ. Below is a simple example call.
+
+[source,c++,linenums]
+----
+VezApplicationInfo appInfo = {};
+appInfo.pApplicationName = "MyApplication";
+appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+appInfo.pEngineName = "MyEngine";
+appinfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+
+VezInstanceCreateInfo createInfo = {};
+createInfo.pApplicationInfo = &appInfo;
+
+VkInstance instance = VK_NULL_HANDLE;
+VkResult result = vezCreateInstance(&createInfo, &instance);
+----
+
+As with Vulkan, instance layers and extensions can be enabled by passing the relevant string names to `VezInstanceCreateInfo::ppEnabledLayerNames` and `VezInstanceCreateInfo::ppEnabledExtensionNames`. For example, to enable the LunarG standard validation layer, the above code would be modified to be the following below.
+
+[source,c++,linenums]
+----
+std::array<const char*> enabledLayers = { "VK_LAYER_LUNARG_standard_validation" };
+
+VezInstanceCreateInfo createInfo = {};
+createInfo.pApplicationInfo = &appInfo;
+createInfo.enabledLayerCount = static_cast<uint32_t>(enabledLayers.size());
+createInfo.ppEnabledLayerNames = enabledLayers.data();
+----
+
+The `vezEnumerateInstanceExtensionProperties` and `vezEnumerateInstanceLayerProperties` may be used to enumerate available instance extensions and layers.  The behavior is identical to native Vulkan. For more information about vkCreateInstance and instance layers and extensions, see the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#initialization-instances[Vulkan spec].
+
+A `VkInstance` object is destroyed by calling `VezDestroyInstance` when an application terminates.
+
+[source,c++,linenums]
+----
+vezDestroyInstance(instance);
+----
+
+=== Surfaces
+V-EZ does not abstract or wrap creation of surfaces in Vulkan.  Applications must use the platform specific WSI Vulkan extensions to create the surface. See the https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/html/vkspec.html#wsi[Vulkan spec] for details.
+
+=== Physical Devices
+To retrieve a list of physical devices in the system, call `vezEnumeratePhysicalDevices`, which behaves identically to its counterpart in Vulkan. Physical device properties and features can be retrieved via `vezGetPhysicalDeviceProperties` and `vezGetPhysicalDeviceFeatures`. The following code snippet demonstrates enumerating all available physical devices in a system and their properties and features.
+
+[source,c++,linenums]
+----
+uint32_t physicalDeviceCount;
+vezEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
+
+std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
+vezEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices.data());
+
+for (auto physicalDevice : physicalDevices)
+{
+    VkPhysicalDeviceProperties properties;
+    vezetPhysicalDeviceProperties(physicalDevice, &properties);
+    
+    VkPhysicalDeviceFeatures features;
+    vezGetPhysicalDeviceFeatures(physicalDevice, &features);
+}
+
+----
+
+==== Extensions Support
+All available Vulkan extensions for a physical device may be enumerated by calling `vezEnumerateDeviceExtensionProperties`. Each `VkExtensionProperties` entry in the output array will contain the string name of the supported extension. If an application needs to quickly check for the existence of a specific extension, it can call `vezGetPhysicalDeviceExtensionSupport`.
+
+==== Layers Support
+As with physical device specific extensions, layers can be enumerated with `vezEnumerateDeviceLayerProperties`.
+
+=== Devices
+Device objects represent logical connections to physical devices (see the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#devsandqueues-devices[Vulkan spec]). An application must create separate device object handles for each physical device it will use.  `vezCreateDevice` is used to create a logical connection to a physical device.
+
+An application may specify a list of device level extensions to enable (see the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#extended-functionality-extensions[Vulkan spec]) by populating `vezCreateDeviceInfo::ppEnabledExtensionNames`.  Device level layers can be enabled by populating `vezCreateDeviceInfo::ppEnabledLayerNames`.  The code snippet below demonstrates creating a device with the `VK_KHR_swapchain` extension enabled.
+
+[source,c++,linenums]
+----
+std::array<const char*, 1> enabledExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+
+VezDeviceCreateInfo deviceCreateInfo = {};
+deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(enabledExtensions.size());
+deviceCreateInfo.ppEnabledExtensionNames = enabledExtensions.data();
+
+VkDevice device = VK_NULL_HANDLE;
+VkResult result = vezCreateDevice(physicalDevice, &deviceCreateInfo, &device);
+----
+
+=== Swapchains and Present Support
+To determine if a physical device supports a particular surface format, call `vezGetPhysicalDeviceSurfaceFormats`. This will retrieve an array of `VkFormat` and `VkColorSpace` values which can be used to check for required compatibility, for example HDR10. In some cases a surface attached to a window handle may not support being presented to, or may only support present with a specific queue family index (see <<Queues>>). This can be determined by calling `vezGetPhysicalDevicePresentSupport`.
+
+After enumerating supported image formats and color spaces for a given physical device, an application can create one or more swapchains in V-EZ by calling `vezCreateSwapchain` with appropriate parameters for `VezSwapchainCreateInfo`. In contrast to Vulkan, V-EZ manages most of the responsibilities of an application's swapchain.
+
+[source,c++,linenums]
+----
+VezSwapchainCreateInfo swapchainCreateInfo = {};
+swapchainCreateInfo.surface = surface;
+swapchainCreateInfo.format = { VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+
+VezSwapchain swapchain = VK_NULL_HANDLE;
+auto result = vezCreateSwapchain(device, &swapchainCreateInfo, &swapchain);
+----
+
+If the format specified in `VezSwapchainCreateInfo` was not supported, V-EZ will choose a default one. An application may query the final image format by calling `vezGetSwapchainSurfaceFormat`.
+
+=== Putting It All Together
+Below is a coding listing demonstrating each preceeding section.
+
+[source,c++,linenums]
+----
+#include <iostream>
+#define GLFW_INCLUDE_NONE
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
+#define VK_USE_PLATFORM_WIN32_KHR
+#include <V-EZ.h>
+
+GLFWwindow* window = nullptr;
+VkInstance instance = VK_NULL_HANDLE;
+VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+VkSurfaceKHR surface = VK_NULL_HANDLE;
+VkDevice device = VK_NULL_HANDLE;
+VezSwapchain swapchain = VK_NULL_HANDLE;
+
+bool InitWindow()
+{
+    glfwInit();
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    window = glfwCreateWindow(800, 600, "MyApplication", nullptr, nullptr);
+    if (!window)
+        return false;
+        
+    return true;
+}
+
+bool InitVulkanEZ()
+{
+    // Create the V-EZ instance.
+    VezApplicationInfo appInfo = {};
+    appInfo.pApplicationName = "MyApplication";
+    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.pEngineName = "MyEngine";
+    appinfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+
+    VezInstanceCreateInfo instanceCreateInfo = {};
+    instanceCreateInfo.pApplicationInfo = &appInfo;
+
+    VkResult result = vezCreateInstance(&instanceCreateInfo, &instance);
+    if (result != VK_SUCCESS)
+        return false;
+        
+    // Create a surface to render to.
+    VezSurfaceCreateInfo surfaceCreateInfo = {};
+    surfaceCreateInfo.hinstance = GetModuleHandle(nullptr);
+    surfaceCreateInfo.hwnd = glfwGetWin32Window(window);
+    result = vezCreateSurface(instance, &surfaceCreateInfo, &surface);
+    if (result != VK_SUCCESS)
+        return false;
+        
+    // Enumerate and select the first discrete GPU physical device.
+    uint32_t physicalDeviceCount;
+    vezEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
+
+    std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
+    vezEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices.data());
+
+    for (auto pd : physicalDevices)
+    {
+        VkPhysicalDeviceProperties properties;
+        vezGetPhysicalDeviceProperties(pd, &properties);
+        if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+        {
+            physicalDevice = pd;
+            break;
+        }
+    }
+
+    if (physicalDevice == VK_NULL_HANDLE)
+        return false;
+     
+    // Create a surface.
+    VezSurfaceCreateInfo createInfo = {};
+    createInfo.hinstance = GetModuleHandle(nullptr);
+    createInfo.hwnd = glfwGetWin32Window(window);
+    result = vezCreateSurface(instance, &createInfo, &surface);
+    if (result != VK_SUCCESS)
+        return false;
+        
+    // Create a logical device connection to the physical device.
+    VezDeviceCreateInfo deviceCreateInfo = {};
+    deviceCreateInfo.enabledExtensionCount = 0;
+    deviceCreateInfo.ppEnabledExtensionNames = nullptr;
+    result = vezCreateDevice(physicalDevice, &deviceCreateInfo, &device);
+    if (result != VK_SUCCESS)
+        return false;
+    
+    // Create the swapchain.
+    VezSwapchainCreateInfo swapchainCreateInfo = {};
+    swapchainCreateInfo.surface = surface;
+    swapchainCreateInfo.format = { VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+    result = vezCreateSwapchain(device, &swapchainCreateInfo, &swapchain);
+    if (result != VK_SUCCESS)
+        return false;
+        
+    return true;
+}
+
+int main(int argc, char** argv)
+{
+    if (!InitGLFW())
+    {
+        std::cout << "Failed to create GLFW window!\n";
+        return -1;
+    }
+    
+    if (!InitVulkanEZ())
+    {
+        std::cout << "Failed to initialize V-EZ!\n";
+        return -1;
+    }
+    
+    vezDestroyDevice(device);
+    vezDestroyInstance(instance);
+    return 0;
+}
+----

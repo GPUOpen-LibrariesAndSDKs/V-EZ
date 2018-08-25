@@ -1,0 +1,25 @@
+== Updating Memory
+Since V-EZ does not explicitly expose underlying memory handles as in Vulkan, applications update buffer and image data using the `VkBuffer` and `VkImage` handles directly.
+
+=== Map and Unmap
+V-EZ exposes map and unmap operations for `VkBuffer` handles only.  An application must ensure that the target `VkBuffer` handle was created with the correct `VezMemoryFlags`.  The *VEZ_MEMORY_GPU_ONLY* is the only enumeration value which cannot be mapped.
+
+To map and unmap a buffer, an application calls `VezMapBuffer` and `vezUnmapBuffer`.  Care must be taken to call `vezFlushMappedBufferRanges` to guarantee writes by the host are made available to the device.  The behavior remains nearly indentical to Vulkan's `vkMapMemory` function.  See the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#memory-device-hostaccess[Vulkan spec] for more details.
+
+=== Utility Functions
+V-EZ simplifies host to device data transfers by providing two utility functions. Both are synchronous function calls on the host and block the calling thread until completion.
+
+[source,c++,linenums]
+----
+VkResult vezBufferSubData(VkDevice device, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize size, const void* pData);
+
+typedef struct VezImageSubDataInfo {
+    uint32_t dataRowLength;
+    uint32_t dataImageHeight;
+    VezImageSubresourceLayers imageSubresource;
+    VkOffset3D imageOffset;
+    VkExtent3D imageExtent;
+} VezImageSubDataInfo;
+
+VkResult vezImageSubData(VkDevice device, VkImage image, const VezImageSubDataInfo* pSubDataInfo, const void* pData);
+----

@@ -1,0 +1,255 @@
+== Command Buffers
+The primary differences between Vulkan and V-EZ with respect to command buffers are the removal of command pools and secondary command buffers in V-EZ. An application need no longer manage individual command pools across threads. Only `VezCommandBuffer` handles are created by an applications in V-EZ.
+
+A secondary difference is with respect to pipeline barriers. As previously stated in <<Synchronization>>, V-EZ does not expose pipeline barriers. Within a command buffer, and between command buffer submissions, pipeline barriers are inserted automatically. An application is no longer responsible for managing this level of synchronization.
+
+Other aspects of command buffers, such as state persistence within a command buffer, is identical to Vulkan. Existing Vulkan command buffer commands are also present, along with additional ones (see <<Resource Binding>>).
+
+=== Allocation and Management
+To create a command buffer an application calls `vezAllocateCommandBuffers`. The intended *queue* the command buffer will be used on must be specified.
+
+[source,c++,linenums]
+----
+VkQueue graphicsQueue = VK_NULL_HANDLE;
+vezGetDeviceGraphicsQueue(device, 0, &graphicsQueue);    
+
+VezCommandBufferAllocateInfo allocInfo = {};
+allocInfo.queue = graphicsQueue;
+allocInfo.commandBufferCount = 1;
+VezCommandBuffer commandBuffer = VK_NULL_HANDLE;
+VkResult result = vezAllocateCommandBuffers(device, &allocInfo, &commandBuffer);    
+----
+
+A command buffer must be destroyed by calling `vezFreeCommandBuffers`.
+
+=== Recording
+An application may begin recording commands to a `VezCommandBuffer` handle by calling `vezBeginCommandBuffer`. The only required parameter is `VkCommandBufferUsageFlags` which gives hints to the driver about how it will be used. See the https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkCommandBufferUsageFlagBits.html[Vulkan spec] for more details. An application ends recording by calling `vezEndCommandBuffer`.
+
+Like Vulkan, an application must wait for a previously submitted `VezCommandBuffer` object handle to not be in use before re-recording. Applications should track queue submissions with fences and query the fence status, or wait, before re-recording commands. See fences under <<Synchronization>>.
+
+=== Graphics State
+As described in <<Pipelines>>, V-EZ removes all graphics state specification from pipeline creation. In V-EZ, graphics state is set dynamically while recording a command buffer. Furthermore, all available https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkDynamicState.html[dynamic states] from Vulkan are enabled by default and their corresponding command buffer functions made available in V-EZ. States are not required to be set within a render pass. The following is a list of states available to be set.
+
+[source,c++,linenums]
+----
+typedef struct VezInputAssemblyState {
+    VkPrimitiveTopology topology;
+    VkBool32 primitiveRestartEnable;
+} VezInputAssemblyState;
+
+typedef struct VezRasterizationState {
+    VkBool32 depthClampEnable;
+    VkBool32 rasterizerDiscardEnable;
+    VkPolygonMode polygonMode;
+    VkCullModeFlags cullMode;
+    VkFrontFace frontFace;
+    VkBool32 depthBiasEnable;
+    float depthBiasConstantFactor;
+    float depthBiasClamp;
+    float depthBiasSlopeFactor;
+} VezRasterizationState;
+
+typedef struct VezMultisampleState {
+    VkSampleCountFlagBits rasterizationSamples;
+    VkBool32 sampleShadingEnable;
+    float minSampleShading;
+    const VkSampleMask* pSampleMask;
+    VkBool32 alphaToCoverageEnable;
+    VkBool32 alphaToOneEnable;
+} VezMultisampleStateCreateInfo;
+
+typedef struct VezStencilOpState {
+    VkStencilOp failOp;
+    VkStencilOp passOp;
+    VkStencilOp depthFailOp;
+    VkCompareOp compareOp;    
+} VezStencilOpState;
+
+typedef struct VezDepthStencilState {
+    VkBool32 depthTestEnable;
+    VkBool32 depthWriteEnable;
+    VkCompareOp depthCompareOp;
+    VkBool32 depthBoundsTestEnable;
+    VkBool32 stencilTestEnable;
+    VkStencilOpState front;
+    VkStencilOpState back;
+} VezDepthStencilState;
+
+typedef struct VezColorBlendAttachmentState {
+    VkBool32 blendEnable;
+    VkBlendFactor srcColorBlendFactor;
+    VkBlendFactor dstColorBlendFactor;
+    VkBlendOp colorBlendOp;
+    VkBlendFactor srcAlphaBlendFactor;
+    VkBlendFactor dstAlphaBlendFactor;
+    VkBlendOp alphaBlendOp;
+    VkColorComponentFlags colorWriteMask;
+} VezColorBlendAttachmentState;
+
+typedef struct VezColorBlendState {
+    VkBool32 logicOpEnable;
+    VkLogicOp logicOp;
+    uint32_t attachmentCount;
+    const VkPipelineColorBlendAttachmentState* pAttachments;
+} VezColorBlendState;
+----
+
+An application is not required to set these, as V-EZ sets default values when an application calls `vezBeginCommandBuffer`. The following tables list the default values for each state.
+
+[caption="VezInputAssemblyState: "]
+.Default values
+[%autowidth]
+[cols="d,e"]
+|===
+|Field name|Default value
+
+|topology
+|VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
+|primitiveRestartEnable
+|VK_FALSE
+|===
+{blankline}
+
+[caption="VezRasterizationState: "]
+.Default values
+[%autowidth]
+[cols="d,e"]
+|===
+|Field name|Default value
+
+|depthClampEnable
+|VK_FALSE
+|rasterizerDiscardEnable
+|VK_FALSE
+|polygonMode
+|VK_POLYGON_MODE_FILL
+|cullMode
+|VK_CULL_MODE_NONE
+|frontFace
+|VK_FRONT_FACE_COUNTER_CLOCKWISE
+|depthBiasEnable
+|VK_FALSE
+|depthBiasConstantFactor
+|0.0
+|depthBiasClamp
+|1.0
+|depthBiasSlopeFactor
+|1.0
+|===
+{blankline}
+
+[caption="VezMultisampleState: "]
+.Default values
+[%autowidth]
+[cols="d,e"]
+|===
+|Field name|Default value
+
+|rasterizationSamples
+|VK_SAMPLE_COUNT_1_BIT
+|sampleShadingEnable
+|VK_FALSE
+|minSampleShading
+|1.0
+|pSampleMask
+|NULL
+|alphaToCoverageEnable
+|VK_FALSE
+|alphaToOneEnable
+|VK_FALSE
+|===
+{blankline}
+
+[caption="VezDepthStencilState: "]
+.Default values
+[%autowidth]
+[cols="d,e"]
+|===
+|Field name|Default value
+
+|depthTestEnable
+|VK_FALSE
+|depthWriteEnable
+|VK_TRUE
+|depthCompareOp
+|VK_COMPARE_OP_LESS_OR_EQUAL
+|depthBoundsTestEnable
+|VK_FALSE
+|stencilTestEnable
+|VK_FALSE
+|front
+|N/A
+|back
+|N/A
+|===
+{blankline}
+
+[caption="VezColorBlendState: "]
+.Default values
+[%autowidth]
+[cols="d,e"]
+|===
+|Field name|Default value
+
+|logicOpEnable
+|VK_FALSE
+|logicOp
+|VK_LOGIC_OP_SET
+|attachmentCount
+|0
+|pAttachments
+|NULL
+|===
+{blankline}
+
+All state blocks are set together, therefore default values must still be set when the application only needs to set a single field. For example, when enabling backface culling, the polygonMode should still be set. The code listing below demonstrates setting setting the viewport, expected primitive topology and enabling backface culling and depth testing.
+
+[source,c++,linenums]
+----
+vezBeginCommandBuffer(commandBuffer, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+
+VkViewport viewport = { 0.0f, 0.0f, width, height, 0.0f, 1.0f };
+vezCmdSetViewport(commandBuffer, 0, 1, &viewport);
+vezCmdSetViewportState(commandBuffer, 1);
+
+VezInputAssemblyState inputAssemblyState = {};
+inputAssemblyState.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+inputAssemblyState.primitiveRestartEnable = VK_FALSE;
+vezCmdSetInputAssemblyState(commandBuffer, &inputAssemblyState);
+
+VezRasterizationState rasterizationState = {};
+rasterizationState.polygonMode = VK_POLGYON_MODE_FILL;
+rasterizationState.cullMode = VK_CULL_MODE_BACK_BIT;
+rasterizationState.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+vezCmdSetRasterizationState(commandBuffer, &rasterizationState);
+
+VezDepthStencilState depthStencilState = {};
+depthStencilState.depthTestEnable = VK_TRUE;
+depthStencilState.depthWriteEnable = VK_FALSE;
+depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+vezCmdSetDepthStencilState(commandBuffer, &depthStencilState);
+
+// Draw commands
+
+vezEndCommandBuffer(commandBuffer);
+----
+
+=== Resource Binding
+In Vulkan descriptor sets are required for binding resources to different bindings for use in a pipeline.  The complexities of descriptor set layouts, descriptor pools and updating descriptor set objects has been abstracted away in V-EZ.  Instead a simplified interface of explicitly binding _buffers_, _bufferViews_, and _images_ to set and binding indices during command buffer recording is exposed. These bindings are persistent only with a command buffer, but maintain persistence across pipeline bindings.
+
+Each binding function for different resource types requires the set number, binding, and array element index.  The following functions are available for binding each resource type.
+
+[source,c++]
+----
+void vezCmdBindBuffer(VezCommandBuffer commandBuffer, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range, uint32_t set, uint32_t binding, uint32_t arrayElement)
+
+void vezCmdBindBufferView(VezCommandBuffer commandBuffer, VkBufferView bufferView, uint32_t set, uint32_t binding, uint32_t arrayElement)
+
+void vezCmdBindImageView(VezCommandBuffer commandBuffer, VkImageView imageView, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);
+
+void vezCmdBindSampler(VezCommandBuffer commandBuffer, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);
+----
+
+NOTE: The preprocessor macro `VK_WHOLE_SIZE` may be passed to the `range` parameter of `vezCmdBindBuffer` when an application desires to bind the entire buffer and not a sub range.
+
+`vkCmdBindImageView` allows an application to specify a sampler alongside the image view.  When sampler is VK_NULL_HANDLE, the binding represents a _sampled image_ or *texture2D* in GLSL.  When sample is not VK_NULL_HANDLE, it represents a _combined image sampler_ or 'sampler2D' in GLSL.  See https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#descriptorsets-types[13.1.3 Sampled Image] in the Vulkan spec for more details.

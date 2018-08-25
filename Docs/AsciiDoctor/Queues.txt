@@ -1,0 +1,97 @@
+== Queues
+=== Queue Families
+As discussed in the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#devsandqueues-queues[Vulkan spec], each physical device may have one or more queue families.  A physical device's queue families can be queried with `vezGetPhysicalDeviceQueueFamilyProperties`.  The returned `VkQueueFamilyProperties` array contains the following fields:
+
+- `queueFlags` indicating the capabilities of the queues in the queue family
+- `queueCount` a count of queues in this queue family
+
+In V-EZ there is no need to explicitly create or request the different queue families.  By default, all queue families and the maximum counts are created and accessible to the application.  An application can obtain `VkQueue` handles to each queue family by calling `vezGetDeviceQueue` with the desired `queueFamilyIndex` and `queueIndex`, which must be less than `queueCount` obtained in `VkQueueFamilyProperties`.  Utility functions are also provided to explicitly request the graphics, compute or transfer queue families.
+
+[source,c++,linenums]
+----
+void vezGetDeviceQueue(VkDevice device, uint32_t queueFamilyIndex, uint32_t queueIndex, VkQueue* pQueue);
+----
+
+[source,c++,linenums]
+----
+void vezGetDeviceGraphicsQueue(VkDevice device, uint32_t queueIndex, VkQueue* pQueue);
+void vezGetDeviceComputeQueue(VkDevice device, uint32_t queueIndex, VkQueue* pQueue);
+void vezGetDeviceTransferQueue(VkDevice device, uint32_t queueIndex, VkQueue* pQueue);
+----
+
+`VkQueue` handles do not need to be explicitly destroyed by the application.
+
+=== Queue Submission
+Queue submission behavior and syntax in V-EZ is nearly identical to Vulkan.  An application fills in a `VezSubmitInfo` structure as described in the Vulkan spec.  Please see  https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#devsandqueues-queues[4.3.5 Queue Submission] for detailed information on this topic.
+
+The primary differences are with respect to semaphores and fences.  In V-EZ, semaphores and fences are never explicitly created by an application.  Instead an application requests them to be created when calling `VezQueueSubmit` by passing valid, uninitialized, object handles to `VezSubmitInfo::pSignalSemaphores` and the final `pFence` parameter of `VezQueueSubmit`. V-EZ will allocate the objects and store them in these handles. An application is responsible for calling `vezDestroyFence` for any `VkFence` object handle returned by V-EZ. As in Vulkan, an application must ensure any queue submission has completed and the `VkFence` object has been signaled before deletion.
+
+For semaphores returned by V-EZ, an application may only pass them to proceeding calls to `VezQueueSubmit` as wait semaphores. V-EZ will ensure the object handles are properly destroyed after the queue submission completes. External semaphores created by native Vulkan may be passed to V-EZ via `VezSubmitInfo::pWaitSemaphores`.
+
+[source,c++,linenums]
+----
+VkSemaphore semaphore = VK_NULL_HANDLE;
+VkFence fence = VK_NULL_HANDLE;
+
+VezSubmitInfo submitInfo = {};
+submitInfo.commandBufferCount = 1;
+submitInfo.pCommandBuffers = &commandBuffer;
+submitInfo.signalSemaphoreCount = 1;
+submitInfo.pSignalSemaphores = &semaphore;
+VkResult result = vezQueueSubmit(queue, 1, &submitInfo, &fence);
+
+// Pass semaphore to another vkQueueSubmit call as a wait semaphore.
+
+// Wait on fence to complete.
+vezWaitForFences(device, 1, &fence, VK_TRUE, ~0ULL);
+vezDestroyFence(device, fence);
+----
+
+More on semaphores and fences will be discussed in <<Synchronization>>. 
+
+=== Queue Presentation
+V-EZ alleviates most of the responsibility for managing the Vulkan swapchain from the application.  The only operation an application must perform to display a rendered image to a window is call `vezQueuePresent` with the `VezPresentInfo` parameter correctly set.  The semantics of `VezPresentInfo` differ quite a bit from Vulkan's `VkPresentInfoKHR`.  Namely, in V-EZ an application presents a `VkImage` object handle rather than specifying the image index of the Vulkan swapchain.  Furthermore, V-EZ allows an application to specify signal semaphores in `VezPresentInfo` which can be used to determine when the `VkImage` object handle is no longer in use.
+
+More than one swapchain may be presented in a single call.  The `pImages` array must contains the same number of entries as `pSwapchains`.
+
+[source,c++,linenums]
+----
+typedef struct VezPresentInfo {
+    const void* pNext;    
+    uint32_t waitSemaphoreCount;
+    const VkSemaphore* pWaitSemaphores;
+    uint32_t swapchainCount;
+    const VezSwapchain* pSwapchains;
+    const VkImage* pImages;
+    uint32_t signalSemaphoreCount;
+    VkSemaphore* pSignalSemaphores;
+    VkResult* pResults;
+} VkPresentInfo;
+----
+
+The code listing below demonstrates presenting an image the application has rendered into, specifying a single wait semaphore from a previous queue submission and retrieving a signal semaphore.
+
+[source,c++,linenums]
+----
+VkSemaphore signalSemaphore = VK_NULL_HANDLE;
+
+VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+VezPresentInfo presentInfo = {};
+presentInfo.waitSemaphoreCount = 1;
+presentInfo.pWaitSemaphores = &semaphore;
+presentInfo.pWaitDstStageMask = &waitDstStageMask;
+presentInfo.swapchainCount = 1;
+presentInfo.pSwapchains = &swapchain;
+presentInfo.pImages = &srcImage;
+presentInfo.signalSemaphoreCount = 1;
+presentInfo.pSignalSemaphores = &signalSemaphore;
+VkResult result = vezQueuePresent(graphicsQueue, &presentInfo);
+
+// Wait on the signal semaphore before using renderedImage again.
+// Ex: pass the semaphore to VezSubmitInfo::pWaitSemaphores.
+----
+
+NOTE: Any images passed to `VezPresentInfo::pImages` must be created with the VK_IMAGE_USAGE_TRANSFER_SRC_BIT usage flag bit. See <<Resource Creation>> for details on image creation and usage flags.
+
+==== Multisampled Images
+If any entry in `VezPresentInfo::pImages` is multisampled, no additional steps need to be taken before calling vezQueuePresent.  V-EZ will automatically resolve the image as its presented to the target window.

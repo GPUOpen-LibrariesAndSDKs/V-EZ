@@ -1,0 +1,92 @@
+== Render Passes
+Render passes in Vulkan are used to encapsulate all draw commands.  No draw command may occur outside of a render pass.  Render passes allow an application to define a sequence of dependent stages within an application's rendering pipeline that should be synchronized and may access the same framebuffer attachments. Desktop applications may not benefit as much from this feature as mobile applications, however use of render passes is still encouraged as AMD's driver can make specific optimizations under many circumstances.
+
+Render passes are greatly simplified in V-EZ.  Applications are no longer required to:
+
+- Explicitly create render pass objects
+- Manage render pass compatibility with pipelines and framebuffers
+- Define attachment image layouts and transitions
+- Define input attachments
+- Define all subpasses up front
+- Define subpass dependencies
+
+These tasks are handled automatically by V-EZ, and in some cases inferred from the SPIR-V of bound pipeline shader stages.  To learn more about render passes and their use cases, please see the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#renderpass[Vulkan spec].
+
+=== Begin A Render Pass
+To begin a render pass, an application may call `vkCmdBeginRenderPass`.  The `VezRenderPassBeginInfo` structure requires a target framebuffer to be specified, an array of `VezAttachmentReference` structures which define load operations, store operations and clear values. The code listing below demonstrates beginning a render pass with two attachments, namely a single color attachment and a depth stencil attachment.  Both attachments are cleared and any values written by the fragment shader stage stored.
+
+[source,c++,linenums]
+----
+// Clear the framebuffer's color and depth attachments (set clear color to red).
+// Always store the fragment stage results.
+std::array<VezAttachmentReference, 2> attachmentReferences = {};
+attachmentReferences[0].clearValue.color = { 0.3f, 0.3f, 0.3f, 0.0f };
+attachmentReferences[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+attachmentReferences[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+attachmentReferences[1].clearValue.depthStencil.depth = 1.0f;
+attachmentReferences[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+attachmentReferences[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+// Begin a render pass.
+VezRenderPassBeginInfo beginInfo = {};
+beginInfo.framebuffer = framebuffer;
+beginInfo.attachmentCount = static_cast<uint32_t>(attachmentReferences.size());
+beginInfo.pAttachments = attachmentReferences.data();
+vezCmdBeginRenderPass(commandBuffer, &beginInfo);
+----
+
+=== Next Subpass
+By default, calling vkCmdBeginRenderPass starts the first subpass.  To transition to a proceeding one, an application may call `vezCmdNextSubpass`.  No parameters are required except the command buffer the call is being recorded to.
+
+As previously stated, V-EZ determines which framebuffer attachments are written to within each subpass based on the pipeline objects that are bound and draw calls made.
+
+=== End A Render Pass
+To end a render pass, call `vezCmdEndRenderPass`.
+
+=== Input Attachments
+Vulkan allows framebuffer attachments to be used as inputs or outputs within a render pass.  One subpass may write to a color attachment while a proceeding subpass may read from it.  V-EZ infers this information from the bound pipeline shader stages, specifically the GLSL `subpassInput` uniform type (see 13.1.11. Input Attachment in the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html[Vulkan spec] for more details.  In the code snippet below, the first subpass outputs to two attachments for color and surface normals.
+
+[source,c++,linenums]
+----
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
+
+layout(location = 0) in VS_OUT
+{
+    vec3 worldNormal;    
+} ps_in;
+
+layout(location = 0) out vec4 albedo;
+layout(location = 1) out vec4 normals;
+
+void main()
+{
+    albedo = ...
+    normals = ps_in.worldNormal;
+}
+----
+
+In the next subpass, the framebuffer attachment storing the normals, index 1, is bound as an input attachment within the shader.
+
+[source,c++,linenums]
+----
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
+
+layout(input_attachment_index = 1, set = 0, binding = 0) uniform subpassInput normals;
+layout(location = 0) out vec4 finalColor;
+
+void main()
+{
+    vec4 normal = subpassLoad(normals);
+    finalColor = ...
+}
+----
+
+The `input_attachment_index` value used in the shader should match the index of the attachment when the framebuffer was created.  In V-EZ these must be absolute indices.  The same applies for the `location` index for output attachments.
+
+
+
+
+
+

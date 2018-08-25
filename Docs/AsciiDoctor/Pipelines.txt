@@ -1,0 +1,150 @@
+== Pipelines
+Pipeline creation and management in V-EZ has been significantly simplified compared to Vulkan. When creating a pipeline in Vulkan, the following graphics state and object handles must be passed to `vkCreateGraphicsPipeline`.
+
+- Vertex input state
+- Input assembly state
+- Viewport state
+- Rasterization state
+- Multisample state
+- Depth stencil state
+- Color blend state
+- Pipeline layout
+- Render passed
+- Subpass index
+
+V-EZ alleviates the need to specify any of this information at creation time, thus allowing an application the flexibility to use the same `VezPipeline` object with different graphics state permutations, vertex attribute bindings and render passes. 
+
+=== Shader Modules
+Shader modules represent the different shader stages of a pipeline. In Vulkan shader modules can only be created from SPIR-V binaries. However V-EZ allows shader module creation from both SPIR-V and GLSL source. To create a shader module, `vezCreateShaderModule` is called with `VezShaderModuleCreateInfo` specifying the stage and GLSL source or SPIR_V binary. The behavior and syntax remain largely the same as Vulkan, with the exception of added GLSL support. The code listing below shows a shader module being created from GLSL source.
+
+[source,c++,linenums]
+----
+std::string glslSource = ReadFile("shader.vert");
+
+VezShaderModuleCreateInfo createInfo = {};
+createInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+createInfo.codeSize = static_cast<uint32_t>(glslSource.size());
+createInfo.pGLSLSource = glslSource.c_str();
+createInfo.pEntryPoint = "main";
+
+VkShaderModule shaderModule = VK_NULL_HANDLE;
+VkResult result = vezCreateShaderModule(device, &createInfo, &shaderModule);
+----
+
+The `VezShaderModuleCreateInfo::pEntryPoint` field is only required when creating a shader module from GLSL source. For more information on shader modules, please see the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#shader-modules[Vulkan spec].
+
+=== Graphics Pipelines
+To create a graphics pipeline, call `vezCreateGraphicsPipeline` with an array of `VezPipelineShaderStageCreateInfo` entries, one for each shader stage the pipeline will use. The code listing below assumes vertex and fragment shader modules have already been created.
+
+[source,c++,linenums]
+----
+std::array<VezPipelineShaderStageCreateInfo, 2> stages = { { {}, {} } };
+stages[0] = {};
+stages[0].module = vertexStageShaderModule;
+stages[0].pEntryPoint = nullptr;
+stages[1] = {};
+stages[1].module = fragmentStageShaderModule;
+stages[1].pEntryPoint = nullptr;
+
+VezGraphicsPipelineCreateInfo createInfo = {};
+createInfo.stageCount = static_cast<uint32_t>(stages.size());
+createInfo.pStages = stages.data();
+
+VezPipeline pipeline = VK_NULL_HANDLE;
+VkResult result = vezCreateGraphicsPipeline(device, &createInfo, &pipeline);
+----
+
+The `VezPipelineShaderStageCreateInfo::pEntryPoint` allows an application to re-specify alternate entry points for a shader module. This is useful in the case where a single shader module contains multiple entry points for a given shader stage and used between more than one pipeline.
+
+=== Compute Pipelines
+Compute pipelines are created with a single `VezPipelineShaderStageCreateInfo` object and a call to `vezCreateComputePipeline`.
+
+=== Specialization Constants
+Specialization constants in V-EZ work the same as they do in Vulkan. An application sets `VezPipelineShaderStageCreateInfo::pSpecializationInfo` accordingly. For more information on specialization constants, please see the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#pipelines-specialization-constants[Vulkan spec].
+
+=== Push Constants
+Push constants are a "_high speed path to modify constant data in pipelines that is expected to out perform memory-backed resource updates_". For more information on push constants, please see the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#descriptorsets-pipelinelayout[Vulkan spec].
+
+V-EZ simplifies the use of push constants by only requiring an application call `vezCmdPushConstants` to update the memory, requiring only an offset, size and pointer to host data to update the push constants memory with. A valid pipeline must be bound before calling `vezCmdPushConstants`.
+
+[source,c++,linenums]
+----
+void vezCmdPushConstants(VezCommandBuffer commandBuffer, uint32_t offset, uint32_t size, const void* pValues);
+----
+
+In the case where multiple shader stages within a pipeline define push constants at different byte offsets, an application may query these offsets and sizes with V-EZ's pipeline reflection described in the next section.
+
+=== Pipeline Reflection
+Unlike Vulkan, V-EZ allows full pipeline shader stage reflection if the shader stages were created from GLSL source, or the SPIR-V binary source contains the relevant meta-data. To enumerate all pipeline resources call `vezEnumeratePipelineResources`, which returns an array of `VkPipelineResource` entries.
+
+[source,c++,linenums]
+----
+typedef struct VezPipelineResource {
+    VkShaderStageFlags stages;
+    VezPipelineResourceType resourceType;
+    VezPipelineResourceBaseType baseType;
+    VkAccessFlags access;
+    uint32_t set;
+    uint32_t binding;
+    uint32_t location;    
+    uint32_t vecSize;
+    uint32_t arraySize;
+    uint32_t offset;
+    uint32_t size;
+    char name[VK_MAX_DESCRIPTION_SIZE];
+} GLPipelineResource;
+----
+
+The *stages* field is a bitmask of all shader stages the resource is used in. For example, a the same uniform buffer binding might be bound and accessed in both the vertex and fragment shader stages.
+
+The *resourceType* field specifies one of the following values:
+
+[source,c++,linenums]
+----
+typedef enum VezPipelineResourceType {
+    VEZ_PIPELINE_RESOURCE_TYPE_INPUT = 0,
+    VEZ_PIPELINE_RESOURCE_TYPE_OUTPUT = 1,
+    VEZ_PIPELINE_RESOURCE_TYPE_SAMPLER = 2,
+    VEZ_PIPELINE_RESOURCE_TYPE_COMBINED_IMAGE_SAMPLER = 3,
+    VEZ_PIPELINE_RESOURCE_TYPE_SAMPLED_IMAGE = 4,
+    VEZ_PIPELINE_RESOURCE_TYPE_STORAGE_IMAGE = 5,
+    VEZ_PIPELINE_RESOURCE_TYPE_UNIFORM_TEXEL_BUFFER = 6,
+    VEZ_PIPELINE_RESOURCE_TYPE_STORAGE_TEXEL_BUFFER = 7,
+    VEZ_PIPELINE_RESOURCE_TYPE_UNIFORM_BUFFER = 8,
+    VEZ_PIPELINE_RESOURCE_TYPE_STORAGE_BUFFER = 9,
+    VEZ_PIPELINE_RESOURCE_TYPE_ATOMIC_COUNTER = 10,
+    VEZ_PIPELINE_RESOURCE_TYPE_PUSH_CONSTANT_BUFFER = 11,
+} VezPipelineResourceType;
+----
+
+The *baseType* field specifies the data type. For GLSL vec4, baseType would be VEZ_PIPELINE_RESOURCE_BASE_TYPE_FLOAT for example.
+
+[source,c++,linenums]
+----
+typedef enum VkPipelineResourceBaseType {
+    VEZ_PIPELINE_RESOURCE_BASE_TYPE_INT = 0,
+    VEZ_PIPELINE_RESOURCE_BASE_TYPE_UINT = 1,
+    VEZ_PIPELINE_RESOURCE_BASE_TYPE_FLOAT = 2,
+    VEZ_PIPELINE_RESOURCE_BASE_TYPE_DOUBLE = 3,
+} VkPipelineResourceBaseType;
+----
+
+The *set* and *binding* fields specify the set number and binding point in the shader as declared in the GLSL source or SPIR-V binary. For additional information on this, please see the <<GLSL Guide>> at the end of this document.
+
+For shader stage inputs and outputs, the *location* field specifies the location binding. Examples include fragment stage output, inputs and outputs between shader stages, etc.
+
+The *vecSize* field specifies the number of components. If the shader resource is vec3, vecSize will equal 3. For scalar pipeline resources, vecSize will be 1.
+
+The 'arraySize' field specifies the number of elements in the pipeline resource's array declaration. For example, in the code listing below, the arraySize would be 10.
+
+[source,c++,linenums]
+----
+layout (set=0, binding=0) uniform sampler2D textures[10];
+----
+
+The 'offset' and 'size' specify the byte offset and byte size of a resource when declared inside of a struct.
+
+If an application knows the name of the pipeline resource to query, `vkGetPipelineResource` may be used.
+
+=== Pipeline Binding
+Graphics pipelines must be bound between `vezCmdBeginRenderPass` and `vezCmdEndRenderPass` calls. Compute pipelines must be bound outside of a render pass.  To bind a pipeline, call `vezCmdBindPipeline`.

@@ -1,0 +1,46 @@
+== Vertex Input Formats
+In Vulkan the expected vertex input state must be specified at graphics pipeline creation time. The downside to this is that an application must manage different permutations of the same pipeline if it's used with more than one vertex input format.  The vertex input format consists of an array of vertex binding descriptions, via `VkVertexInputBindingDescription`, and vertex attribute descriptions, via `VkVertexInputAttributeDescription`.
+
+V-EZ alleviates this requirement, as graphics pipeline creation only requires an array of shader modules (<<Graphics Pipelines>>).  Instead, the desired vertex input format is set during command buffer recording by calling `vezCmdSetVertexInputFormat`.
+
+[source,c++,linenums]
+----
+void vezCmdSetVertexInputFormat(VkCommandBuffer commandBuffer, VezVertexInputFormat format);
+----
+
+=== Creation
+An application now only needs to manage vertex input formats at the mesh or object level.  V-EZ moves the specification of the `VkVertexInputBindingDescription` and `VkVertexInputAttributeDescription` arrays to the `VkVertexInputFormat` object creation.  In the code listing below, a vertex input format is created specifying a single binding point and two vertex attributes.
+
+[source,c++,linenums]
+----
+// All vertex attributes bound using a single buffer binding point.
+VkVertexInputBindingDescription bindingDescription = {};
+bindingDescription.binding = 0;
+bindingDescription.stride = sizeof(float) * 5;
+bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+// XYZ position and XY texture coordinate attributes declared.
+std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions;
+attributeDescriptions[0].location = 0;
+attributeDescriptions[0].binding = 0;
+attributeDescriptions[0].offset = 0;
+attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+attributeDescriptions[1].location = 1;
+attributeDescriptions[1].binding = 0;
+attributeDescriptions[1].offset = sizeof(float) * 3;
+attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
+
+VezVertexInputFormatCreateInfo createInfo = {};
+createInfo.vertexBindingDescriptionCount = 1;
+createInfo.pVertexBindingDescriptions = &bindingDescription;
+createInfo.vertexAttributeDescriptionCount = static_cast<uin32_t>(attributeDescriptions.size());
+createInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+
+VezVertexInputFormat vertexInputFormat = VK_NULL_HANDLE;
+VkResult result = vezCreateVertexInputFormat(device, &createInfo, &vertexInputFormat);
+----
+
+The rules and semantics of specifying `VkVertexInputBindingDescription` and `VkVertexInputAttributeDescription` follow the same rules as specified in the https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkPipelineVertexInputStateCreateInfo.html[Vulkan spec].
+
+=== Destruction
+When an application no longer requires a `VezVertexInputFormat` it should be destroyed by calling `vezDestroyVertexInputFormat`.

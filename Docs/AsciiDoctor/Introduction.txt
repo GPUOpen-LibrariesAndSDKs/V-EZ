@@ -1,0 +1,48 @@
+== Introduction
+This document describes the V-EZ Vulkan wrapper library, what it is, what it abstracts away from the Vulkan API, and how to use it. Comparisons to Vulkan are made with the assumption the reader has a moderate understanding of the Khronos specification. In many sections of this documentation, details of functions calls are omitted since the behavior is nearly identical to Vulkan. The latest specification for the Vulkan API can be found https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html[here].
+
+=== What is V-EZ?
+V-EZ is designed to be a C based light-weight layer around Vulkan which maintains mostly identical semantics but abstracts away the lower level complexities. The motivation behind this design is to accelerate adoption of Vulkan among software vendors outside of the gaming industry, who desire modern graphics API features without all of the low level responsibilities.
+
+=== What is Abstracted From Vulkan?
+The following is a short list of low level Vulkan API features and responsibilities which are abstracted in V-EZ and no longer a concern of the application.
+
+- Memory management
+- Swapchain management
+- Render Passes
+- Pipeline permutations
+- Pipeline layouts
+- Pipeline barriers
+- Descriptor pools
+- Descriptor sets
+- Descriptor set layouts
+- Image layouts
+- GLSL compilation
+
+Below is a diagram of the Vulkan API objects and their interactions.
+
+image::VulkanAPI.PNG[Vulkan API Objects]
+
+The next image is a diagram of V-EZ.  Notice the number of native Vulkan objects which are abstracted and whose responsibility is removed from the application.
+
+image::V-EZ.PNG[V-EZ API]
+
+=== Performance Comparisons
+V-EZ incurs only slight overhead compared to native Vulkan API calls. However in most cases the performance overhead is negligible.  Existing best practices with respect to Vulkan are still applicable with V-EZ.  These include, but are not limited to:
+
+- Batching queue submissions
+- Multi-threaded command buffer recording
+- Reusing command buffers
+- Minimizing pipeline bindings
+- Minimizing resource bindings
+- Batching draw calls
+
+=== Native Vulkan Calls
+Most object handles created by V-EZ are the native Vulkan objects.  These can be used in native Vulkan.  There are only a few exceptions, which are prefixed with `vez` rather than `vk`.  These object handles may only be passed to V-EZ.
+
+*   vezSwapchain
+*   vezCommandBuffer
+*   vezPipeline
+*   vezFramebuffer
+
+Any native Vulkan API functions that do not exist within V-EZ may be used with Vulkan object handles returned by V-EZ.

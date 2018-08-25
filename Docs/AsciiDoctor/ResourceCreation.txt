@@ -1,0 +1,140 @@
+== Resource Creation
+Like Vulkan, V-EZ supports two low-level resource types: _buffers_ and _images_. However V-EZ does not require an application to manage the underlying memory, which is completely abstracted away. All the application sees are `VkBuffer` and `VkImage` objects. For more information on resource creation and memory, see the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#resources[Vulkan spec].
+
+Since memory management is hidden from the application, V-EZ exposes `VezMemoryFlags` when creating buffers and images. These flags allow an application to specify how the memory will be used and where the it should reside.
+
+[source,c++,linenums]
+----
+typedef enum VezMemoryFlagsBits {
+    VEZ_MEMORY_GPU_ONLY = 0x00000000,
+    VEZ_MEMORY_CPU_ONLY = 0x00000001,
+    VEZ_MEMORY_CPU_TO_GPU = 0x00000002,
+    VEZ_MEMORY_GPU_TO_CPU = 0x00000004,
+    VEZ_MEMORY_DEDICATED_ALLOCATION = 0x00000008,
+} VezMemoryFlagsBits;
+----
+
+*VEZ_MEMORY_GPU_ONLY* specifies a buffer or image memory backing should reside in a device's local memory only.
+
+*VEZ_MEMORY_CPU_ONLY* specifies a buffer or image memory backing should reside in host memory.
+
+*VEZ_MEMORY_CPU_TO_GPU* specifies a buffer or image memory backing should be optimized for data transfers from the host to the device.
+
+*VEZ_MEMORY_GPU_TO_CPU* specifies a buffer or image memory backing should be optimized for data transfers from the device to the host.
+
+*VEZ_MEMORY_DEDICATED_ALLOCATION* specifies that the buffer or image should use a unique memory block.
+
+V-EZ's internal memory management sub-allocates memory blocks by default.  If an application prefers that a particular buffer or image have its own dedicated memory block, *VEZ_MEMORY_DEDICATED_ALLOCATION* can be used.
+
+=== Buffers
+Buffers are represented by `VkBuffer` handles and created by calling `vkCreateBuffer`. The code listing below demonstrates creating a buffer to be used for _staging_, or data transfers optimized for host to device.
+
+[source,c++,linenums]
+----
+VezBufferCreateInfo createInfo = {};
+createInfo.size = (32 << 20ULL) // 32 megabytes
+createInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+
+VkBuffer buffer = VK_NULL_HANDLE;
+VkResult result = vezCreateBuffer(device, VEZMEMORY_CPU_TO_GPU, &createInfo, &buffer);
+----
+
+The application must always specify the intended usage for a buffer using the `VezBufferUsageFlagBits` enumeration values. In the code listing above, the buffer is only used as a _source_ for data transfers.
+
+Like Vulkan, V-EZ allows an application to specify an array of queue family indices the buffer will be used with. If an application sets `queueFamilyIndexCount` to 0, V-EZ defaults the buffer to being accessible to all queue families.
+
+When a `VkBuffer` handle is no longer used by an application, it should be destroyed with `vezDestroyBuffer`.
+
+=== Buffer Views
+Creating buffer views from buffers has nearly identical syntax to Vulkan. An application calls `vezCreateBufferView` with appropriate values for fields in `VezBufferViewCreateInfo`. Buffer views are destroyed by calling `vezDestroyBufferView`.  For more information on buffer views, see the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#resources-buffer-views[Vulkan spec].
+
+=== Images
+Images are represented by `VkImage` handles and created by calling `vezCreateImage`.  Like buffers, `VezMemoryFlags` is passed to `vezCreateImage` allowing an application to specify how the memory will be used and where the it should reside.  The syntax and behavior of `vezCreateImage` and `VezImageCreateInfo` in V-EZ are nearly identical to Vulkan, see the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#resources-images[Vulkan spec] for more information.
+
+As with buffers, if the *queueFamilyIndexCount* in `VezImageCreateInfo` is set to 0, then V-EZ assumes the image will be used with all available queue families.
+
+=== Image Views
+See the https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#resources-image-views[Vulkan spec] for more information on image views.  The behavior and syntax in V-EZ is nearly identical to Vulkan.
+
+=== Framebuffers
+In Vulkan, an application must specify an array of `VkImageView` attachments, a https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#renderpass-compatibility[compatible] Render Pass, and the dimensions when creating a framebuffer.  V-EZ simplifies this to only requiring the array of attachments and the dimensions.  Render passes are never explicitly created by applications V-EZ (see <<Render Passes>>), and therefore are not required when creating a framebuffer.
+
+The coding listing below demonstrates creating a simple framebuffer from a color and depth image. Note that the usage parameter for the color image has the VK_IMAGE_USAGE_TRANSFER_SRC_BIT set.  This is required for any image presented to a window when calling `vezQueuePresent`.
+
+[source,c++,linenums]
+----
+// Create the color image.
+VezImageCreateInfo imageCreateInfo = {};
+imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+imageCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+imageCreateInfo.extent = { width, height, 1 };
+imageCreateInfo.mipLevels = 1;
+imageCreateInfo.arrayLayers = 1;
+imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+VkImage colorImage = VK_NULL_HANDLE;
+vezCreateImage(device, VEZ_MEMORY_GPU_ONLY, &imageCreateInfo, &colorImage);
+
+// Create the image view.
+VezImageViewCreateInfo imageViewCreateInfo = {};
+imageViewCreateInfo.image = colorImage;
+imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+imageViewCreateInfo.format = imageCreateInfo.format;
+imageViewCreateInfo.subresourceRange.layerCount = 1;
+imageViewCreateInfo.subresourceRange.levelCount = 1;
+
+VkImageView colorImageView = VK_NULL_HANDLE;
+vezCreateImageView(device, &imageViewCreateInfo, &colorImageView);
+
+// Create the depth image attachment.
+imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+imageCreateInfo.format = VK_FORMAT_D32_SFLOAT;
+imageCreateInfo.extent = { width, height, 1 };
+imageCreateInfo.mipLevels = 1;
+imageCreateInfo.arrayLayers = 1;
+imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+imageCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+
+VkImage depthImage = VK_NULL_HANDLE;
+vezCreateImage(device, VEZ_MEMORY_GPU_ONLY, &imageCreateInfo, &depthImage);
+
+// Create the image view.
+imageViewCreateInfo.image = depthImage;
+imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+imageViewCreateInfo.format = imageCreateInfo.format;
+imageViewCreateInfo.subresourceRange.layerCount = 1;
+imageViewCreateInfo.subresourceRange.levelCount = 1;
+
+VkImageView depthImageView = VK_NULL_HANDLE;
+vezCreateImageView(device, &imageViewCreateInfo, &depthImageView);
+
+// Create the framebuffer.
+std::array<VkImageView, 2> attachments = { colorImageView, depthImageView };
+VezFramebufferCreateInfo framebufferCreateInfo = {};
+framebufferCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+framebufferCreateInfo.pAttachments = attachments.data();
+framebufferCreateInfo.width = width;
+framebufferCreateInfo.height = height;
+framebufferCreateInfo.depth = 1;
+VezFramebuffer framebuffer = VK_NULL_HANDLE;
+vezCreateFramebuffer(device, &framebufferCreateInfo, &framebuffer);
+----
+
+Framebuffers are destroyed by calling `vezDestroyFramebuffer`.
+
+==== Multisampled Framebuffers
+An application may create a multisampled framebuffer by setting `VezImageCreateInfo::samples` to the appropriate value when creating the color and depth stencil attachments.  Then the multisample state block must be set appropriately to enable multisampled rendering (see <<Graphics State>>).
+
+==== Framebuffers With No Attachments
+As described in the Vulkan specification, framebuffers with no attachments but valid dimensions may still be created. To create a framebuffer with no attachments in V-EZ, simply set `VezFramebufferCreateInfo::pAttachments` to null and `VezFramebufferCreateInfo::attachmentCount` to 0.  Then set appropriate values for width, height, depth and samples.
+
+
+
+
+
+
+
+

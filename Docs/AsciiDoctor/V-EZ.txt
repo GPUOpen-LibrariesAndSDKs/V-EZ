@@ -1,0 +1,38 @@
+:doctype: book
+:toc: left
+:toclevels: 3
+:numbered:
+:experimental:
+:imagesdir: ./img
+:source-highlighter: coderay
+:coderay-linenums-mode: inline
+:coderay-css: class
+:max-width: 90
+:blankline: pass:[ +]
+
+= V-EZ API Documentation
+Advanced Micro Devices - Version 1.1.0, 2018-08-25
+
+include::Introduction.txt[]
+
+include::Initialization.txt[]
+
+include::Queues.txt[]
+
+include::Synchronization.txt[]
+
+include::Pipelines.txt[]
+
+include::VertexInputFormats.txt[]
+
+include::ResourceCreation.txt[]
+
+include::Samplers.txt[]
+
+include::CommandBuffers.txt[]
+
+include::RenderPasses.txt[]
+
+include::UpdatingMemory.txt[]
+
+include::GLSLGuide.txt[]
