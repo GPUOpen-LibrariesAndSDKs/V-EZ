@@ -479,7 +479,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vezEnumerateDeviceLayerProperties(VkPhysicalDevic
 VKAPI_ATTR VkResult VKAPI_CALL vezCreateDevice(VkPhysicalDevice physicalDevice, const VezDeviceCreateInfo* pCreateInfo, VkDevice* pDevice);
 VKAPI_ATTR void VKAPI_CALL vezDestroyDevice(VkDevice device);
 VKAPI_ATTR VkResult VKAPI_CALL vezDeviceWaitIdle(VkDevice device);
-VKAPI_ATTR VkResult VKAPI_CALL vezDeviceSetVSync(VkDevice device, VkBool32 enabled);
 VKAPI_ATTR void VKAPI_CALL vezGetDeviceQueue(VkDevice device, uint32_t queueFamilyIndex, uint32_t queueIndex, VkQueue* pQueue);
 VKAPI_ATTR void VKAPI_CALL vezGetDeviceGraphicsQueue(VkDevice device, uint32_t queueIndex, VkQueue* pQueue);
 VKAPI_ATTR void VKAPI_CALL vezGetDeviceComputeQueue(VkDevice device, uint32_t queueIndex, VkQueue* pQueue);
@@ -489,6 +488,7 @@ VKAPI_ATTR void VKAPI_CALL vezGetDeviceTransferQueue(VkDevice device, uint32_t q
 VKAPI_ATTR VkResult VKAPI_CALL vezCreateSwapchain(VkDevice device, const VezSwapchainCreateInfo* pCreateInfo, VezSwapchain* pSwapchain);
 VKAPI_ATTR void VKAPI_CALL vezDestroySwapchain(VkDevice device, VezSwapchain swapchain);
 VKAPI_ATTR void VKAPI_CALL vezGetSwapchainSurfaceFormat(VezSwapchain swapchain, VkSurfaceFormatKHR* pFormat);
+VKAPI_ATTR VkResult VKAPI_CALL vezSwapchainSetVSync(VezSwapchain swapchain, VkBool32 enabled);
 
 // Queue functions.
 VKAPI_ATTR VkResult VKAPI_CALL vezQueueSubmit(VkQueue queue, uint32_t submitCount, const VezSubmitInfo* pSubmits, VkFence* pFence);

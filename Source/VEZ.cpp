@@ -227,17 +227,6 @@ VkResult VKAPI_CALL vezDeviceWaitIdle(VkDevice device)
     return deviceImpl->WaitIdle();
 }
 
-VKAPI_ATTR VkResult VKAPI_CALL vezDeviceSetVSync(VkDevice device, VkBool32 enabled)
-{
-    // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
-    if (!deviceImpl)
-        return VK_INCOMPLETE;
-
-    // Call class method.
-    return deviceImpl->SetVSync(enabled);
-}
-
 void VKAPI_CALL vezGetDeviceQueue(VkDevice device, uint32_t queueFamilyIndex, uint32_t queueIndex, VkQueue* pQueue)
 {
     // Lookup object handle.
@@ -329,6 +318,11 @@ void VKAPI_CALL vezGetSwapchainSurfaceFormat(VezSwapchain swapchain, VkSurfaceFo
 {
     auto surfaceFormat = reinterpret_cast<vez::Swapchain*>(swapchain)->GetFormat();
     memcpy(pFormat, &surfaceFormat, sizeof(VkSurfaceFormatKHR));
+}
+
+VkResult VKAPI_CALL vezSwapchainSetVSync(VezSwapchain swapchain, VkBool32 enabled)
+{
+    return reinterpret_cast<vez::Swapchain*>(swapchain)->SetVSync(enabled);
 }
 
 VkResult VKAPI_CALL vezQueueSubmit(VkQueue queue, uint32_t submitCount, const VezSubmitInfo* pSubmits, VkFence* pFence)
