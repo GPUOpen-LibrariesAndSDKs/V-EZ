@@ -515,6 +515,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vezGetQueryPoolResults(VkDevice device, VkQueryPo
 VKAPI_ATTR VkResult VKAPI_CALL vezCreateShaderModule(VkDevice device, const VezShaderModuleCreateInfo* pCreateInfo, VkShaderModule* pShaderModule);
 VKAPI_ATTR void VKAPI_CALL vezDestroyShaderModule(VkDevice device, VkShaderModule shaderModule);
 VKAPI_ATTR void VKAPI_CALL vezGetShaderModuleInfoLog(VkShaderModule shaderModule, uint32_t* pLength, char* pInfoLog);
+VKAPI_ATTR VkResult VKAPI_CALL vezGetShaderModuleBinary(VkShaderModule shaderModule, uint32_t* pLength, uint32_t* pBinary);
 VKAPI_ATTR VkResult VKAPI_CALL vezCreateGraphicsPipeline(VkDevice device, const VezGraphicsPipelineCreateInfo* pCreateInfo, VezPipeline* pPipeline);
 VKAPI_ATTR VkResult VKAPI_CALL vezCreateComputePipeline(VkDevice device, const VezComputePipelineCreateInfo* pCreateInfo, VezPipeline* pPipeline);
 VKAPI_ATTR void VKAPI_CALL vezDestroyPipeline(VkDevice device, VezPipeline pipeline);

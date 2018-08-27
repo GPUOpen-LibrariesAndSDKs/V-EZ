@@ -522,6 +522,16 @@ void VKAPI_CALL vezGetShaderModuleInfoLog(VkShaderModule shaderModule, uint32_t*
     }
 }
 
+VkResult VKAPI_CALL vezGetShaderModuleBinary(VkShaderModule shaderModule, uint32_t* pLength, uint32_t* pBinary)
+{
+    // Lookup object handle.
+    auto shaderModuleImpl = vez::ObjectLookup::GetObjectImpl(shaderModule);
+    if (!shaderModuleImpl)
+        return VK_INCOMPLETE;
+
+    return shaderModuleImpl->GetBinary(pLength, pBinary);
+}
+
 VkResult VKAPI_CALL vezCreateGraphicsPipeline(VkDevice device, const VezGraphicsPipelineCreateInfo* pCreateInfo, VezPipeline* pPipeline)
 {
     // Lookup object handle.

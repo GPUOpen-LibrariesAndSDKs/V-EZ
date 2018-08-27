@@ -37,7 +37,6 @@ namespace vez
 
         // If application is passing in GLSL source code, compile to SPIR-V.
         VkResult result = VK_SUCCESS;
-        std::vector<uint32_t> spirv;
         if (pCreateInfo->pGLSLSource)
         {
             // Compiling from GLSL source requires the entry point.
@@ -48,7 +47,7 @@ namespace vez
             }
 
             // Compile the GLSL source.
-            if (!CompileGLSL2SPIRV(pCreateInfo->stage, pCreateInfo->pGLSLSource, pCreateInfo->pEntryPoint, spirv, shaderModule->m_infoLog))
+            if (!CompileGLSL2SPIRV(pCreateInfo->stage, pCreateInfo->pGLSLSource, pCreateInfo->pEntryPoint, shaderModule->m_spirv, shaderModule->m_infoLog))
             {
                 // Store ShaderModule object address so shader log can be retrived.  Set the native Vulkan object handle to the same memory address.
                 shaderModule->m_handle = reinterpret_cast<VkShaderModule>(shaderModule);
@@ -59,26 +58,26 @@ namespace vez
             // Save entry point name.
             shaderModule->m_entryPoint = pCreateInfo->pEntryPoint;
         }
-        // Copy the spirv data into a separate vector.
+        // Copy the shaderModule->m_spirv data into a separate vector.
         else
         {
-            spirv.resize(pCreateInfo->codeSize / sizeof(uint32_t));
-            memcpy(spirv.data(), pCreateInfo->pCode, pCreateInfo->codeSize);
+            shaderModule->m_spirv.resize(pCreateInfo->codeSize / sizeof(uint32_t));
+            memcpy(shaderModule->m_spirv.data(), pCreateInfo->pCode, pCreateInfo->codeSize);
         }
 
         // If GLSL compilation was successfull, or it wasn't needed, move onto the SPIR-V.
         if (result == VK_SUCCESS)
         {
             // Reflection all shader resouces.
-            if (!SPIRVReflectResources(spirv, shaderModule->m_stage, shaderModule->m_resources))
+            if (!SPIRVReflectResources(shaderModule->m_spirv, shaderModule->m_stage, shaderModule->m_resources))
                 return VK_ERROR_INITIALIZATION_FAILED;
 
             // Create the Vulkan handle.
             VkShaderModuleCreateInfo createInfo = {};
             createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
             createInfo.pNext = pCreateInfo->pNext;
-            createInfo.codeSize = spirv.size() * 4;
-            createInfo.pCode = spirv.data();
+            createInfo.codeSize = shaderModule->m_spirv.size() * sizeof(uint32_t);
+            createInfo.pCode = shaderModule->m_spirv.data();
             result = vkCreateShaderModule(pDevice->GetHandle(), &createInfo, nullptr, &shaderModule->m_handle);
             if (result == VK_SUCCESS)
                 *ppShaderModule = shaderModule;
@@ -93,5 +92,13 @@ namespace vez
         // Handle case where GLSL compilation failed but ShaderModule class object was still created in order to retrieve info log.
         if (m_handle && m_handle != reinterpret_cast<VkShaderModule>(this))
             vkDestroyShaderModule(m_device->GetHandle(), m_handle, nullptr);
-    }    
+    }
+
+    VkResult ShaderModule::GetBinary(uint32_t* pLength, uint32_t* pBinary)
+    {
+        *pLength = sizeof(uint32_t) * m_spirv.size();
+        if (pBinary)
+            memcpy(reinterpret_cast<void*>(pBinary), reinterpret_cast<void*>(m_spirv.data()), sizeof(uint32_t) * m_spirv.size());
+        return VK_SUCCESS;
+    }
 }

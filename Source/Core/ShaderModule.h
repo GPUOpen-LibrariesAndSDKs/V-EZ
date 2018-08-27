@@ -46,11 +46,14 @@ namespace vez
 
         const std::string& GetInfoLog() const { return m_infoLog; }
 
+        VkResult GetBinary(uint32_t* pLength, uint32_t* pBinary);
+
     private:
         Device* m_device = nullptr;
         VkShaderModule m_handle = VK_NULL_HANDLE;
         VkShaderStageFlagBits m_stage;
         std::string m_entryPoint;
+        std::vector<uint32_t> m_spirv;
         std::vector<VezPipelineResource> m_resources;
         std::string m_infoLog;
     };    
