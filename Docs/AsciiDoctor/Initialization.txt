@@ -67,7 +67,7 @@ vezEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices.data
 for (auto physicalDevice : physicalDevices)
 {
     VkPhysicalDeviceProperties properties;
-    vezetPhysicalDeviceProperties(physicalDevice, &properties);
+    vezGetPhysicalDeviceProperties(physicalDevice, &properties);
     
     VkPhysicalDeviceFeatures features;
     vezGetPhysicalDeviceFeatures(physicalDevice, &features);
