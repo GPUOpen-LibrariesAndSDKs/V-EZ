@@ -106,6 +106,17 @@ void SimpleQuad::Draw()
         FATAL("vezQueuePresentKHR failed");
 }
 
+void SimpleQuad::OnKeyUp(int key)
+{
+    static bool vsyncEnabled = false;
+    if (key == GLFW_KEY_P)
+    {
+        vsyncEnabled = !vsyncEnabled;
+        vezDeviceWaitIdle(AppBase::GetDevice());
+        vezSwapchainSetVSync(AppBase::GetSwapchain(), vsyncEnabled);
+    }
+}
+
 void SimpleQuad::OnResize(int width, int height)
 {
     // Re-create command buffer.

@@ -19,9 +19,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//
-// @author Sean O'Connell (Sean.OConnell@amd.com)
-//
 #pragma once
 
 #include <vector>
@@ -45,6 +42,7 @@ protected:
     void Initialize() final;
     void Cleanup() final;
     void Draw() final;
+    void OnKeyUp(int key) final;
     void OnResize(int width, int height) final;
     void Update(float timeElapsed) final;
 

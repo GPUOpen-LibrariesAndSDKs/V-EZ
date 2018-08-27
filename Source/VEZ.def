@@ -15,7 +15,6 @@ EXPORTS
     vezCreateDevice
     vezDestroyDevice
     vezDeviceWaitIdle
-    vezDeviceSetVSync
     vezGetDeviceQueue
     vezGetDeviceGraphicsQueue
     vezGetDeviceTransferQueue
@@ -23,6 +22,7 @@ EXPORTS
     vezCreateSwapchain
     vezDestroySwapchain
     vezGetSwapchainSurfaceFormat
+    vezSwapchainSetVSync
     vezQueueSubmit
     vezQueuePresent
     vezDestroyFence
