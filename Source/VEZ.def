@@ -32,6 +32,7 @@ EXPORTS
     vezCreateShaderModule
     vezDestroyShaderModule
     vezGetShaderModuleInfoLog
+    vezGetShaderModuleBinary
     vezCreateGraphicsPipeline
     vezCreateComputePipeline
     vezDestroyPipeline
