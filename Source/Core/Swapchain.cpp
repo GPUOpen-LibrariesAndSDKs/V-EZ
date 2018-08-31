@@ -88,14 +88,24 @@ namespace vez
         }
     }
 
-    static VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes, VkPresentModeKHR desiredMode)
+    static VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes, bool vsyncEnabled)
     {
+        // Try to match the correct present mode to the vsync state.
+        std::vector<VkPresentModeKHR> desiredModes;
+        if (vsyncEnabled) desiredModes = { VK_PRESENT_MODE_FIFO_KHR, VK_PRESENT_MODE_MAILBOX_KHR };
+        else desiredModes = { VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_FIFO_RELAXED_KHR };
+    
+        // Iterate over all available present mdoes and match to one of the desired ones.
         for (const auto& availablePresentMode : availablePresentModes)
         {
-            if (availablePresentMode == desiredMode)
-                return availablePresentMode;
+            for (auto mode : desiredModes)
+            {
+                if (availablePresentMode == mode)
+                    return availablePresentMode;
+            }
         }
 
+        // If no match was found, return the first present mode or default to FIFO.
         if (availablePresentModes.size() > 0) return availablePresentModes[0];
         else return VK_PRESENT_MODE_FIFO_KHR;
     }
@@ -202,7 +212,7 @@ namespace vez
 
         // Select the best color format and present mode based on what's available.
         auto surfaceFormat = ChooseSwapSurfaceFormat(m_swapchainSupport.formats, m_createInfo.format.format, m_createInfo.format.colorSpace);
-        auto presentMode = ChooseSwapPresentMode(m_swapchainSupport.presentModes, (m_vsyncEnabled) ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_IMMEDIATE_KHR);
+        auto presentMode = ChooseSwapPresentMode(m_swapchainSupport.presentModes, m_vsyncEnabled);
 
         // Determine the total number of images required.
         uint32_t imageCount = m_swapchainSupport.capabilities.minImageCount + 1;
