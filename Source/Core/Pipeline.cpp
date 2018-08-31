@@ -98,7 +98,7 @@ namespace vez
         // Merge shader stage resources into pipeline's.
         for (auto i = 0U; i < pipeline->m_stages.size(); ++i)
         {
-            pipeline->MergeShaderResources(shaderModules[i]->GetResouces());
+            pipeline->MergeShaderResources(shaderModules[i]->GetResources());
         }
 
         // Separate all resources by set # which is required for descriptor set creation/management.
@@ -183,7 +183,7 @@ namespace vez
         pipeline->m_entryPoints.push_back(shaderModuleEntryPoint);
 
         // Merge shader stage resources into pipeline's.
-        pipeline->MergeShaderResources(shaderModule->GetResouces());
+        pipeline->MergeShaderResources(shaderModule->GetResources());
 
         // Separate all resources by set # which is required for descriptor set creation/management.
         pipeline->CreateSetBindings();

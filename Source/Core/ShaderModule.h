@@ -42,7 +42,7 @@ namespace vez
 
         const std::string& GetEntryPoint() const { return m_entryPoint; }
 
-        const std::vector<VezPipelineResource>& GetResouces() const { return m_resources; }
+        const std::vector<VezPipelineResource>& GetResources() const { return m_resources; }
 
         const std::string& GetInfoLog() const { return m_infoLog; }
 

@@ -60,7 +60,7 @@ set(CORE_SOURCES
     Core/Instance.h
     Core/PhysicalDevice.h
     Core/Pipeline.cpp
-    Core/Pipeline.cpp
+    Core/Pipeline.h
     Core/PipelineBarriers.cpp
     Core/PipelineBarriers.h
     Core/PipelineCache.cpp
