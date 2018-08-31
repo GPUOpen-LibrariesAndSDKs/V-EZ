@@ -172,14 +172,15 @@ namespace vez
             if (nextDescriptorSetBinding != encoder.GetDescriptorSetBindings().cend())
             {
                 // The next descriptor set binding's stream position must be equal to the current read position.
-                if (nextDescriptorSetBinding->streamPosition == streamPosition)
+                while (nextDescriptorSetBinding->streamPosition == streamPosition)
                 {
                     // Bind the descriptor set.
                     vkCmdBindDescriptorSets(commandBuffer.GetHandle(), nextDescriptorSetBinding->bindPoint, nextDescriptorSetBinding->pipelineLayout,
                         nextDescriptorSetBinding->setIndex, 1, &nextDescriptorSetBinding->descriptorSet, 0, nullptr);
 
                     // Move to the next descriptor set binding in the list.
-                    ++nextDescriptorSetBinding;
+                    if (++nextDescriptorSetBinding == encoder.GetDescriptorSetBindings().cend())
+                        break;
                 }
             }
 
