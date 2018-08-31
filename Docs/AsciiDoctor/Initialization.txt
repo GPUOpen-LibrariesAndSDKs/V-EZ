@@ -1,18 +1,8 @@
 == Initialization
 This section describes how an application initializes V-EZ, enumerates devices attached to the system and creates one or more handles to those devices for use.
 
-=== Preprocessor Macros
-An application must first define which windowing platform is being used with V-EZ. To faciliate this, existing preprocessor macros from the Vulkan API are used. One of these should be defined before including `V-EZ.h` in the application's source code.
-
-- VK_USE_PLATFORM_WIN32_KHR
-- VK_USE_PLATFORM_MACOS_MVK
-- VK_USE_PLATFORM_XLIB_KHR
-- VK_USE_PLATFORM_XCB_KHR
-- VK_USE_PLATFORM_WAYLAND_KHR
-
-
 === Instances
-The next step to using V-EZ is to create a `VkInstance` object by calling `vezCreateInstance` with appropriate parameter values set in `VezInstanceCreateInfo` and `VezApplicationInfo`. These structures allow an application to pass information about itself to V-EZ. Below is a simple example call.
+The first step to using V-EZ is to create a `VkInstance` object by calling `vezCreateInstance` with appropriate parameter values set in `VezInstanceCreateInfo` and `VezApplicationInfo`. These structures allow an application to pass information about itself to V-EZ. Below is a simple example call.
 
 [source,c++,linenums]
 ----
@@ -125,8 +115,7 @@ Below is a coding listing demonstrating each preceeding section.
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
-#define VK_USE_PLATFORM_WIN32_KHR
-#include <V-EZ.h>
+#include <VEZ.h>
 
 GLFWwindow* window = nullptr;
 VkInstance instance = VK_NULL_HANDLE;
@@ -142,7 +131,7 @@ bool InitWindow()
     window = glfwCreateWindow(800, 600, "MyApplication", nullptr, nullptr);
     if (!window)
         return false;
-        
+
     return true;
 }
 
@@ -163,12 +152,9 @@ bool InitVulkanEZ()
         return false;
         
     // Create a surface to render to.
-    VezSurfaceCreateInfo surfaceCreateInfo = {};
-    surfaceCreateInfo.hinstance = GetModuleHandle(nullptr);
-    surfaceCreateInfo.hwnd = glfwGetWin32Window(window);
-    result = vezCreateSurface(instance, &surfaceCreateInfo, &surface);
+    result = glfwCreateWindowSurface(instance, window, nullptr, &surface);
     if (result != VK_SUCCESS)
-        return false;
+        return false;        
         
     // Enumerate and select the first discrete GPU physical device.
     uint32_t physicalDeviceCount;
