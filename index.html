@@ -542,18 +542,17 @@ table.CodeRay td.code>pre{padding:0}
 </li>
 <li><a href="#_initialization">2. Initialization</a>
 <ul class="sectlevel2">
-<li><a href="#_preprocessor_macros">2.1. Preprocessor Macros</a></li>
-<li><a href="#_instances">2.2. Instances</a></li>
-<li><a href="#_surfaces">2.3. Surfaces</a></li>
-<li><a href="#_physical_devices">2.4. Physical Devices</a>
+<li><a href="#_instances">2.1. Instances</a></li>
+<li><a href="#_surfaces">2.2. Surfaces</a></li>
+<li><a href="#_physical_devices">2.3. Physical Devices</a>
 <ul class="sectlevel3">
-<li><a href="#_extensions_support">2.4.1. Extensions Support</a></li>
-<li><a href="#_layers_support">2.4.2. Layers Support</a></li>
+<li><a href="#_extensions_support">2.3.1. Extensions Support</a></li>
+<li><a href="#_layers_support">2.3.2. Layers Support</a></li>
 </ul>
 </li>
-<li><a href="#_devices">2.5. Devices</a></li>
-<li><a href="#_swapchains_and_present_support">2.6. Swapchains and Present Support</a></li>
-<li><a href="#_putting_it_all_together">2.7. Putting It All Together</a></li>
+<li><a href="#_devices">2.4. Devices</a></li>
+<li><a href="#_swapchains_and_present_support">2.5. Swapchains and Present Support</a></li>
+<li><a href="#_putting_it_all_together">2.6. Putting It All Together</a></li>
 </ul>
 </li>
 <li><a href="#_queues">3. Queues</a>
@@ -767,34 +766,9 @@ table.CodeRay td.code>pre{padding:0}
 <p>This section describes how an application initializes V-EZ, enumerates devices attached to the system and creates one or more handles to those devices for use.</p>
 </div>
 <div class="sect2">
-<h3 id="_preprocessor_macros">2.1. Preprocessor Macros</h3>
+<h3 id="_instances">2.1. Instances</h3>
 <div class="paragraph">
-<p>An application must first define which windowing platform is being used with V-EZ. To faciliate this, existing preprocessor macros from the Vulkan API are used. One of these should be defined before including <code>V-EZ.h</code> in the application&#8217;s source code.</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>VK_USE_PLATFORM_WIN32_KHR</p>
-</li>
-<li>
-<p>VK_USE_PLATFORM_MACOS_MVK</p>
-</li>
-<li>
-<p>VK_USE_PLATFORM_XLIB_KHR</p>
-</li>
-<li>
-<p>VK_USE_PLATFORM_XCB_KHR</p>
-</li>
-<li>
-<p>VK_USE_PLATFORM_WAYLAND_KHR</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_instances">2.2. Instances</h3>
-<div class="paragraph">
-<p>The next step to using V-EZ is to create a <code>VkInstance</code> object by calling <code>vezCreateInstance</code> with appropriate parameter values set in <code>VezInstanceCreateInfo</code> and <code>VezApplicationInfo</code>. These structures allow an application to pass information about itself to V-EZ. Below is a simple example call.</p>
+<p>The first step to using V-EZ is to create a <code>VkInstance</code> object by calling <code>vezCreateInstance</code> with appropriate parameter values set in <code>VezInstanceCreateInfo</code> and <code>VezApplicationInfo</code>. These structures allow an application to pass information about itself to V-EZ. Below is a simple example call.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -837,13 +811,13 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 </div>
 <div class="sect2">
-<h3 id="_surfaces">2.3. Surfaces</h3>
+<h3 id="_surfaces">2.2. Surfaces</h3>
 <div class="paragraph">
 <p>V-EZ does not abstract or wrap creation of surfaces in Vulkan.  Applications must use the platform specific WSI Vulkan extensions to create the surface. See the <a href="https://www.khronos.org/registry/vulkan/specs/1.0-wsi_extensions/html/vkspec.html#wsi">Vulkan spec</a> for details.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_physical_devices">2.4. Physical Devices</h3>
+<h3 id="_physical_devices">2.3. Physical Devices</h3>
 <div class="paragraph">
 <p>To retrieve a list of physical devices in the system, call <code>vezEnumeratePhysicalDevices</code>, which behaves identically to its counterpart in Vulkan. Physical device properties and features can be retrieved via <code>vezGetPhysicalDeviceProperties</code> and <code>vezGetPhysicalDeviceFeatures</code>. The following code snippet demonstrates enumerating all available physical devices in a system and their properties and features.</p>
 </div>
@@ -866,20 +840,20 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 </div>
 <div class="sect3">
-<h4 id="_extensions_support">2.4.1. Extensions Support</h4>
+<h4 id="_extensions_support">2.3.1. Extensions Support</h4>
 <div class="paragraph">
 <p>All available Vulkan extensions for a physical device may be enumerated by calling <code>vezEnumerateDeviceExtensionProperties</code>. Each <code>VkExtensionProperties</code> entry in the output array will contain the string name of the supported extension. If an application needs to quickly check for the existence of a specific extension, it can call <code>vezGetPhysicalDeviceExtensionSupport</code>.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_layers_support">2.4.2. Layers Support</h4>
+<h4 id="_layers_support">2.3.2. Layers Support</h4>
 <div class="paragraph">
 <p>As with physical device specific extensions, layers can be enumerated with <code>vezEnumerateDeviceLayerProperties</code>.</p>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_devices">2.5. Devices</h3>
+<h3 id="_devices">2.4. Devices</h3>
 <div class="paragraph">
 <p>Device objects represent logical connections to physical devices (see the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#devsandqueues-devices">Vulkan spec</a>). An application must create separate device object handles for each physical device it will use.  <code>vezCreateDevice</code> is used to create a logical connection to a physical device.</p>
 </div>
@@ -900,7 +874,7 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 </div>
 <div class="sect2">
-<h3 id="_swapchains_and_present_support">2.6. Swapchains and Present Support</h3>
+<h3 id="_swapchains_and_present_support">2.5. Swapchains and Present Support</h3>
 <div class="paragraph">
 <p>To determine if a physical device supports a particular surface format, call <code>vezGetPhysicalDeviceSurfaceFormats</code>. This will retrieve an array of <code>VkFormat</code> and <code>VkColorSpace</code> values which can be used to check for required compatibility, for example HDR10. In some cases a surface attached to a window handle may not support being presented to, or may only support present with a specific queue family index (see <a href="#_queues">Queues</a>). This can be determined by calling <code>vezGetPhysicalDevicePresentSupport</code>.</p>
 </div>
@@ -922,7 +896,7 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 </div>
 <div class="sect2">
-<h3 id="_putting_it_all_together">2.7. Putting It All Together</h3>
+<h3 id="_putting_it_all_together">2.6. Putting It All Together</h3>
 <div class="paragraph">
 <p>Below is a coding listing demonstrating each preceeding section.</p>
 </div>
@@ -933,117 +907,113 @@ table.CodeRay td.code>pre{padding:0}
 <span class="line-numbers">  3</span><span class="preprocessor">#define</span> GLFW_EXPOSE_NATIVE_WIN32
 <span class="line-numbers">  4</span><span class="preprocessor">#include</span> <span class="include">&lt;GLFW/glfw3.h&gt;</span>
 <span class="line-numbers">  5</span><span class="preprocessor">#include</span> <span class="include">&lt;GLFW/glfw3native.h&gt;</span>
-<span class="line-numbers">  6</span><span class="preprocessor">#define</span> VK_USE_PLATFORM_WIN32_KHR
-<span class="line-numbers">  7</span><span class="preprocessor">#include</span> <span class="include">&lt;V-EZ.h&gt;</span>
-<span class="line-numbers">  8</span>
-<span class="line-numbers">  9</span>GLFWwindow* window = <span class="predefined-constant">nullptr</span>;
-<span class="line-numbers"> 10</span>VkInstance instance = VK_NULL_HANDLE;
-<span class="line-numbers"> 11</span>VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-<span class="line-numbers"> 12</span>VkSurfaceKHR surface = VK_NULL_HANDLE;
-<span class="line-numbers"> 13</span>VkDevice device = VK_NULL_HANDLE;
-<span class="line-numbers"> 14</span>VezSwapchain swapchain = VK_NULL_HANDLE;
-<span class="line-numbers"> 15</span>
-<span class="line-numbers"> 16</span><span class="predefined-type">bool</span> InitWindow()
-<span class="line-numbers"> 17</span>{
-<span class="line-numbers"> 18</span>    glfwInit();
-<span class="line-numbers"> 19</span>    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-<span class="line-numbers"> 20</span>    window = glfwCreateWindow(<span class="integer">800</span>, <span class="integer">600</span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">MyApplication</span><span class="delimiter">&quot;</span></span>, <span class="predefined-constant">nullptr</span>, <span class="predefined-constant">nullptr</span>);
-<span class="line-numbers"> 21</span>    <span class="keyword">if</span> (!window)
-<span class="line-numbers"> 22</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
-<span class="line-numbers"> 23</span>
-<span class="line-numbers"> 24</span>    <span class="keyword">return</span> <span class="predefined-constant">true</span>;
-<span class="line-numbers"> 25</span>}
-<span class="line-numbers"> 26</span>
-<span class="line-numbers"> 27</span><span class="predefined-type">bool</span> InitVulkanEZ()
-<span class="line-numbers"> 28</span>{
-<span class="line-numbers"> 29</span>    <span class="comment">// Create the V-EZ instance.</span>
-<span class="line-numbers"> 30</span>    VezApplicationInfo appInfo = {};
-<span class="line-numbers"> 31</span>    appInfo.pApplicationName = <span class="string"><span class="delimiter">&quot;</span><span class="content">MyApplication</span><span class="delimiter">&quot;</span></span>;
-<span class="line-numbers"> 32</span>    appInfo.applicationVersion = VK_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
-<span class="line-numbers"> 33</span>    appInfo.pEngineName = <span class="string"><span class="delimiter">&quot;</span><span class="content">MyEngine</span><span class="delimiter">&quot;</span></span>;
-<span class="line-numbers"> 34</span>    appinfo.engineVersion = VK_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
-<span class="line-numbers"> 35</span>
-<span class="line-numbers"> 36</span>    VezInstanceCreateInfo instanceCreateInfo = {};
-<span class="line-numbers"> 37</span>    instanceCreateInfo.pApplicationInfo = &amp;appInfo;
-<span class="line-numbers"> 38</span>
-<span class="line-numbers"> 39</span>    VkResult result = vezCreateInstance(&amp;instanceCreateInfo, &amp;instance);
-<span class="line-numbers"> 40</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
-<span class="line-numbers"> 41</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
-<span class="line-numbers"> 42</span>
-<span class="line-numbers"> 43</span>    <span class="comment">// Create a surface to render to.</span>
-<span class="line-numbers"> 44</span>    VezSurfaceCreateInfo surfaceCreateInfo = {};
-<span class="line-numbers"> 45</span>    surfaceCreateInfo.hinstance = GetModuleHandle(<span class="predefined-constant">nullptr</span>);
-<span class="line-numbers"> 46</span>    surfaceCreateInfo.hwnd = glfwGetWin32Window(window);
-<span class="line-numbers"> 47</span>    result = vezCreateSurface(instance, &amp;surfaceCreateInfo, &amp;surface);
-<span class="line-numbers"> 48</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
-<span class="line-numbers"> 49</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
+<span class="line-numbers">  6</span><span class="preprocessor">#include</span> <span class="include">&lt;VEZ.h&gt;</span>
+<span class="line-numbers">  7</span>
+<span class="line-numbers">  8</span>GLFWwindow* window = <span class="predefined-constant">nullptr</span>;
+<span class="line-numbers">  9</span>VkInstance instance = VK_NULL_HANDLE;
+<span class="line-numbers"> 10</span>VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+<span class="line-numbers"> 11</span>VkSurfaceKHR surface = VK_NULL_HANDLE;
+<span class="line-numbers"> 12</span>VkDevice device = VK_NULL_HANDLE;
+<span class="line-numbers"> 13</span>VezSwapchain swapchain = VK_NULL_HANDLE;
+<span class="line-numbers"> 14</span>
+<span class="line-numbers"> 15</span><span class="predefined-type">bool</span> InitWindow()
+<span class="line-numbers"> 16</span>{
+<span class="line-numbers"> 17</span>    glfwInit();
+<span class="line-numbers"> 18</span>    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+<span class="line-numbers"> 19</span>    window = glfwCreateWindow(<span class="integer">800</span>, <span class="integer">600</span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">MyApplication</span><span class="delimiter">&quot;</span></span>, <span class="predefined-constant">nullptr</span>, <span class="predefined-constant">nullptr</span>);
+<span class="line-numbers"> 20</span>    <span class="keyword">if</span> (!window)
+<span class="line-numbers"> 21</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
+<span class="line-numbers"> 22</span>
+<span class="line-numbers"> 23</span>    <span class="keyword">return</span> <span class="predefined-constant">true</span>;
+<span class="line-numbers"> 24</span>}
+<span class="line-numbers"> 25</span>
+<span class="line-numbers"> 26</span><span class="predefined-type">bool</span> InitVulkanEZ()
+<span class="line-numbers"> 27</span>{
+<span class="line-numbers"> 28</span>    <span class="comment">// Create the V-EZ instance.</span>
+<span class="line-numbers"> 29</span>    VezApplicationInfo appInfo = {};
+<span class="line-numbers"> 30</span>    appInfo.pApplicationName = <span class="string"><span class="delimiter">&quot;</span><span class="content">MyApplication</span><span class="delimiter">&quot;</span></span>;
+<span class="line-numbers"> 31</span>    appInfo.applicationVersion = VK_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
+<span class="line-numbers"> 32</span>    appInfo.pEngineName = <span class="string"><span class="delimiter">&quot;</span><span class="content">MyEngine</span><span class="delimiter">&quot;</span></span>;
+<span class="line-numbers"> 33</span>    appinfo.engineVersion = VK_MAKE_VERSION(<span class="integer">1</span>, <span class="integer">0</span>, <span class="integer">0</span>);
+<span class="line-numbers"> 34</span>
+<span class="line-numbers"> 35</span>    VezInstanceCreateInfo instanceCreateInfo = {};
+<span class="line-numbers"> 36</span>    instanceCreateInfo.pApplicationInfo = &amp;appInfo;
+<span class="line-numbers"> 37</span>
+<span class="line-numbers"> 38</span>    VkResult result = vezCreateInstance(&amp;instanceCreateInfo, &amp;instance);
+<span class="line-numbers"> 39</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
+<span class="line-numbers"> 40</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
+<span class="line-numbers"> 41</span>
+<span class="line-numbers"> 42</span>    <span class="comment">// Create a surface to render to.</span>
+<span class="line-numbers"> 43</span>    result = glfwCreateWindowSurface(instance, window, <span class="predefined-constant">nullptr</span>, &amp;surface);
+<span class="line-numbers"> 44</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
+<span class="line-numbers"> 45</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
+<span class="line-numbers"> 46</span>
+<span class="line-numbers"> 47</span>    <span class="comment">// Enumerate and select the first discrete GPU physical device.</span>
+<span class="line-numbers"> 48</span>    uint32_t physicalDeviceCount;
+<span class="line-numbers"> 49</span>    vezEnumeratePhysicalDevices(instance, &amp;physicalDeviceCount, <span class="predefined-constant">nullptr</span>);
 <span class="line-numbers"> 50</span>
-<span class="line-numbers"> 51</span>    <span class="comment">// Enumerate and select the first discrete GPU physical device.</span>
-<span class="line-numbers"> 52</span>    uint32_t physicalDeviceCount;
-<span class="line-numbers"> 53</span>    vezEnumeratePhysicalDevices(instance, &amp;physicalDeviceCount, <span class="predefined-constant">nullptr</span>);
-<span class="line-numbers"> 54</span>
-<span class="line-numbers"> 55</span>    std::vector&lt;VkPhysicalDevice&gt; physicalDevices(physicalDeviceCount);
-<span class="line-numbers"> 56</span>    vezEnumeratePhysicalDevices(instance, &amp;physicalDeviceCount, physicalDevices.data());
-<span class="line-numbers"> 57</span>
-<span class="line-numbers"> 58</span>    <span class="keyword">for</span> (<span class="directive">auto</span> pd : physicalDevices)
-<span class="line-numbers"> 59</span>    {
-<span class="line-numbers"> 60</span>        VkPhysicalDeviceProperties properties;
-<span class="line-numbers"> 61</span>        vezGetPhysicalDeviceProperties(pd, &amp;properties);
-<span class="line-numbers"> 62</span>        <span class="keyword">if</span> (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
-<span class="line-numbers"> 63</span>        {
-<span class="line-numbers"> 64</span>            physicalDevice = pd;
-<span class="line-numbers"> 65</span>            <span class="keyword">break</span>;
-<span class="line-numbers"> 66</span>        }
-<span class="line-numbers"> 67</span>    }
-<span class="line-numbers"> 68</span>
-<span class="line-numbers"> 69</span>    <span class="keyword">if</span> (physicalDevice == VK_NULL_HANDLE)
-<span class="line-numbers"> 70</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
-<span class="line-numbers"> 71</span>
-<span class="line-numbers"> 72</span>    <span class="comment">// Create a surface.</span>
-<span class="line-numbers"> 73</span>    VezSurfaceCreateInfo createInfo = {};
-<span class="line-numbers"> 74</span>    createInfo.hinstance = GetModuleHandle(<span class="predefined-constant">nullptr</span>);
-<span class="line-numbers"> 75</span>    createInfo.hwnd = glfwGetWin32Window(window);
-<span class="line-numbers"> 76</span>    result = vezCreateSurface(instance, &amp;createInfo, &amp;surface);
-<span class="line-numbers"> 77</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
-<span class="line-numbers"> 78</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
-<span class="line-numbers"> 79</span>
-<span class="line-numbers"> 80</span>    <span class="comment">// Create a logical device connection to the physical device.</span>
-<span class="line-numbers"> 81</span>    VezDeviceCreateInfo deviceCreateInfo = {};
-<span class="line-numbers"> 82</span>    deviceCreateInfo.enabledExtensionCount = <span class="integer">0</span>;
-<span class="line-numbers"> 83</span>    deviceCreateInfo.ppEnabledExtensionNames = <span class="predefined-constant">nullptr</span>;
-<span class="line-numbers"> 84</span>    result = vezCreateDevice(physicalDevice, &amp;deviceCreateInfo, &amp;device);
-<span class="line-numbers"> 85</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
-<span class="line-numbers"> 86</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
-<span class="line-numbers"> 87</span>
-<span class="line-numbers"> 88</span>    <span class="comment">// Create the swapchain.</span>
-<span class="line-numbers"> 89</span>    VezSwapchainCreateInfo swapchainCreateInfo = {};
-<span class="line-numbers"> 90</span>    swapchainCreateInfo.surface = surface;
-<span class="line-numbers"> 91</span>    swapchainCreateInfo.format = { VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
-<span class="line-numbers"> 92</span>    result = vezCreateSwapchain(device, &amp;swapchainCreateInfo, &amp;swapchain);
-<span class="line-numbers"> 93</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
-<span class="line-numbers"> 94</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
-<span class="line-numbers"> 95</span>
-<span class="line-numbers"> 96</span>    <span class="keyword">return</span> <span class="predefined-constant">true</span>;
-<span class="line-numbers"> 97</span>}
-<span class="line-numbers"> 98</span>
-<span class="line-numbers"> 99</span><span class="predefined-type">int</span> main(<span class="predefined-type">int</span> argc, <span class="predefined-type">char</span>** argv)
-<span class="line-numbers">100</span>{
-<span class="line-numbers">101</span>    <span class="keyword">if</span> (!InitGLFW())
-<span class="line-numbers">102</span>    {
-<span class="line-numbers">103</span>        std::cout &lt;&lt; <span class="string"><span class="delimiter">&quot;</span><span class="content">Failed to create GLFW window!</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>;
-<span class="line-numbers">104</span>        <span class="keyword">return</span> -<span class="integer">1</span>;
-<span class="line-numbers">105</span>    }
-<span class="line-numbers">106</span>
-<span class="line-numbers">107</span>    <span class="keyword">if</span> (!InitVulkanEZ())
-<span class="line-numbers">108</span>    {
-<span class="line-numbers">109</span>        std::cout &lt;&lt; <span class="string"><span class="delimiter">&quot;</span><span class="content">Failed to initialize V-EZ!</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>;
-<span class="line-numbers">110</span>        <span class="keyword">return</span> -<span class="integer">1</span>;
-<span class="line-numbers">111</span>    }
-<span class="line-numbers">112</span>
-<span class="line-numbers">113</span>    vezDestroyDevice(device);
-<span class="line-numbers">114</span>    vezDestroyInstance(instance);
-<span class="line-numbers">115</span>    <span class="keyword">return</span> <span class="integer">0</span>;
-<span class="line-numbers">116</span>}</code></pre>
+<span class="line-numbers"> 51</span>    std::vector&lt;VkPhysicalDevice&gt; physicalDevices(physicalDeviceCount);
+<span class="line-numbers"> 52</span>    vezEnumeratePhysicalDevices(instance, &amp;physicalDeviceCount, physicalDevices.data());
+<span class="line-numbers"> 53</span>
+<span class="line-numbers"> 54</span>    <span class="keyword">for</span> (<span class="directive">auto</span> pd : physicalDevices)
+<span class="line-numbers"> 55</span>    {
+<span class="line-numbers"> 56</span>        VkPhysicalDeviceProperties properties;
+<span class="line-numbers"> 57</span>        vezGetPhysicalDeviceProperties(pd, &amp;properties);
+<span class="line-numbers"> 58</span>        <span class="keyword">if</span> (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+<span class="line-numbers"> 59</span>        {
+<span class="line-numbers"> 60</span>            physicalDevice = pd;
+<span class="line-numbers"> 61</span>            <span class="keyword">break</span>;
+<span class="line-numbers"> 62</span>        }
+<span class="line-numbers"> 63</span>    }
+<span class="line-numbers"> 64</span>
+<span class="line-numbers"> 65</span>    <span class="keyword">if</span> (physicalDevice == VK_NULL_HANDLE)
+<span class="line-numbers"> 66</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
+<span class="line-numbers"> 67</span>
+<span class="line-numbers"> 68</span>    <span class="comment">// Create a surface.</span>
+<span class="line-numbers"> 69</span>    VezSurfaceCreateInfo createInfo = {};
+<span class="line-numbers"> 70</span>    createInfo.hinstance = GetModuleHandle(<span class="predefined-constant">nullptr</span>);
+<span class="line-numbers"> 71</span>    createInfo.hwnd = glfwGetWin32Window(window);
+<span class="line-numbers"> 72</span>    result = vezCreateSurface(instance, &amp;createInfo, &amp;surface);
+<span class="line-numbers"> 73</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
+<span class="line-numbers"> 74</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
+<span class="line-numbers"> 75</span>
+<span class="line-numbers"> 76</span>    <span class="comment">// Create a logical device connection to the physical device.</span>
+<span class="line-numbers"> 77</span>    VezDeviceCreateInfo deviceCreateInfo = {};
+<span class="line-numbers"> 78</span>    deviceCreateInfo.enabledExtensionCount = <span class="integer">0</span>;
+<span class="line-numbers"> 79</span>    deviceCreateInfo.ppEnabledExtensionNames = <span class="predefined-constant">nullptr</span>;
+<span class="line-numbers"> 80</span>    result = vezCreateDevice(physicalDevice, &amp;deviceCreateInfo, &amp;device);
+<span class="line-numbers"> 81</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
+<span class="line-numbers"> 82</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
+<span class="line-numbers"> 83</span>
+<span class="line-numbers"> 84</span>    <span class="comment">// Create the swapchain.</span>
+<span class="line-numbers"> 85</span>    VezSwapchainCreateInfo swapchainCreateInfo = {};
+<span class="line-numbers"> 86</span>    swapchainCreateInfo.surface = surface;
+<span class="line-numbers"> 87</span>    swapchainCreateInfo.format = { VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+<span class="line-numbers"> 88</span>    result = vezCreateSwapchain(device, &amp;swapchainCreateInfo, &amp;swapchain);
+<span class="line-numbers"> 89</span>    <span class="keyword">if</span> (result != VK_SUCCESS)
+<span class="line-numbers"> 90</span>        <span class="keyword">return</span> <span class="predefined-constant">false</span>;
+<span class="line-numbers"> 91</span>
+<span class="line-numbers"> 92</span>    <span class="keyword">return</span> <span class="predefined-constant">true</span>;
+<span class="line-numbers"> 93</span>}
+<span class="line-numbers"> 94</span>
+<span class="line-numbers"> 95</span><span class="predefined-type">int</span> main(<span class="predefined-type">int</span> argc, <span class="predefined-type">char</span>** argv)
+<span class="line-numbers"> 96</span>{
+<span class="line-numbers"> 97</span>    <span class="keyword">if</span> (!InitGLFW())
+<span class="line-numbers"> 98</span>    {
+<span class="line-numbers"> 99</span>        std::cout &lt;&lt; <span class="string"><span class="delimiter">&quot;</span><span class="content">Failed to create GLFW window!</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>;
+<span class="line-numbers">100</span>        <span class="keyword">return</span> -<span class="integer">1</span>;
+<span class="line-numbers">101</span>    }
+<span class="line-numbers">102</span>
+<span class="line-numbers">103</span>    <span class="keyword">if</span> (!InitVulkanEZ())
+<span class="line-numbers">104</span>    {
+<span class="line-numbers">105</span>        std::cout &lt;&lt; <span class="string"><span class="delimiter">&quot;</span><span class="content">Failed to initialize V-EZ!</span><span class="char">\n</span><span class="delimiter">&quot;</span></span>;
+<span class="line-numbers">106</span>        <span class="keyword">return</span> -<span class="integer">1</span>;
+<span class="line-numbers">107</span>    }
+<span class="line-numbers">108</span>
+<span class="line-numbers">109</span>    vezDestroyDevice(device);
+<span class="line-numbers">110</span>    vezDestroyInstance(instance);
+<span class="line-numbers">111</span>    <span class="keyword">return</span> <span class="integer">0</span>;
+<span class="line-numbers">112</span>}</code></pre>
 </div>
 </div>
 </div>
@@ -2256,7 +2226,7 @@ The preprocessor macro <code>VK_WHOLE_SIZE</code> may be passed to the <code>ran
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-08-25 13:06:20 Central Daylight Time
+Last updated 2018-08-27 08:28:30 Central Daylight Time
 </div>
 </div>
 </body>
