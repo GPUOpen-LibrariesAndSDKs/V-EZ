@@ -271,12 +271,22 @@ namespace vez
 
     VkResult Pipeline::GetPipelineResource(const char* name, VezPipelineResource* pResource)
     {
-        auto it = m_resources.find(std::string(name));
-        if (it == m_resources.end())
-            return VK_INCOMPLETE;
+        // Iterate over set of resources to find specified name.
+        for (auto it : m_resources)
+        {
+            // If resource is an output, remove the custom prefix from the key.
+            auto key = it.first;
+            if (key.find(':') != std::string::npos)
+                key = key.substr(key.find(':') + 1);
 
-        memcpy(pResource, &it->second, sizeof(VezPipelineResource));
-        return VK_SUCCESS;
+            if (key == name)
+            {
+                memcpy(pResource, &it.second, sizeof(VezPipelineResource));
+                return VK_SUCCESS;
+            }
+        }
+        
+        return VK_INCOMPLETE;
     }
 
     DescriptorSetLayout* Pipeline::GetDescriptorSetLayout(uint32_t setIndex)
@@ -336,13 +346,19 @@ namespace vez
         // Iterate over all of the shader resources and merge into pipeline's resources map.
         for (auto& resource : shaderResources)
         {
+            // The key used for each resource is its name, except in the case of outputs, since its legal to
+            // have separate outputs with the same name across shader stages.
+            auto key = std::string(resource.name);
+            if (resource.resourceType == VEZ_PIPELINE_RESOURCE_TYPE_OUTPUT)
+                key = std::to_string(resource.stages) + ":" + key;
+
             // If resource already exists in pipeline resource map, add current stage's bit.
             // Else create a new entry in the pipeline resource map.
-            auto it = m_resources.find(std::string(resource.name));
+            auto it = m_resources.find(key);
             if (it != m_resources.end())
                 it->second.stages |= resource.stages;
             else
-                m_resources.emplace(std::string(resource.name), resource);
+                m_resources.emplace(key, resource);
         }
     }
 
