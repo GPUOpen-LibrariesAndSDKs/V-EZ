@@ -349,7 +349,7 @@ namespace vez
             // The key used for each resource is its name, except in the case of outputs, since its legal to
             // have separate outputs with the same name across shader stages.
             auto key = std::string(resource.name);
-            if (resource.resourceType == VEZ_PIPELINE_RESOURCE_TYPE_OUTPUT)
+            if (resource.resourceType == VEZ_PIPELINE_RESOURCE_TYPE_OUTPUT || resource.resourceType == VEZ_PIPELINE_RESOURCE_TYPE_INPUT)
                 key = std::to_string(resource.stages) + ":" + key;
 
             // If resource already exists in pipeline resource map, add current stage's bit.
