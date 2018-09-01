@@ -92,8 +92,8 @@ namespace vez
     {
         // Try to match the correct present mode to the vsync state.
         std::vector<VkPresentModeKHR> desiredModes;
-        if (vsyncEnabled) desiredModes = { VK_PRESENT_MODE_FIFO_KHR, VK_PRESENT_MODE_MAILBOX_KHR };
-        else desiredModes = { VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_FIFO_RELAXED_KHR };
+        if (vsyncEnabled) desiredModes = { VK_PRESENT_MODE_FIFO_KHR, VK_PRESENT_MODE_FIFO_RELAXED_KHR };
+        else desiredModes = { VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_MAILBOX_KHR };
     
         // Iterate over all available present mdoes and match to one of the desired ones.
         for (const auto& availablePresentMode : availablePresentModes)
@@ -215,7 +215,7 @@ namespace vez
         auto presentMode = ChooseSwapPresentMode(m_swapchainSupport.presentModes, m_vsyncEnabled);
 
         // Determine the total number of images required.
-        uint32_t imageCount = m_swapchainSupport.capabilities.minImageCount + 1;
+        uint32_t imageCount = (m_createInfo.tripleBuffer) ? 3 : m_swapchainSupport.capabilities.minImageCount + 1;
         if (m_swapchainSupport.capabilities.maxImageCount > 0 && imageCount > m_swapchainSupport.capabilities.maxImageCount)
             imageCount = m_swapchainSupport.capabilities.maxImageCount;
 
