@@ -99,6 +99,7 @@ typedef struct VezSwapchainCreateInfo
     const void* pNext;
     VkSurfaceKHR surface;
     VkSurfaceFormatKHR format;
+    VkBool32 tripleBuffer;
 } VezSwapchainCreateInfo;
 
 typedef struct VezDeviceCreateInfo
