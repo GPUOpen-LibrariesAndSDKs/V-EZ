@@ -1341,20 +1341,34 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VezPipelineResource {
-<span class="line-numbers"> 2</span>    VkShaderStageFlags stages;
-<span class="line-numbers"> 3</span>    VezPipelineResourceType resourceType;
-<span class="line-numbers"> 4</span>    VezPipelineResourceBaseType baseType;
-<span class="line-numbers"> 5</span>    VkAccessFlags access;
-<span class="line-numbers"> 6</span>    uint32_t set;
-<span class="line-numbers"> 7</span>    uint32_t binding;
-<span class="line-numbers"> 8</span>    uint32_t location;
-<span class="line-numbers"> 9</span>    uint32_t vecSize;
-<span class="line-numbers">10</span>    uint32_t arraySize;
-<span class="line-numbers">11</span>    uint32_t offset;
-<span class="line-numbers">12</span>    uint32_t size;
-<span class="line-numbers">13</span>    <span class="predefined-type">char</span> name[VK_MAX_DESCRIPTION_SIZE];
-<span class="line-numbers">14</span>} GLPipelineResource;</code></pre>
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VezMemberInfo
+<span class="line-numbers"> 2</span>{
+<span class="line-numbers"> 3</span>    VezBaseType baseType;
+<span class="line-numbers"> 4</span>    uint32_t offset;
+<span class="line-numbers"> 5</span>    uint32_t size;
+<span class="line-numbers"> 6</span>    uint32_t vecSize;
+<span class="line-numbers"> 7</span>    uint32_t arraySize;
+<span class="line-numbers"> 8</span>    <span class="predefined-type">char</span> name[VK_MAX_DESCRIPTION_SIZE];
+<span class="line-numbers"> 9</span>    <span class="directive">const</span> VezMemberInfo* pNext;
+<span class="line-numbers">10</span>    <span class="directive">const</span> VezMemberInfo* pMembers;
+<span class="line-numbers">11</span>} VezMemberInfo;
+<span class="line-numbers">12</span>
+<span class="line-numbers">13</span><span class="keyword">typedef</span> <span class="keyword">struct</span> VezPipelineResource {
+<span class="line-numbers">14</span>    VkShaderStageFlags stages;
+<span class="line-numbers">15</span>    VezPipelineResourceType resourceType;
+<span class="line-numbers">16</span>    VezBaseType baseType;
+<span class="line-numbers">17</span>    VkAccessFlags access;
+<span class="line-numbers">18</span>    uint32_t set;
+<span class="line-numbers">19</span>    uint32_t binding;
+<span class="line-numbers">20</span>    uint32_t location;
+<span class="line-numbers">21</span>    uint32_t inputAttachmentIndex;
+<span class="line-numbers">22</span>    uint32_t vecSize;
+<span class="line-numbers">23</span>    uint32_t arraySize;
+<span class="line-numbers">24</span>    uint32_t offset;
+<span class="line-numbers">25</span>    uint32_t size;
+<span class="line-numbers">26</span>    <span class="predefined-type">char</span> name[VK_MAX_DESCRIPTION_SIZE];
+<span class="line-numbers">27</span>    <span class="directive">const</span> VezMemberInfo* pMembers;
+<span class="line-numbers">28</span>} VezPipelineResource;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1386,19 +1400,30 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers">1</span><span class="keyword">typedef</span> <span class="keyword">enum</span> VkPipelineResourceBaseType {
-<span class="line-numbers">2</span>    VEZ_PIPELINE_RESOURCE_BASE_TYPE_INT = <span class="integer">0</span>,
-<span class="line-numbers">3</span>    VEZ_PIPELINE_RESOURCE_BASE_TYPE_UINT = <span class="integer">1</span>,
-<span class="line-numbers">4</span>    VEZ_PIPELINE_RESOURCE_BASE_TYPE_FLOAT = <span class="integer">2</span>,
-<span class="line-numbers">5</span>    VEZ_PIPELINE_RESOURCE_BASE_TYPE_DOUBLE = <span class="integer">3</span>,
-<span class="line-numbers">6</span>} VkPipelineResourceBaseType;</code></pre>
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span><span class="keyword">typedef</span> <span class="keyword">enum</span> VezBaseType {
+<span class="line-numbers"> 2</span>    VEZ_BASE_TYPE_BOOL = <span class="integer">0</span>,
+<span class="line-numbers"> 3</span>    VEZ_BASE_TYPE_CHAR = <span class="integer">1</span>,
+<span class="line-numbers"> 4</span>    VEZ_BASE_TYPE_INT = <span class="integer">2</span>,
+<span class="line-numbers"> 5</span>    VEZ_BASE_TYPE_UINT = <span class="integer">3</span>,
+<span class="line-numbers"> 6</span>    VEZ_BASE_TYPE_UINT64 = <span class="integer">4</span>,
+<span class="line-numbers"> 7</span>    VEZ_BASE_TYPE_HALF = <span class="integer">5</span>,
+<span class="line-numbers"> 8</span>    VEZ_BASE_TYPE_FLOAT = <span class="integer">6</span>,
+<span class="line-numbers"> 9</span>    VEZ_BASE_TYPE_DOUBLE = <span class="integer">7</span>,
+<span class="line-numbers">10</span>    VEZ_BASE_TYPE_STRUCT = <span class="integer">8</span>,
+<span class="line-numbers">11</span>} VezBaseType;</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>The <strong>access</strong> field specifies whether the resource has read and/or write access.</p>
 </div>
 <div class="paragraph">
 <p>The <strong>set</strong> and <strong>binding</strong> fields specify the set number and binding point in the shader as declared in the GLSL source or SPIR-V binary. For additional information on this, please see the <a href="#_glsl_guide">GLSL Guide</a> at the end of this document.</p>
 </div>
 <div class="paragraph">
 <p>For shader stage inputs and outputs, the <strong>location</strong> field specifies the location binding. Examples include fragment stage output, inputs and outputs between shader stages, etc.</p>
+</div>
+<div class="paragraph">
+<p>For renderpass subpasses, the <strong>inputAttachmentIndex</strong> specifies the index the attachment is bound to.</p>
 </div>
 <div class="paragraph">
 <p>The <strong>vecSize</strong> field specifies the number of components. If the shader resource is vec3, vecSize will equal 3. For scalar pipeline resources, vecSize will be 1.</p>
@@ -1416,6 +1441,9 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 </div>
 <div class="paragraph">
 <p>If an application knows the name of the pipeline resource to query, <code>vkGetPipelineResource</code> may be used.</p>
+</div>
+<div class="paragraph">
+<p>For uniform and shader storage buffer objects, the <strong>pMembers</strong> field forms a multi-level linked list of members of these structured bindings. See the <strong>PipelineReflection</strong> sample for how to iterate over these.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1670,7 +1698,7 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 <h2 id="_command_buffers">9. Command Buffers</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The primary differences between Vulkan and V-EZ with respect to command buffers are the removal of command pools and secondary command buffers in V-EZ. An application need no longer manage individual command pools across threads. Only <code>VezCommandBuffer</code> handles are created by an applications in V-EZ.</p>
+<p>The primary differences between Vulkan and V-EZ with respect to command buffers are the removal of command pools and secondary command buffers in V-EZ. An application need no longer manage individual command pools across threads. Only <code>VkCommandBuffer</code> handles are created by an applications in V-EZ.</p>
 </div>
 <div class="paragraph">
 <p>A secondary difference is with respect to pipeline barriers. As previously stated in <a href="#_synchronization">Synchronization</a>, V-EZ does not expose pipeline barriers. Within a command buffer, and between command buffer submissions, pipeline barriers are inserted automatically. An application is no longer responsible for managing this level of synchronization.</p>
@@ -1702,10 +1730,10 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 <div class="sect2">
 <h3 id="_recording">9.2. Recording</h3>
 <div class="paragraph">
-<p>An application may begin recording commands to a <code>VezCommandBuffer</code> handle by calling <code>vezBeginCommandBuffer</code>. The only required parameter is <code>VkCommandBufferUsageFlags</code> which gives hints to the driver about how it will be used. See the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkCommandBufferUsageFlagBits.html">Vulkan spec</a> for more details. An application ends recording by calling <code>vezEndCommandBuffer</code>.</p>
+<p>An application may begin recording commands to a <code>VkCommandBuffer</code> handle by calling <code>vezBeginCommandBuffer</code>. The only required parameter is <code>VkCommandBufferUsageFlags</code> which gives hints to the driver about how it will be used. See the <a href="https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkCommandBufferUsageFlagBits.html">Vulkan spec</a> for more details. Unlike native Vulkan, V-EZ&#8217;s equivalent command buffer functions do not require the VkCommandBuffer handle be passed in. Rather, all vezCmd* functions are associated with the VkCommandBuffer passed to vezBeginCommandBuffer within the same application thread. Commands recorded across threads must indepdently call vezBeginCommandBuffer. An application ends recording by calling <code>vezEndCommandBuffer</code>.</p>
 </div>
 <div class="paragraph">
-<p>Like Vulkan, an application must wait for a previously submitted <code>VezCommandBuffer</code> object handle to not be in use before re-recording. Applications should track queue submissions with fences and query the fence status, or wait, before re-recording commands. See fences under <a href="#_synchronization">Synchronization</a>.</p>
+<p>Like Vulkan, an application must wait for a previously submitted <code>VkCommandBuffer</code> object handle to not be in use before re-recording. Applications should track queue submissions with fences and query the fence status, or wait, before re-recording commands. See fences under <a href="#_synchronization">Synchronization</a>.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1990,29 +2018,29 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="line-numbers"> 1</span>vezBeginCommandBuffer(commandBuffer, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 <span class="line-numbers"> 2</span>
 <span class="line-numbers"> 3</span>VkViewport viewport = { <span class="float">0</span><span class="float">.0f</span>, <span class="float">0</span><span class="float">.0f</span>, width, height, <span class="float">0</span><span class="float">.0f</span>, <span class="float">1</span><span class="float">.0f</span> };
-<span class="line-numbers"> 4</span>vezCmdSetViewport(commandBuffer, <span class="integer">0</span>, <span class="integer">1</span>, &amp;viewport);
-<span class="line-numbers"> 5</span>vezCmdSetViewportState(commandBuffer, <span class="integer">1</span>);
+<span class="line-numbers"> 4</span>vezCmdSetViewport(<span class="integer">0</span>, <span class="integer">1</span>, &amp;viewport);
+<span class="line-numbers"> 5</span>vezCmdSetViewportState(<span class="integer">1</span>);
 <span class="line-numbers"> 6</span>
 <span class="line-numbers"> 7</span>VezInputAssemblyState inputAssemblyState = {};
 <span class="line-numbers"> 8</span>inputAssemblyState.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
 <span class="line-numbers"> 9</span>inputAssemblyState.primitiveRestartEnable = VK_FALSE;
-<span class="line-numbers">10</span>vezCmdSetInputAssemblyState(commandBuffer, &amp;inputAssemblyState);
+<span class="line-numbers">10</span>vezCmdSetInputAssemblyState(&amp;inputAssemblyState);
 <span class="line-numbers">11</span>
 <span class="line-numbers">12</span>VezRasterizationState rasterizationState = {};
 <span class="line-numbers">13</span>rasterizationState.polygonMode = VK_POLGYON_MODE_FILL;
 <span class="line-numbers">14</span>rasterizationState.cullMode = VK_CULL_MODE_BACK_BIT;
 <span class="line-numbers">15</span>rasterizationState.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-<span class="line-numbers">16</span>vezCmdSetRasterizationState(commandBuffer, &amp;rasterizationState);
+<span class="line-numbers">16</span>vezCmdSetRasterizationState(&amp;rasterizationState);
 <span class="line-numbers">17</span>
 <span class="line-numbers">18</span>VezDepthStencilState depthStencilState = {};
 <span class="line-numbers">19</span>depthStencilState.depthTestEnable = VK_TRUE;
 <span class="line-numbers">20</span>depthStencilState.depthWriteEnable = VK_FALSE;
 <span class="line-numbers">21</span>depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-<span class="line-numbers">22</span>vezCmdSetDepthStencilState(commandBuffer, &amp;depthStencilState);
+<span class="line-numbers">22</span>vezCmdSetDepthStencilState(&amp;depthStencilState);
 <span class="line-numbers">23</span>
 <span class="line-numbers">24</span><span class="comment">// Draw commands</span>
 <span class="line-numbers">25</span>
-<span class="line-numbers">26</span>vezEndCommandBuffer(commandBuffer);</code></pre>
+<span class="line-numbers">26</span>vezEndCommandBuffer();</code></pre>
 </div>
 </div>
 </div>
@@ -2026,13 +2054,13 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="directive">void</span> vezCmdBindBuffer(VezCommandBuffer commandBuffer, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range, uint32_t set, uint32_t binding, uint32_t arrayElement)
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="directive">void</span> vezCmdBindBuffer(VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range, uint32_t set, uint32_t binding, uint32_t arrayElement)
 
-<span class="directive">void</span> vezCmdBindBufferView(VezCommandBuffer commandBuffer, VkBufferView bufferView, uint32_t set, uint32_t binding, uint32_t arrayElement)
+<span class="directive">void</span> vezCmdBindBufferView(VkBufferView bufferView, uint32_t set, uint32_t binding, uint32_t arrayElement)
 
-<span class="directive">void</span> vezCmdBindImageView(VezCommandBuffer commandBuffer, VkImageView imageView, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);
+<span class="directive">void</span> vezCmdBindImageView(VkImageView imageView, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);
 
-<span class="directive">void</span> vezCmdBindSampler(VezCommandBuffer commandBuffer, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);</code></pre>
+<span class="directive">void</span> vezCmdBindSampler(VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -2226,7 +2254,7 @@ The preprocessor macro <code>VK_WHOLE_SIZE</code> may be passed to the <code>ran
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-08-27 08:28:30 Central Daylight Time
+Last updated 2018-08-30 20:57:17 Central Daylight Time
 </div>
 </div>
 </body>
