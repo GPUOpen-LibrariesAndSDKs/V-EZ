@@ -776,7 +776,7 @@ namespace vez
         auto curOffset = pSubDataInfo->imageOffset;
 
         // Each layer's data is copied separately.
-        for (auto arrayLayer = pSubDataInfo->imageSubresource.baseArrayLayer; arrayLayer < pSubDataInfo->imageSubresource.layerCount; ++arrayLayer)
+        for (auto arrayLayer = pSubDataInfo->imageSubresource.baseArrayLayer; arrayLayer < pSubDataInfo->imageSubresource.baseArrayLayer + pSubDataInfo->imageSubresource.layerCount; ++arrayLayer)
         {
             // Each depth layer in a 3D texture is copied separately.
             for (auto z = 0U; z < pSubDataInfo->imageExtent.depth; z += maxExtent.depth)
@@ -921,7 +921,7 @@ namespace vez
         auto curOffset = pSubDataInfo->imageOffset;
 
         // Each layer's data is copied separately.
-        for (auto layer = pSubDataInfo->imageSubresource.baseArrayLayer; layer < pSubDataInfo->imageSubresource.layerCount; ++layer)
+        for (auto layer = pSubDataInfo->imageSubresource.baseArrayLayer; layer <  pSubDataInfo->imageSubresource.baseArrayLayer + pSubDataInfo->imageSubresource.layerCount; ++layer)
         {
             // Each depth layer in a 3D texture is copied separately.
             for (auto z = 0U; z < pSubDataInfo->imageExtent.depth; ++z)
