@@ -66,7 +66,7 @@ void PipelineReflection::Initialize()
 
 void PipelineReflection::DisplayMember(uint32_t level, const VezMemberInfo* pMemberInfo)
 {
-    std::cout << std::setw(level * 4) << "" << "name=" << pMemberInfo->name << ", offset=" << pMemberInfo->offset << ", size=" << pMemberInfo->size << "\n";
+    std::cout << std::setw(level * 4) << "" << "name=" << pMemberInfo->name << ", offset=" << pMemberInfo->offset << ", size=" << pMemberInfo->size << ", vecsize=" << pMemberInfo->vecSize << ", columns=" << pMemberInfo->columns << "\n";
 
     if (pMemberInfo->pMembers)
         DisplayMember(level + 1, pMemberInfo->pMembers);

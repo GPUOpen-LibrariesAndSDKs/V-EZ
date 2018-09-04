@@ -55,6 +55,7 @@ namespace vez
             mi->offset = compiler.type_struct_member_offset(spirType, i);
             mi->size = compiler.get_declared_struct_member_size(spirType, i);
             mi->vecSize = memberType.vecsize;
+            mi->columns = memberType.columns;
             mi->arraySize = (memberType.array.size() == 0) ? 1 : memberType.array[0];
             mi->pNext = nullptr;
             mi->pMembers = nullptr;
