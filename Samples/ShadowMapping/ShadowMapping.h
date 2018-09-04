@@ -67,7 +67,7 @@ private:
     VkBuffer m_lightMatrices = VK_NULL_HANDLE;
     Model m_model;
     VkQueue m_graphicsQueue = VK_NULL_HANDLE;
-    VezCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
+    VkCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
     glm::vec3 m_cameraRotation = glm::vec3(0.0f);
     float m_cameraZoom = 1.0f;
 };

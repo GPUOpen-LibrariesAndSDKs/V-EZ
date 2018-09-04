@@ -322,7 +322,7 @@ void ShadowMapping::CreateCommandBuffer()
     ScenePass();
 
     // End recording.
-    if (vezEndCommandBuffer(m_commandBuffer) != VK_SUCCESS)
+    if (vezEndCommandBuffer() != VK_SUCCESS)
         FATAL("vkEndCommandBuffer failed");
 }
 
@@ -331,12 +331,12 @@ void ShadowMapping::DepthPass()
     // Set the viewport state and dimensions.
     VkViewport viewport = { 0.0f, 0.0f, 2048.0f, 2048.0f, 0.0f, 1.0f };
     VkRect2D scissor = { { 0, 0 },{ 2048, 2048 } };
-    vezCmdSetViewport(m_commandBuffer, 0, 1, &viewport);
-    vezCmdSetScissor(m_commandBuffer, 0, 1, &scissor);
-    vezCmdSetViewportState(m_commandBuffer, 1);
+    vezCmdSetViewport(0, 1, &viewport);
+    vezCmdSetScissor(0, 1, &scissor);
+    vezCmdSetViewportState(1);
 
     // Set depth bias for geometry rendered into shadow map.
-    vezCmdSetDepthBias(m_commandBuffer, 1.25f, 0.0f, 1.75f);
+    vezCmdSetDepthBias(1.25f, 0.0f, 1.75f);
 
     // Define clear values for the swapchain's color and depth attachments.
     std::array<VezAttachmentReference, 1> attachmentReferences = {};
@@ -349,14 +349,14 @@ void ShadowMapping::DepthPass()
     beginInfo.framebuffer = m_depthFramebuffer;
     beginInfo.attachmentCount = static_cast<uint32_t>(attachmentReferences.size());
     beginInfo.pAttachments = attachmentReferences.data();
-    vezCmdBeginRenderPass(m_commandBuffer, &beginInfo);
+    vezCmdBeginRenderPass(&beginInfo);
 
     // Bind the pipeline.
-    vezCmdBindPipeline(m_commandBuffer, m_depthPassPipeline.pipeline);
+    vezCmdBindPipeline(m_depthPassPipeline.pipeline);
 
     // Bind resources.
-    vezCmdBindBuffer(m_commandBuffer, m_cameraMatrices, 0, VK_WHOLE_SIZE, 0, 0, 0);
-    vezCmdBindBuffer(m_commandBuffer, m_lightMatrices, 0, VK_WHOLE_SIZE, 0, 1, 0);
+    vezCmdBindBuffer(m_cameraMatrices, 0, VK_WHOLE_SIZE, 0, 0, 0);
+    vezCmdBindBuffer(m_lightMatrices, 0, VK_WHOLE_SIZE, 0, 1, 0);
 
     // Set rasterization state.
     VezRasterizationState rasterizationState = {};
@@ -364,20 +364,20 @@ void ShadowMapping::DepthPass()
     rasterizationState.cullMode = VK_CULL_MODE_BACK_BIT;
     rasterizationState.frontFace = VK_FRONT_FACE_CLOCKWISE;
     rasterizationState.depthBiasEnable = VK_TRUE;
-    vezCmdSetRasterizationState(m_commandBuffer, &rasterizationState);
+    vezCmdSetRasterizationState(&rasterizationState);
 
     // Set depth stencil state.
     VezDepthStencilState depthStencilState = {};
     depthStencilState.depthTestEnable = VK_TRUE;
     depthStencilState.depthWriteEnable = VK_TRUE;
     depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-    vezCmdSetDepthStencilState(m_commandBuffer, &depthStencilState);
+    vezCmdSetDepthStencilState(&depthStencilState);
 
     // Draw the model.
-    m_model.Draw(m_commandBuffer);
+    m_model.Draw();
 
     // End the render pass.
-    vezCmdEndRenderPass(m_commandBuffer);
+    vezCmdEndRenderPass();
 }
 
 void ShadowMapping::ScenePass()
@@ -389,9 +389,9 @@ void ShadowMapping::ScenePass()
     // Set the viewport state and dimensions.
     VkViewport viewport = { 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
     VkRect2D scissor = { { 0, 0 },{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) } };
-    vezCmdSetViewport(m_commandBuffer, 0, 1, &viewport);
-    vezCmdSetScissor(m_commandBuffer, 0, 1, &scissor);
-    vezCmdSetViewportState(m_commandBuffer, 1);
+    vezCmdSetViewport(0, 1, &viewport);
+    vezCmdSetScissor(0, 1, &scissor);
+    vezCmdSetViewportState(1);
 
     // Define clear values for the swapchain's color and depth attachments.
     std::array<VezAttachmentReference, 2> attachmentReferences = {};
@@ -407,31 +407,31 @@ void ShadowMapping::ScenePass()
     beginInfo.framebuffer = AppBase::GetFramebuffer();
     beginInfo.attachmentCount = static_cast<uint32_t>(attachmentReferences.size());
     beginInfo.pAttachments = attachmentReferences.data();
-    vezCmdBeginRenderPass(m_commandBuffer, &beginInfo);
+    vezCmdBeginRenderPass(&beginInfo);
 
     // Bind the pipeline.
-    vezCmdBindPipeline(m_commandBuffer, m_scenePassPipeline.pipeline);
+    vezCmdBindPipeline(m_scenePassPipeline.pipeline);
 
     // Bind resources.
-    vezCmdBindImageView(m_commandBuffer, m_depthImageView, m_sampler, 0, 2, 0);
+    vezCmdBindImageView(m_depthImageView, m_sampler, 0, 2, 0);
 
     // Set rasterization state.
     VezRasterizationState rasterizationState = {};
     rasterizationState.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizationState.cullMode = VK_CULL_MODE_BACK_BIT;
     rasterizationState.frontFace = VK_FRONT_FACE_CLOCKWISE;
-    vezCmdSetRasterizationState(m_commandBuffer, &rasterizationState);
+    vezCmdSetRasterizationState(&rasterizationState);
 
     // Set depth stencil state.
     VezPipelineDepthStencilState depthStencilState = {};
     depthStencilState.depthTestEnable = VK_TRUE;
     depthStencilState.depthWriteEnable = VK_TRUE;
     depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-    vezCmdSetDepthStencilState(m_commandBuffer, &depthStencilState);
+    vezCmdSetDepthStencilState(&depthStencilState);
 
     // Draw the model.
-    m_model.Draw(m_commandBuffer);
+    m_model.Draw();
 
     // End the render pass.
-    vezCmdEndRenderPass(m_commandBuffer);
+    vezCmdEndRenderPass();
 }

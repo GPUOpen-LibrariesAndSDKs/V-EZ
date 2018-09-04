@@ -287,20 +287,20 @@ void SoftwareRasterization::CreateCommandBuffer()
     VezImageSubresourceRange range = {};
     range.layerCount = 1;
     range.levelCount = 1;
-    vezCmdClearColorImage(m_commandBuffer, m_colorOutput.image, &clearColor, 1, &range);
+    vezCmdClearColorImage(m_colorOutput.image, &clearColor, 1, &range);
 
     // Bind the compute pipeline and resouces.
-    vezCmdBindPipeline(m_commandBuffer, m_computePipeline.pipeline);
-    vezCmdBindBuffer(m_commandBuffer, m_uniformBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
-    vezCmdBindImageView(m_commandBuffer, m_imageView, m_sampler, 0, 1, 0);
-    vezCmdBindImageView(m_commandBuffer, m_colorOutput.imageView, VK_NULL_HANDLE, 0, 2, 0);
+    vezCmdBindPipeline(m_computePipeline.pipeline);
+    vezCmdBindBuffer(m_uniformBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
+    vezCmdBindImageView(m_imageView, m_sampler, 0, 1, 0);
+    vezCmdBindImageView(m_colorOutput.imageView, VK_NULL_HANDLE, 0, 2, 0);
 
     // Dispatch compute to rasterize N simulated primitives.
     auto groupCountX = static_cast<uint32_t>(ceilf(width / 8.0f));
     auto groupCountY = static_cast<uint32_t>(ceilf(height / 8.0f));
-    vezCmdDispatch(m_commandBuffer, groupCountX, groupCountY, 1U);
+    vezCmdDispatch(groupCountX, groupCountY, 1U);
 
     // End command buffer recording.
-    if (vezEndCommandBuffer(m_commandBuffer) != VK_SUCCESS)
+    if (vezEndCommandBuffer() != VK_SUCCESS)
         FATAL("vkEndCommandBuffer failed");
 }

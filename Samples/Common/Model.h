@@ -20,9 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//
-// @author Sean O'Connell (Sean.OConnell@amd.com)
-//#pragma once
+#pragma once
 
 #include <stdint.h>
 #include <string>
@@ -52,7 +50,7 @@ public:
 
     bool LoadFromFile(const std::string& filename, VkDevice device);    
 
-    void Draw(VezCommandBuffer commandBuffer, uint32_t instanceCount = 1);
+    void Draw(uint32_t instanceCount = 1);
 
 private:
     struct Part

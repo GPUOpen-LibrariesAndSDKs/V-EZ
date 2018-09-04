@@ -414,9 +414,11 @@ namespace vez
             cmdBuffer->End();
 
             // Submit to the queue.
+            auto cmdBufferHandle = cmdBuffer->GetHandle();
+
             VezSubmitInfo submitInfo = {};
             submitInfo.commandBufferCount = 1;
-            submitInfo.pCommandBuffers = reinterpret_cast<VezCommandBuffer*>(&cmdBuffer);
+            submitInfo.pCommandBuffers = &cmdBufferHandle;
             auto result = queue->Submit(1, &submitInfo, nullptr);
             if (result != VK_SUCCESS)
                 return result;
@@ -623,9 +625,11 @@ namespace vez
         auto queue = m_queues[cmdBuffer->GetPool()->GetQueueFamilyIndex()][0];
 
         // Submit to the queue.
+        auto cmdBufferHandle = cmdBuffer->GetHandle();
+
         VezSubmitInfo submitInfo = {};
         submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = reinterpret_cast<const VezCommandBuffer*>(&cmdBuffer);
+        submitInfo.pCommandBuffers = &cmdBufferHandle;
         queue->Submit(1, &submitInfo, nullptr);
 
         // Wait for all operations to complete before returning.
@@ -645,7 +649,7 @@ namespace vez
         // Track the number of fences that have been created for queue submissions.
         ++m_fencesQueuedRunningCount;
 
-        // Evaluate tracked fences and their underlying signal semaphores after a certain threshold has been reached.
+        // Evaluate tracked fences after a certain threshold has been reached.
         if (m_fencesQueuedRunningCount % m_fencesQueuedUntilTrackedFencesEval == 0)
         {
             m_trackedFencesLock.Lock();
@@ -841,9 +845,11 @@ namespace vez
                         cmdBuffer->End();
 
                         // Submit to the queue.
+                        auto cmdBufferHandle = cmdBuffer->GetHandle();
+
                         VezSubmitInfo submitInfo = {};
                         submitInfo.commandBufferCount = 1;
-                        submitInfo.pCommandBuffers = reinterpret_cast<VezCommandBuffer*>(&cmdBuffer);
+                        submitInfo.pCommandBuffers = &cmdBufferHandle;
                         auto result = queue->Submit(1, &submitInfo, nullptr);
                         if (result != VK_SUCCESS)
                             return result;
@@ -981,9 +987,10 @@ namespace vez
                         cmdBuffer->End();
 
                         // Submit to the queue.
+                        auto cmdBufferHandle = cmdBuffer->GetHandle();
                         VezSubmitInfo submitInfo = {};
                         submitInfo.commandBufferCount = 1;
-                        submitInfo.pCommandBuffers = reinterpret_cast<VezCommandBuffer*>(&cmdBuffer);
+                        submitInfo.pCommandBuffers = &cmdBufferHandle;
                         auto result = queue->Submit(1, &submitInfo, nullptr);
                         if (result != VK_SUCCESS)
                             return result;

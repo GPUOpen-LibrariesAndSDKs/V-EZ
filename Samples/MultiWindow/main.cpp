@@ -42,7 +42,7 @@ VkShaderModule vertShaderModule = VK_NULL_HANDLE;
 VkShaderModule fragShaderModule = VK_NULL_HANDLE;
 VezPipeline pipeline = VK_NULL_HANDLE;
 VkQueue graphicsQueue = VK_NULL_HANDLE;
-std::array<VezCommandBuffer, WINDOW_COUNT> commandBuffers;
+std::array<VkCommandBuffer, WINDOW_COUNT> commandBuffers;
 
 bool StandardValidationPresent()
 {
@@ -284,9 +284,9 @@ void RecordCommandBuffers()
         // Set the viewport state and dimensions.
         VkViewport viewport = { 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
         VkRect2D scissor = { { 0, 0 },{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) } };
-        vezCmdSetViewport(cmdBuffer, 0, 1, &viewport);
-        vezCmdSetScissor(cmdBuffer, 0, 1, &scissor);
-        vezCmdSetViewportState(cmdBuffer, 1);
+        vezCmdSetViewport(0, 1, &viewport);
+        vezCmdSetScissor(0, 1, &scissor);
+        vezCmdSetViewportState(1);
 
         // Define clear values for the swapchain's color and depth attachments.
         std::array<VezAttachmentReference, 2> attachmentReferences = {};
@@ -302,11 +302,11 @@ void RecordCommandBuffers()
         beginInfo.framebuffer = windows[i]->GetFramebuffer();
         beginInfo.attachmentCount = static_cast<uint32_t>(attachmentReferences.size());
         beginInfo.pAttachments = attachmentReferences.data();
-        vezCmdBeginRenderPass(cmdBuffer, &beginInfo);
+        vezCmdBeginRenderPass(&beginInfo);
 
         // Bind the pipeline and associated resources.
-        vezCmdBindPipeline(cmdBuffer, pipeline);
-        vezCmdBindImageView(cmdBuffer, imageView, sampler, 0, 0, 0);
+        vezCmdBindPipeline(pipeline);
+        vezCmdBindImageView(imageView, sampler, 0, 0, 0);
 
         // Set push constant buffer with matrix transforms.
         struct {
@@ -323,21 +323,21 @@ void RecordCommandBuffers()
         projection[1][1] *= -1.0f;
 
         pushConstants.modelViewProj = projection * view * model;
-        vezCmdPushConstants(cmdBuffer, 0, sizeof(pushConstants), reinterpret_cast<const void*>(&pushConstants));
+        vezCmdPushConstants(0, sizeof(pushConstants), reinterpret_cast<const void*>(&pushConstants));
 
         // Bind the vertex buffer and index buffers.
         VkDeviceSize offset = 0;
-        vezCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBuffer, &offset);
-        vezCmdBindIndexBuffer(cmdBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+        vezCmdBindVertexBuffers(0, 1, &vertexBuffer, &offset);
+        vezCmdBindIndexBuffer(indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
         // Draw the quad.
-        vezCmdDrawIndexed(cmdBuffer, 6, 1, 0, 0, 0);
+        vezCmdDrawIndexed(6, 1, 0, 0, 0);
 
         // End the render pass.
-        vezCmdEndRenderPass(cmdBuffer);
+        vezCmdEndRenderPass();
 
         // End recording.
-        vezEndCommandBuffer(cmdBuffer);
+        vezEndCommandBuffer();
     }
 }
 

@@ -89,6 +89,10 @@ namespace vez
 
     ShaderModule::~ShaderModule()
     {
+        // Destroy VezMemberInfo chains within SPIRV reflection data.
+        for (auto& resource : m_resources)
+            DestroyMemberInfos(const_cast<VezMemberInfo*>(resource.pMembers));
+
         // Handle case where GLSL compilation failed but ShaderModule class object was still created in order to retrieve info log.
         if (m_handle && m_handle != reinterpret_cast<VkShaderModule>(this))
             vkDestroyShaderModule(m_device->GetHandle(), m_handle, nullptr);

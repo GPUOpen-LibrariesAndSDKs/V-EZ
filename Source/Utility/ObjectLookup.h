@@ -48,8 +48,9 @@ namespace vez
         OBJECT_LOOKUP_DECLARATION(VkInstance, Instance);
         OBJECT_LOOKUP_DECLARATION(VkPhysicalDevice, PhysicalDevice);
         OBJECT_LOOKUP_DECLARATION(VkDevice, Device);
-        OBJECT_LOOKUP_DECLARATION(VkSwapchainKHR, Swapchain);
         OBJECT_LOOKUP_DECLARATION(VkQueue, Queue);
+        OBJECT_LOOKUP_DECLARATION(VkSwapchainKHR, Swapchain);
+        OBJECT_LOOKUP_DECLARATION(VkCommandBuffer, CommandBuffer);
         OBJECT_LOOKUP_DECLARATION(VkShaderModule, ShaderModule);
         OBJECT_LOOKUP_DECLARATION(VkBuffer, Buffer);
         OBJECT_LOOKUP_DECLARATION(VkBufferView, BufferView);

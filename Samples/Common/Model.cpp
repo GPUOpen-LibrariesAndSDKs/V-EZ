@@ -19,9 +19,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//
-// @author Sean O'Connell (Sean.OConnell@amd.com)
-//
 #include <iostream>
 #include <array>
 #include <assimp/Importer.hpp>
@@ -191,15 +188,15 @@ bool Model::LoadFromFile(const std::string& filename, VkDevice device)
     return true;
 }
 
-void Model::Draw(VezCommandBuffer commandBuffer, uint32_t instanceCount)
+void Model::Draw(uint32_t instanceCount)
 {
     // Bind the vertex and index buffers.
     VkDeviceSize offset = 0;
-    vezCmdBindVertexBuffers(commandBuffer, 0, 1, &m_vertexBuffer, &offset);
-    vezCmdBindIndexBuffer(commandBuffer, m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    vezCmdBindVertexBuffers(0, 1, &m_vertexBuffer, &offset);
+    vezCmdBindIndexBuffer(m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
     // Set the vertex input format.
-    vezCmdSetVertexInputFormat(commandBuffer, m_vertexInputFormat);
+    vezCmdSetVertexInputFormat(m_vertexInputFormat);
 
 #if 0
     // Draw each part.
@@ -207,7 +204,6 @@ void Model::Draw(VezCommandBuffer commandBuffer, uint32_t instanceCount)
         vkCmdDrawIndexed(commandBuffer, part.indexCount, instanceCount, part.indexBase, 0, 0);
 #else
     // Draw the entire model in one call.
-    vezCmdDrawIndexed(commandBuffer, m_indexCount, 1, 0, 0, 0);
-    //vezCmdDraw(commandBuffer, m_vertexCount, 1, 0, 0);
+    vezCmdDrawIndexed(m_indexCount, 1, 0, 0, 0);
 #endif
 }

@@ -286,6 +286,7 @@ int AppBase::Run()
     VezSwapchainCreateInfo swapchainCreateInfo = {};
     swapchainCreateInfo.surface = m_surface;
     swapchainCreateInfo.format = { VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+    swapchainCreateInfo.tripleBuffer = VK_TRUE;
     result = vezCreateSwapchain(m_device, &swapchainCreateInfo, &m_swapchain);
     if (result != VK_SUCCESS)
     {

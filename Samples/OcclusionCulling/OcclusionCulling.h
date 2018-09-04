@@ -67,9 +67,9 @@ private:
     VkBuffer m_occluderBuffer = VK_NULL_HANDLE;
     VkQueue m_graphicsQueue = VK_NULL_HANDLE;
     VkQueue m_transferQueue = VK_NULL_HANDLE;
-    VezCommandBuffer m_occlusionTestCmdBuf = VK_NULL_HANDLE;
-    VezCommandBuffer m_sceneRenderCmdBuf = VK_NULL_HANDLE;
-    VezCommandBuffer m_visibilityReadbackCmdBuf = VK_NULL_HANDLE;
+    VkCommandBuffer m_occlusionTestCmdBuf = VK_NULL_HANDLE;
+    VkCommandBuffer m_sceneRenderCmdBuf = VK_NULL_HANDLE;
+    VkCommandBuffer m_visibilityReadbackCmdBuf = VK_NULL_HANDLE;
     VkFence m_fence = VK_NULL_HANDLE;
     glm::vec3 m_cameraRotation = glm::vec3(0.0f);
     float m_cameraZoom = 3.0f;

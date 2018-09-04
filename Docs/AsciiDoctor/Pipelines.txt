@@ -79,20 +79,34 @@ Unlike Vulkan, V-EZ allows full pipeline shader stage reflection if the shader s
 
 [source,c++,linenums]
 ----
+typedef struct VezMemberInfo
+{
+    VezBaseType baseType;
+    uint32_t offset;
+    uint32_t size;
+    uint32_t vecSize;
+    uint32_t arraySize;
+    char name[VK_MAX_DESCRIPTION_SIZE];
+    const VezMemberInfo* pNext;
+    const VezMemberInfo* pMembers;
+} VezMemberInfo;
+
 typedef struct VezPipelineResource {
     VkShaderStageFlags stages;
     VezPipelineResourceType resourceType;
-    VezPipelineResourceBaseType baseType;
+    VezBaseType baseType;
     VkAccessFlags access;
     uint32_t set;
     uint32_t binding;
-    uint32_t location;    
+    uint32_t location;
+    uint32_t inputAttachmentIndex;    
     uint32_t vecSize;
     uint32_t arraySize;
     uint32_t offset;
     uint32_t size;
     char name[VK_MAX_DESCRIPTION_SIZE];
-} GLPipelineResource;
+    const VezMemberInfo* pMembers;
+} VezPipelineResource;
 ----
 
 The *stages* field is a bitmask of all shader stages the resource is used in. For example, a the same uniform buffer binding might be bound and accessed in both the vertex and fragment shader stages.
@@ -121,17 +135,26 @@ The *baseType* field specifies the data type. For GLSL vec4, baseType would be V
 
 [source,c++,linenums]
 ----
-typedef enum VkPipelineResourceBaseType {
-    VEZ_PIPELINE_RESOURCE_BASE_TYPE_INT = 0,
-    VEZ_PIPELINE_RESOURCE_BASE_TYPE_UINT = 1,
-    VEZ_PIPELINE_RESOURCE_BASE_TYPE_FLOAT = 2,
-    VEZ_PIPELINE_RESOURCE_BASE_TYPE_DOUBLE = 3,
-} VkPipelineResourceBaseType;
+typedef enum VezBaseType {
+    VEZ_BASE_TYPE_BOOL = 0,
+    VEZ_BASE_TYPE_CHAR = 1,
+    VEZ_BASE_TYPE_INT = 2,
+    VEZ_BASE_TYPE_UINT = 3,
+    VEZ_BASE_TYPE_UINT64 = 4,
+    VEZ_BASE_TYPE_HALF = 5,
+    VEZ_BASE_TYPE_FLOAT = 6,
+    VEZ_BASE_TYPE_DOUBLE = 7,
+    VEZ_BASE_TYPE_STRUCT = 8,
+} VezBaseType;
 ----
+
+The *access* field specifies whether the resource has read and/or write access.
 
 The *set* and *binding* fields specify the set number and binding point in the shader as declared in the GLSL source or SPIR-V binary. For additional information on this, please see the <<GLSL Guide>> at the end of this document.
 
 For shader stage inputs and outputs, the *location* field specifies the location binding. Examples include fragment stage output, inputs and outputs between shader stages, etc.
+
+For renderpass subpasses, the *inputAttachmentIndex* specifies the index the attachment is bound to.
 
 The *vecSize* field specifies the number of components. If the shader resource is vec3, vecSize will equal 3. For scalar pipeline resources, vecSize will be 1.
 
@@ -145,6 +168,8 @@ layout (set=0, binding=0) uniform sampler2D textures[10];
 The 'offset' and 'size' specify the byte offset and byte size of a resource when declared inside of a struct.
 
 If an application knows the name of the pipeline resource to query, `vkGetPipelineResource` may be used.
+
+For uniform and shader storage buffer objects, the *pMembers* field forms a multi-level linked list of members of these structured bindings. See the *PipelineReflection* sample for how to iterate over these.
 
 === Pipeline Binding
 Graphics pipelines must be bound between `vezCmdBeginRenderPass` and `vezCmdEndRenderPass` calls. Compute pipelines must be bound outside of a render pass.  To bind a pipeline, call `vezCmdBindPipeline`.

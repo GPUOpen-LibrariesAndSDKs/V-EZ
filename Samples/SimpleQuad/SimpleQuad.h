@@ -62,5 +62,5 @@ private:
     VkSampler m_sampler = VK_NULL_HANDLE;
     VkBuffer m_uniformBuffer = VK_NULL_HANDLE;
     PipelineDesc m_basicPipeline;
-    VezCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
+    VkCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
 };

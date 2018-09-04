@@ -40,6 +40,9 @@
 #include "Core/ImageView.h"
 #include "Core/Framebuffer.h"
 
+// Per thread command buffer currently being recorded.
+static thread_local vez::CommandBuffer* s_pActiveCommandBuffer = nullptr;
+
 // Utility function for importing an external VkBuffer object handle into VEZ.
 vez::Buffer* ImportVkBuffer(vez::Device* device, VkBuffer buffer)
 {
@@ -862,7 +865,7 @@ void VKAPI_CALL vezDestroyFramebuffer(VkDevice device, VezFramebuffer framebuffe
     delete reinterpret_cast<vez::Framebuffer*>(framebuffer);
 }
 
-VkResult VKAPI_CALL vezAllocateCommandBuffers(VkDevice device, const VezCommandBufferAllocateInfo* pAllocateInfo, VezCommandBuffer* pCommandBuffers)
+VkResult VKAPI_CALL vezAllocateCommandBuffers(VkDevice device, const VezCommandBufferAllocateInfo* pAllocateInfo, VkCommandBuffer* pCommandBuffers)
 {
     // Lookup object handle.
     auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
@@ -875,79 +878,104 @@ VkResult VKAPI_CALL vezAllocateCommandBuffers(VkDevice device, const VezCommandB
         return VK_INCOMPLETE;
 
     // Allocate the command buffers.
-    auto result = deviceImpl->AllocateCommandBuffers(queueImpl, pAllocateInfo->pNext, pAllocateInfo->commandBufferCount, reinterpret_cast<vez::CommandBuffer**>(pCommandBuffers));
+    std::vector<vez::CommandBuffer*> commandBuffers(pAllocateInfo->commandBufferCount);
+    auto result = deviceImpl->AllocateCommandBuffers(queueImpl, pAllocateInfo->pNext, pAllocateInfo->commandBufferCount, commandBuffers.data());
     if (result != VK_SUCCESS)
         return result;
+
+    // Copy native handles to pCommandBuffers and add to ObjectLookup.
+    for (auto i = 0U; i < pAllocateInfo->commandBufferCount; ++i)
+    {
+        pCommandBuffers[i] = commandBuffers[i]->GetHandle();
+        vez::ObjectLookup::AddObjectImpl(pCommandBuffers[i], commandBuffers[i]);
+    }
 
     // Return success.
     return VK_SUCCESS;
 }
 
-void VKAPI_CALL vezFreeCommandBuffers(VkDevice device, uint32_t commandBufferCount, const VezCommandBuffer* pCommandBuffers)
+void VKAPI_CALL vezFreeCommandBuffers(VkDevice device, uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers)
 {
     // Lookup object handle.
     auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
     if (!deviceImpl)
         return;
 
-    // Free the command buffers.
-    deviceImpl->FreeCommandBuffers(commandBufferCount, reinterpret_cast<vez::CommandBuffer**>(const_cast<VezCommandBuffer*>(pCommandBuffers)));
+    // Free command buffers and remove command buffers from ObjectLookup.
+    for (auto i = 0U; i < commandBufferCount; ++i)
+    {
+        auto cmdBufferImpl = vez::ObjectLookup::GetObjectImpl(pCommandBuffers[i]);
+        deviceImpl->FreeCommandBuffers(1, &cmdBufferImpl);
+        vez::ObjectLookup::RemoveObjectImpl(pCommandBuffers[i]);
+    }
 }
 
-VkResult VKAPI_CALL vezBeginCommandBuffer(VezCommandBuffer commandBuffer, VkCommandBufferUsageFlags flags)
+VkResult VKAPI_CALL vezBeginCommandBuffer(VkCommandBuffer commandBuffer, VkCommandBufferUsageFlags flags)
 {
-    return reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->Begin(flags);
+    auto cmdBufferImpl = vez::ObjectLookup::GetObjectImpl(commandBuffer);
+    if (!cmdBufferImpl)
+        return VK_INCOMPLETE;
+
+    s_pActiveCommandBuffer = cmdBufferImpl;
+    return s_pActiveCommandBuffer->Begin(flags);
 }
 
-VkResult VKAPI_CALL vezEndCommandBuffer(VezCommandBuffer commandBuffer)
+VkResult VKAPI_CALL vezEndCommandBuffer()
 {
-    return reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->End();
+    if (!s_pActiveCommandBuffer)
+        return VK_INCOMPLETE;
+
+    auto result = s_pActiveCommandBuffer->End();
+    s_pActiveCommandBuffer = nullptr;
+    return result;
 }
 
-VkResult VKAPI_CALL vezResetCommandBuffer(VezCommandBuffer commandBuffer)
+VkResult VKAPI_CALL vezResetCommandBuffer(VkCommandBuffer commandBuffer)
 {
-    return reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->Reset();
+    auto cmdBufferImpl = vez::ObjectLookup::GetObjectImpl(commandBuffer);
+    if (!cmdBufferImpl) return VK_INCOMPLETE;
+    else return cmdBufferImpl->Reset();
 }
 
-void VKAPI_CALL vezCmdBeginRenderPass(VezCommandBuffer commandBuffer, const VezRenderPassBeginInfo* pBeginInfo)
+void VKAPI_CALL vezCmdBeginRenderPass(const VezRenderPassBeginInfo* pBeginInfo)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdBeginRenderPass(pBeginInfo);
+    s_pActiveCommandBuffer->CmdBeginRenderPass(pBeginInfo);
 }
 
-void VKAPI_CALL vezCmdNextSubpass(VezCommandBuffer commandBuffer)
+void VKAPI_CALL vezCmdNextSubpass()
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdNextSubpass();
+    s_pActiveCommandBuffer->CmdNextSubpass();
 }
 
-void VKAPI_CALL vezCmdEndRenderPass(VezCommandBuffer commandBuffer)
+void VKAPI_CALL vezCmdEndRenderPass()
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdEndRenderPass();
+    s_pActiveCommandBuffer->CmdEndRenderPass();
 }
 
-void VKAPI_CALL vezCmdBindPipeline(VezCommandBuffer commandBuffer, VezPipeline pipeline)
+void VKAPI_CALL vezCmdBindPipeline(VezPipeline pipeline)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdBindPipeline(reinterpret_cast<vez::Pipeline*>(pipeline));
+    s_pActiveCommandBuffer->CmdBindPipeline(reinterpret_cast<vez::Pipeline*>(pipeline));
 }
 
-void VKAPI_CALL vezCmdPushConstants(VezCommandBuffer commandBuffer, uint32_t offset, uint32_t size, const void* pValues)
+void VKAPI_CALL vezCmdPushConstants(uint32_t offset, uint32_t size, const void* pValues)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdPushConstants(offset, size, pValues);
+    s_pActiveCommandBuffer->CmdPushConstants(offset, size, pValues);
 }
 
-void VKAPI_CALL vezCmdBindBuffer(VezCommandBuffer commandBuffer, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range, uint32_t set, uint32_t binding, uint32_t arrayElement)
+void VKAPI_CALL vezCmdBindBuffer(VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range, uint32_t set, uint32_t binding, uint32_t arrayElement)
 {
     // Lookup Buffer object handle.
     auto bufferImpl = vez::ObjectLookup::GetObjectImpl(buffer);
 
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
-    if (!bufferImpl) bufferImpl = ImportVkBuffer(reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->GetPool()->GetDevice(), buffer);
+    if (!bufferImpl) bufferImpl = ImportVkBuffer(s_pActiveCommandBuffer->GetPool()->GetDevice(), buffer);
     
     // Bind buffer.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdBindBuffer(bufferImpl, offset, range, set, binding, arrayElement);
+    s_pActiveCommandBuffer->CmdBindBuffer(bufferImpl, offset, range, set, binding, arrayElement);
 }
 
-void VKAPI_CALL vezCmdBindBufferView(VezCommandBuffer commandBuffer, VkBufferView bufferView, uint32_t set, uint32_t binding, uint32_t arrayElement)
+void VKAPI_CALL vezCmdBindBufferView(VkBufferView bufferView, uint32_t set, uint32_t binding, uint32_t arrayElement)
 {
     // Lookup Buffer object handle.
     auto bufferViewImpl = vez::ObjectLookup::GetObjectImpl(bufferView);
@@ -955,10 +983,10 @@ void VKAPI_CALL vezCmdBindBufferView(VezCommandBuffer commandBuffer, VkBufferVie
         return;
 
     // Bind buffer view.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdBindBufferView(bufferViewImpl, set, binding, arrayElement);
+    s_pActiveCommandBuffer->CmdBindBufferView(bufferViewImpl, set, binding, arrayElement);
 }
 
-void VKAPI_CALL vezCmdBindImageView(VezCommandBuffer commandBuffer, VkImageView imageView, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement)
+void VKAPI_CALL vezCmdBindImageView(VkImageView imageView, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement)
 {
     // Lookup ImageView object handle.
     auto imageViewImpl = vez::ObjectLookup::GetObjectImpl(imageView);
@@ -966,15 +994,15 @@ void VKAPI_CALL vezCmdBindImageView(VezCommandBuffer commandBuffer, VkImageView 
         return;
 
     // Bind buffer view.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdBindImageView(imageViewImpl, sampler, set, binding, arrayElement);
+    s_pActiveCommandBuffer->CmdBindImageView(imageViewImpl, sampler, set, binding, arrayElement);
 }
 
-void VKAPI_CALL vezCmdBindSampler(VezCommandBuffer commandBuffer, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement)
+void VKAPI_CALL vezCmdBindSampler(VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdBindSampler(sampler, set, binding, arrayElement);
+    s_pActiveCommandBuffer->CmdBindSampler(sampler, set, binding, arrayElement);
 }
 
-void VKAPI_CALL vezCmdBindVertexBuffers(VezCommandBuffer commandBuffer, uint32_t firstBinding, uint32_t bindingCount, const VkBuffer* pBuffers, const VkDeviceSize* pOffset)
+void VKAPI_CALL vezCmdBindVertexBuffers(uint32_t firstBinding, uint32_t bindingCount, const VkBuffer* pBuffers, const VkDeviceSize* pOffset)
 {
     // Lookup Buffer object handles.
     std::vector<vez::Buffer*> buffers(bindingCount);
@@ -984,116 +1012,116 @@ void VKAPI_CALL vezCmdBindVertexBuffers(VezCommandBuffer commandBuffer, uint32_t
         
         // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
         // Create a new proxy Buffer class object and add it to the object lookup.
-        if (!buffers[i]) buffers[i] = ImportVkBuffer(reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->GetPool()->GetDevice(), pBuffers[i]);
+        if (!buffers[i]) buffers[i] = ImportVkBuffer(s_pActiveCommandBuffer->GetPool()->GetDevice(), pBuffers[i]);
     }
 
     // Bind vertex buffers.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdBindVertexBuffers(firstBinding, bindingCount, buffers.data(), pOffset);
+    s_pActiveCommandBuffer->CmdBindVertexBuffers(firstBinding, bindingCount, buffers.data(), pOffset);
 }
 
-void VKAPI_CALL vezCmdBindIndexBuffer(VezCommandBuffer commandBuffer, VkBuffer buffer, VkDeviceSize offset, VkIndexType indexType)
+void VKAPI_CALL vezCmdBindIndexBuffer(VkBuffer buffer, VkDeviceSize offset, VkIndexType indexType)
 {
     // Lookup Buffer object handle.
     auto bufferImpl = vez::ObjectLookup::GetObjectImpl(buffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
-    if (!bufferImpl) bufferImpl = ImportVkBuffer(reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->GetPool()->GetDevice(), buffer);
+    if (!bufferImpl) bufferImpl = ImportVkBuffer(s_pActiveCommandBuffer->GetPool()->GetDevice(), buffer);
 
     // Bind index buffer.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdBindIndexBuffer(bufferImpl, offset, indexType);
+    s_pActiveCommandBuffer->CmdBindIndexBuffer(bufferImpl, offset, indexType);
 }
 
-void VKAPI_CALL vezCmdSetVertexInputFormat(VezCommandBuffer commandBuffer, VezVertexInputFormat format)
+void VKAPI_CALL vezCmdSetVertexInputFormat(VezVertexInputFormat format)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetVertexInputFormat(reinterpret_cast<vez::VertexInputFormat*>(format));
+    s_pActiveCommandBuffer->CmdSetVertexInputFormat(reinterpret_cast<vez::VertexInputFormat*>(format));
 }
 
-void VKAPI_CALL vezCmdSetViewportState(VezCommandBuffer commandBuffer, uint32_t viewportCount)
+void VKAPI_CALL vezCmdSetViewportState(uint32_t viewportCount)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetViewportState(viewportCount);
+    s_pActiveCommandBuffer->CmdSetViewportState(viewportCount);
 }
 
-void VKAPI_CALL vezCmdSetInputAssemblyState(VezCommandBuffer commandBuffer, const VezInputAssemblyState* pStateInfo)
+void VKAPI_CALL vezCmdSetInputAssemblyState(const VezInputAssemblyState* pStateInfo)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetInputAssemblyState(pStateInfo);
+    s_pActiveCommandBuffer->CmdSetInputAssemblyState(pStateInfo);
 }
-void VKAPI_CALL vezCmdSetRasterizationState(VezCommandBuffer commandBuffer, const VezRasterizationState* pStateInfo)
+void VKAPI_CALL vezCmdSetRasterizationState(const VezRasterizationState* pStateInfo)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetRasterizationState(pStateInfo);
-}
-
-void VKAPI_CALL vezCmdSetMultisampleState(VezCommandBuffer commandBuffer, const VezMultisampleState* pStateInfo)
-{
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetMultisampleState(pStateInfo);
+    s_pActiveCommandBuffer->CmdSetRasterizationState(pStateInfo);
 }
 
-void VKAPI_CALL vezCmdSetDepthStencilState(VezCommandBuffer commandBuffer, const VezDepthStencilState* pStateInfo)
+void VKAPI_CALL vezCmdSetMultisampleState(const VezMultisampleState* pStateInfo)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetDepthStencilState(pStateInfo);
+    s_pActiveCommandBuffer->CmdSetMultisampleState(pStateInfo);
 }
 
-void VKAPI_CALL vezCmdSetColorBlendState(VezCommandBuffer commandBuffer, const VezColorBlendState* pStateInfo)
+void VKAPI_CALL vezCmdSetDepthStencilState(const VezDepthStencilState* pStateInfo)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetColorBlendState(pStateInfo);
+    s_pActiveCommandBuffer->CmdSetDepthStencilState(pStateInfo);
 }
 
-void VKAPI_CALL vezCmdSetViewport(VezCommandBuffer commandBuffer, uint32_t firstViewport, uint32_t viewportCount, const VkViewport* pViewports)
+void VKAPI_CALL vezCmdSetColorBlendState(const VezColorBlendState* pStateInfo)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetViewport(firstViewport, viewportCount, pViewports);
+    s_pActiveCommandBuffer->CmdSetColorBlendState(pStateInfo);
 }
 
-void VKAPI_CALL vezCmdSetScissor(VezCommandBuffer commandBuffer, uint32_t firstScissor, uint32_t scissorCount, const VkRect2D* pScissors)
+void VKAPI_CALL vezCmdSetViewport(uint32_t firstViewport, uint32_t viewportCount, const VkViewport* pViewports)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetScissor(firstScissor, scissorCount, pScissors);
+    s_pActiveCommandBuffer->CmdSetViewport(firstViewport, viewportCount, pViewports);
 }
 
-void VKAPI_CALL vezCmdSetLineWidth(VezCommandBuffer commandBuffer, float lineWidth)
+void VKAPI_CALL vezCmdSetScissor(uint32_t firstScissor, uint32_t scissorCount, const VkRect2D* pScissors)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetLineWidth(lineWidth);
+    s_pActiveCommandBuffer->CmdSetScissor(firstScissor, scissorCount, pScissors);
 }
 
-void VKAPI_CALL vezCmdSetDepthBias(VezCommandBuffer commandBuffer, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor)
+void VKAPI_CALL vezCmdSetLineWidth(float lineWidth)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetDepthBias(depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
+    s_pActiveCommandBuffer->CmdSetLineWidth(lineWidth);
 }
 
-void VKAPI_CALL vezCmdSetBlendConstants(VezCommandBuffer commandBuffer, const float blendConstants[4])
+void VKAPI_CALL vezCmdSetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetBlendConstants(blendConstants);
+    s_pActiveCommandBuffer->CmdSetDepthBias(depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
 }
 
-void VKAPI_CALL vezCmdSetDepthBounds(VezCommandBuffer commandBuffer, float minDepthBounds, float maxDepthBounds)
+void VKAPI_CALL vezCmdSetBlendConstants(const float blendConstants[4])
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetDepthBounds(minDepthBounds, maxDepthBounds);
+    s_pActiveCommandBuffer->CmdSetBlendConstants(blendConstants);
 }
 
-void VKAPI_CALL vezCmdSetStencilCompareMask(VezCommandBuffer commandBuffer, VkStencilFaceFlags faceMask, uint32_t compareMask)
+void VKAPI_CALL vezCmdSetDepthBounds(float minDepthBounds, float maxDepthBounds)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetStencilCompareMask(faceMask, compareMask);
+    s_pActiveCommandBuffer->CmdSetDepthBounds(minDepthBounds, maxDepthBounds);
 }
 
-void VKAPI_CALL vezCmdSetStencilWriteMask(VezCommandBuffer commandBuffer, VkStencilFaceFlags faceMask, uint32_t writeMask)
+void VKAPI_CALL vezCmdSetStencilCompareMask(VkStencilFaceFlags faceMask, uint32_t compareMask)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetStencilWriteMask(faceMask, writeMask);
+    s_pActiveCommandBuffer->CmdSetStencilCompareMask(faceMask, compareMask);
 }
 
-void VKAPI_CALL vezCmdSetStencilReference(VezCommandBuffer commandBuffer, VkStencilFaceFlags faceMask, uint32_t reference)
+void VKAPI_CALL vezCmdSetStencilWriteMask(VkStencilFaceFlags faceMask, uint32_t writeMask)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetStencilReference(faceMask, reference);
+    s_pActiveCommandBuffer->CmdSetStencilWriteMask(faceMask, writeMask);
 }
 
-void VKAPI_CALL vezCmdDraw(VezCommandBuffer commandBuffer, uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
+void VKAPI_CALL vezCmdSetStencilReference(VkStencilFaceFlags faceMask, uint32_t reference)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdDraw(vertexCount, instanceCount, firstVertex, firstInstance);
+    s_pActiveCommandBuffer->CmdSetStencilReference(faceMask, reference);
 }
 
-void VKAPI_CALL vezCmdDrawIndexed(VezCommandBuffer commandBuffer, uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance)
+void VKAPI_CALL vezCmdDraw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdDrawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+    s_pActiveCommandBuffer->CmdDraw(vertexCount, instanceCount, firstVertex, firstInstance);
 }
 
-void VKAPI_CALL vezCmdDrawIndirect(VezCommandBuffer commandBuffer, VkBuffer buffer, VkDeviceSize offset, uint32_t drawCount, uint32_t stride)
+void VKAPI_CALL vezCmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance)
+{
+    s_pActiveCommandBuffer->CmdDrawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+}
+
+void VKAPI_CALL vezCmdDrawIndirect(VkBuffer buffer, VkDeviceSize offset, uint32_t drawCount, uint32_t stride)
 {
     // Lookup Buffer object handle.
     auto bufferImpl = vez::ObjectLookup::GetObjectImpl(buffer);
@@ -1101,61 +1129,61 @@ void VKAPI_CALL vezCmdDrawIndirect(VezCommandBuffer commandBuffer, VkBuffer buff
         return;
 
     // Call draw indirect.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdDrawIndirect(bufferImpl, offset, drawCount, stride);
+    s_pActiveCommandBuffer->CmdDrawIndirect(bufferImpl, offset, drawCount, stride);
 }
 
-void VKAPI_CALL vezCmdDrawIndexedIndirect(VezCommandBuffer commandBuffer, VkBuffer buffer, VkDeviceSize offset, uint32_t drawCount, uint32_t stride)
+void VKAPI_CALL vezCmdDrawIndexedIndirect(VkBuffer buffer, VkDeviceSize offset, uint32_t drawCount, uint32_t stride)
 {
     // Lookup Buffer object handle.
     auto bufferImpl = vez::ObjectLookup::GetObjectImpl(buffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
-    if (!bufferImpl) bufferImpl = ImportVkBuffer(reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->GetPool()->GetDevice(), buffer);
+    if (!bufferImpl) bufferImpl = ImportVkBuffer(s_pActiveCommandBuffer->GetPool()->GetDevice(), buffer);
 
     // Call draw indexed indirect.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdDrawIndexedIndirect(bufferImpl, offset, drawCount, stride);
+    s_pActiveCommandBuffer->CmdDrawIndexedIndirect(bufferImpl, offset, drawCount, stride);
 }
 
-void VKAPI_CALL vezCmdDispatch(VezCommandBuffer commandBuffer, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ)
+void VKAPI_CALL vezCmdDispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdDispatch(groupCountX, groupCountY, groupCountZ);
+    s_pActiveCommandBuffer->CmdDispatch(groupCountX, groupCountY, groupCountZ);
 }
 
-void VKAPI_CALL vezCmdDispatchIndirect(VezCommandBuffer commandBuffer, VkBuffer buffer, VkDeviceSize offset)
+void VKAPI_CALL vezCmdDispatchIndirect(VkBuffer buffer, VkDeviceSize offset)
 {
     // Lookup Buffer object handle.
     auto bufferImpl = vez::ObjectLookup::GetObjectImpl(buffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
-    if (!bufferImpl) bufferImpl = ImportVkBuffer(reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->GetPool()->GetDevice(), buffer);
+    if (!bufferImpl) bufferImpl = ImportVkBuffer(s_pActiveCommandBuffer->GetPool()->GetDevice(), buffer);
 
     // Call dispatch indirect.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdDispatchIndirect(bufferImpl, offset);
+    s_pActiveCommandBuffer->CmdDispatchIndirect(bufferImpl, offset);
 }
 
-void VKAPI_CALL vezCmdCopyBuffer(VezCommandBuffer commandBuffer, VkBuffer srcBuffer, VkBuffer dstBuffer, uint32_t regionCount, const VezBufferCopy* pRegions)
+void VKAPI_CALL vezCmdCopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, uint32_t regionCount, const VezBufferCopy* pRegions)
 {
     // Lookup Buffer object handle.
     auto srcBufferImpl = vez::ObjectLookup::GetObjectImpl(srcBuffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
-    if (!srcBufferImpl) srcBufferImpl = ImportVkBuffer(reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->GetPool()->GetDevice(), srcBuffer);
+    if (!srcBufferImpl) srcBufferImpl = ImportVkBuffer(s_pActiveCommandBuffer->GetPool()->GetDevice(), srcBuffer);
 
     // Lookup Buffer object handle.
     auto dstBufferImpl = vez::ObjectLookup::GetObjectImpl(dstBuffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
-    if (!dstBufferImpl) dstBufferImpl = ImportVkBuffer(reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->GetPool()->GetDevice(), dstBuffer);
+    if (!dstBufferImpl) dstBufferImpl = ImportVkBuffer(s_pActiveCommandBuffer->GetPool()->GetDevice(), dstBuffer);
 
     // Call copy buffer.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdCopyBuffer(srcBufferImpl, dstBufferImpl, regionCount, pRegions);
+    s_pActiveCommandBuffer->CmdCopyBuffer(srcBufferImpl, dstBufferImpl, regionCount, pRegions);
 }
 
-void VKAPI_CALL vezCmdCopyImage(VezCommandBuffer commandBuffer, VkImage srcImage, VkImage dstImage, uint32_t regionCount, const VezImageCopy* pRegions)
+void VKAPI_CALL vezCmdCopyImage(VkImage srcImage, VkImage dstImage, uint32_t regionCount, const VezImageCopy* pRegions)
 {
     // Lookup Image object handles.
     auto srcImageImpl = vez::ObjectLookup::GetObjectImpl(srcImage);
@@ -1167,10 +1195,10 @@ void VKAPI_CALL vezCmdCopyImage(VezCommandBuffer commandBuffer, VkImage srcImage
         return;
 
     // Call copy image.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdCopyImage(srcImageImpl, dstImageImpl, regionCount, pRegions);
+    s_pActiveCommandBuffer->CmdCopyImage(srcImageImpl, dstImageImpl, regionCount, pRegions);
 }
 
-void VKAPI_CALL vezCmdBlitImage(VezCommandBuffer commandBuffer, VkImage srcImage, VkImage dstImage, uint32_t regionCount, const VezImageBlit* pRegions, VkFilter filter)
+void VKAPI_CALL vezCmdBlitImage(VkImage srcImage, VkImage dstImage, uint32_t regionCount, const VezImageBlit* pRegions, VkFilter filter)
 {
     // Lookup Image object handles.
     auto srcImageImpl = vez::ObjectLookup::GetObjectImpl(srcImage);
@@ -1182,27 +1210,27 @@ void VKAPI_CALL vezCmdBlitImage(VezCommandBuffer commandBuffer, VkImage srcImage
         return;
 
     // Call blit image.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdBlitImage(srcImageImpl, dstImageImpl, regionCount, pRegions, filter);
+    s_pActiveCommandBuffer->CmdBlitImage(srcImageImpl, dstImageImpl, regionCount, pRegions, filter);
 }
 
-void VKAPI_CALL vezCmdCopyBufferToImage(VezCommandBuffer commandBuffer, VkBuffer srcBuffer, VkImage dstImage, uint32_t regionCount, const VezBufferImageCopy* pRegions)
+void VKAPI_CALL vezCmdCopyBufferToImage(VkBuffer srcBuffer, VkImage dstImage, uint32_t regionCount, const VezBufferImageCopy* pRegions)
 {
     // Lookup Buffer and Image object handles.
     auto srcBufferImpl = vez::ObjectLookup::GetObjectImpl(srcBuffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
-    if (!srcBufferImpl) srcBufferImpl = ImportVkBuffer(reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->GetPool()->GetDevice(), srcBuffer);
+    if (!srcBufferImpl) srcBufferImpl = ImportVkBuffer(s_pActiveCommandBuffer->GetPool()->GetDevice(), srcBuffer);
 
     auto dstImageImpl = vez::ObjectLookup::GetObjectImpl(dstImage);
     if (!dstImageImpl)
         return;
 
     // Call copy buffer to image.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdCopyBufferToImage(srcBufferImpl, dstImageImpl, regionCount, pRegions);
+    s_pActiveCommandBuffer->CmdCopyBufferToImage(srcBufferImpl, dstImageImpl, regionCount, pRegions);
 }
 
-void VKAPI_CALL vezCmdCopyImageToBuffer(VezCommandBuffer commandBuffer, VkImage srcImage, VkBuffer dstBuffer, uint32_t regionCount, const VezBufferImageCopy* pRegions)
+void VKAPI_CALL vezCmdCopyImageToBuffer(VkImage srcImage, VkBuffer dstBuffer, uint32_t regionCount, const VezBufferImageCopy* pRegions)
 {
     // Lookup Buffer and Image object handles.
     auto srcImageImpl = vez::ObjectLookup::GetObjectImpl(srcImage);
@@ -1213,39 +1241,39 @@ void VKAPI_CALL vezCmdCopyImageToBuffer(VezCommandBuffer commandBuffer, VkImage 
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
-    if (!dstBufferImpl) dstBufferImpl = ImportVkBuffer(reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->GetPool()->GetDevice(), dstBuffer);
+    if (!dstBufferImpl) dstBufferImpl = ImportVkBuffer(s_pActiveCommandBuffer->GetPool()->GetDevice(), dstBuffer);
 
     // Call copy image to buffer.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdCopyImageToBuffer(srcImageImpl, dstBufferImpl, regionCount, pRegions);
+    s_pActiveCommandBuffer->CmdCopyImageToBuffer(srcImageImpl, dstBufferImpl, regionCount, pRegions);
 }
 
-void VKAPI_CALL vezCmdUpdateBuffer(VezCommandBuffer commandBuffer, VkBuffer dstBuffer, VkDeviceSize dstOffset, VkDeviceSize dataSize, const void* pData)
+void VKAPI_CALL vezCmdUpdateBuffer(VkBuffer dstBuffer, VkDeviceSize dstOffset, VkDeviceSize dataSize, const void* pData)
 {
     // Lookup Buffer object handle.
     auto dstBufferImpl = vez::ObjectLookup::GetObjectImpl(dstBuffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
-    if (!dstBufferImpl) dstBufferImpl = ImportVkBuffer(reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->GetPool()->GetDevice(), dstBuffer);
+    if (!dstBufferImpl) dstBufferImpl = ImportVkBuffer(s_pActiveCommandBuffer->GetPool()->GetDevice(), dstBuffer);
 
     // Call update buffer.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdUpdateBuffer(dstBufferImpl, dstOffset, dataSize, pData);
+    s_pActiveCommandBuffer->CmdUpdateBuffer(dstBufferImpl, dstOffset, dataSize, pData);
 }
 
-void VKAPI_CALL vezCmdFillBuffer(VezCommandBuffer commandBuffer, VkBuffer dstBuffer, VkDeviceSize dstOffset, VkDeviceSize size, uint32_t data)
+void VKAPI_CALL vezCmdFillBuffer(VkBuffer dstBuffer, VkDeviceSize dstOffset, VkDeviceSize size, uint32_t data)
 {
     // Lookup Buffer object handle.
     auto dstBufferImpl = vez::ObjectLookup::GetObjectImpl(dstBuffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
-    if (!dstBufferImpl) dstBufferImpl = ImportVkBuffer(reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->GetPool()->GetDevice(), dstBuffer);
+    if (!dstBufferImpl) dstBufferImpl = ImportVkBuffer(s_pActiveCommandBuffer->GetPool()->GetDevice(), dstBuffer);
 
     // Call fill buffer.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdFillBuffer(dstBufferImpl, dstOffset, size, data);
+    s_pActiveCommandBuffer->CmdFillBuffer(dstBufferImpl, dstOffset, size, data);
 }
 
-void VKAPI_CALL vezCmdClearColorImage(VezCommandBuffer commandBuffer, VkImage image, const VkClearColorValue* pColor, uint32_t rangeCount, const VezImageSubresourceRange* pRanges)
+void VKAPI_CALL vezCmdClearColorImage(VkImage image, const VkClearColorValue* pColor, uint32_t rangeCount, const VezImageSubresourceRange* pRanges)
 {
     // Lookup Image object handle.
     auto imageImpl = vez::ObjectLookup::GetObjectImpl(image);
@@ -1253,10 +1281,10 @@ void VKAPI_CALL vezCmdClearColorImage(VezCommandBuffer commandBuffer, VkImage im
         return;
 
     // Call clear color image.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdClearColorImage(imageImpl, pColor, rangeCount, pRanges);
+    s_pActiveCommandBuffer->CmdClearColorImage(imageImpl, pColor, rangeCount, pRanges);
 }
 
-void VKAPI_CALL vezCmdClearDepthStencilImage(VezCommandBuffer commandBuffer, VkImage image, const VkClearDepthStencilValue* pDepthStencil, uint32_t rangeCount, const VezImageSubresourceRange* pRanges)
+void VKAPI_CALL vezCmdClearDepthStencilImage(VkImage image, const VkClearDepthStencilValue* pDepthStencil, uint32_t rangeCount, const VezImageSubresourceRange* pRanges)
 {
     // Lookup Image object handle.
     auto imageImpl = vez::ObjectLookup::GetObjectImpl(image);
@@ -1264,15 +1292,15 @@ void VKAPI_CALL vezCmdClearDepthStencilImage(VezCommandBuffer commandBuffer, VkI
         return;
 
     // Call clear depth stencil image.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdClearDepthStencilImage(imageImpl, pDepthStencil, rangeCount, pRanges);
+    s_pActiveCommandBuffer->CmdClearDepthStencilImage(imageImpl, pDepthStencil, rangeCount, pRanges);
 }
 
-void VKAPI_CALL vezCmdClearAttachments(VezCommandBuffer commandBuffer, uint32_t attachmentCount, const VezClearAttachment* pAttachments, uint32_t rectCount, const VkClearRect* pRects)
+void VKAPI_CALL vezCmdClearAttachments(uint32_t attachmentCount, const VezClearAttachment* pAttachments, uint32_t rectCount, const VkClearRect* pRects)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdClearAttachments(attachmentCount, pAttachments, rectCount, pRects);
+    s_pActiveCommandBuffer->CmdClearAttachments(attachmentCount, pAttachments, rectCount, pRects);
 }
 
-void VKAPI_CALL vezCmdResolveImage(VezCommandBuffer commandBuffer, VkImage srcImage, VkImage dstImage, uint32_t regionCount, const VezImageResolve* pRegions)
+void VKAPI_CALL vezCmdResolveImage(VkImage srcImage, VkImage dstImage, uint32_t regionCount, const VezImageResolve* pRegions)
 {
     // Lookup Image object handles.
     auto srcImageImpl = vez::ObjectLookup::GetObjectImpl(srcImage);
@@ -1284,15 +1312,15 @@ void VKAPI_CALL vezCmdResolveImage(VezCommandBuffer commandBuffer, VkImage srcIm
         return;
 
     // Call clear color image.
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdResolveImage(srcImageImpl, dstImageImpl, regionCount, pRegions);
+    s_pActiveCommandBuffer->CmdResolveImage(srcImageImpl, dstImageImpl, regionCount, pRegions);
 }
 
-void VKAPI_CALL vezCmdSetEvent(VezCommandBuffer commandBuffer, VkEvent event, VkPipelineStageFlags stageMask)
+void VKAPI_CALL vezCmdSetEvent(VkEvent event, VkPipelineStageFlags stageMask)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdSetEvent(event, stageMask);
+    s_pActiveCommandBuffer->CmdSetEvent(event, stageMask);
 }
 
-void VKAPI_CALL vezCmdResetEvent(VezCommandBuffer commandBuffer, VkEvent event, VkPipelineStageFlags stageMask)
+void VKAPI_CALL vezCmdResetEvent(VkEvent event, VkPipelineStageFlags stageMask)
 {
-    reinterpret_cast<vez::CommandBuffer*>(commandBuffer)->CmdResetEvent(event, stageMask);
+    s_pActiveCommandBuffer->CmdResetEvent(event, stageMask);
 }

@@ -338,9 +338,9 @@ void VulkanMemory::CreateCommandBuffer()
     AppBase::GetWindowSize(&width, &height);
     VkViewport viewport = { 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
     VkRect2D scissor = { { 0, 0 },{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) } };
-    vezCmdSetViewport(m_commandBuffer, 0, 1, &viewport);
-    vezCmdSetScissor(m_commandBuffer, 0, 1, &scissor);
-    vezCmdSetViewportState(m_commandBuffer, 1);
+    vezCmdSetViewport(0, 1, &viewport);
+    vezCmdSetScissor(0, 1, &scissor);
+    vezCmdSetViewportState(1);
 
     // Define clear values for the swapchain's color and depth attachments.
     std::array<VezAttachmentReference, 2> attachmentReferences = {};
@@ -356,36 +356,36 @@ void VulkanMemory::CreateCommandBuffer()
     beginInfo.framebuffer = AppBase::GetFramebuffer();
     beginInfo.attachmentCount = static_cast<uint32_t>(attachmentReferences.size());
     beginInfo.pAttachments = attachmentReferences.data();
-    vezCmdBeginRenderPass(m_commandBuffer, &beginInfo);
+    vezCmdBeginRenderPass(&beginInfo);
  
     // Bind the pipeline and associated resources.
-    vezCmdBindPipeline(m_commandBuffer, m_basicPipeline.pipeline);
-    vezCmdBindBuffer(m_commandBuffer, m_uniformBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
-    vezCmdBindImageView(m_commandBuffer, m_imageView, m_sampler, 0, 1, 0);
+    vezCmdBindPipeline(m_basicPipeline.pipeline);
+    vezCmdBindBuffer(m_uniformBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
+    vezCmdBindImageView(m_imageView, m_sampler, 0, 1, 0);
 
     // Set push constants.
     //float blendColor[3] = { 1.0f, 1.0f, 1.0f };
-    //vezCmdPushConstants(m_commandBuffer, 0, sizeof(float) * 3, &blendColor[0]);
+    //vezCmdPushConstants(0, sizeof(float) * 3, &blendColor[0]);
 
     // Set depth stencil state.
     VezPipelineDepthStencilState depthStencilState = {};
     depthStencilState.depthTestEnable = VK_TRUE;
     depthStencilState.depthWriteEnable = VK_TRUE;
     depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-    vezCmdSetDepthStencilState(m_commandBuffer, &depthStencilState);
+    vezCmdSetDepthStencilState(&depthStencilState);
 
     // Bind the vertex buffer and index buffers.
     VkDeviceSize offset = 0;
-    vezCmdBindVertexBuffers(m_commandBuffer, 0, 1, &m_vertexBuffer.handle, &offset);
-    vezCmdBindIndexBuffer(m_commandBuffer, m_indexBuffer.handle, 0, VK_INDEX_TYPE_UINT32);
+    vezCmdBindVertexBuffers(0, 1, &m_vertexBuffer.handle, &offset);
+    vezCmdBindIndexBuffer(m_indexBuffer.handle, 0, VK_INDEX_TYPE_UINT32);
 
     // Draw the quad.
-    vezCmdDrawIndexed(m_commandBuffer, 6, 1, 0, 0, 0);
+    vezCmdDrawIndexed(6, 1, 0, 0, 0);
 
     // End the render pass.
-    vezCmdEndRenderPass(m_commandBuffer);
+    vezCmdEndRenderPass();
 
     // End command buffer recording.
-    if (vezEndCommandBuffer(m_commandBuffer) != VK_SUCCESS)
+    if (vezEndCommandBuffer() != VK_SUCCESS)
         FATAL("vezEndCommandBuffer failed");
 }

@@ -1,5 +1,5 @@
 == Command Buffers
-The primary differences between Vulkan and V-EZ with respect to command buffers are the removal of command pools and secondary command buffers in V-EZ. An application need no longer manage individual command pools across threads. Only `VezCommandBuffer` handles are created by an applications in V-EZ.
+The primary differences between Vulkan and V-EZ with respect to command buffers are the removal of command pools and secondary command buffers in V-EZ. An application need no longer manage individual command pools across threads. Only `VkCommandBuffer` handles are created by an applications in V-EZ.
 
 A secondary difference is with respect to pipeline barriers. As previously stated in <<Synchronization>>, V-EZ does not expose pipeline barriers. Within a command buffer, and between command buffer submissions, pipeline barriers are inserted automatically. An application is no longer responsible for managing this level of synchronization.
 
@@ -23,9 +23,9 @@ VkResult result = vezAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
 A command buffer must be destroyed by calling `vezFreeCommandBuffers`.
 
 === Recording
-An application may begin recording commands to a `VezCommandBuffer` handle by calling `vezBeginCommandBuffer`. The only required parameter is `VkCommandBufferUsageFlags` which gives hints to the driver about how it will be used. See the https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkCommandBufferUsageFlagBits.html[Vulkan spec] for more details. An application ends recording by calling `vezEndCommandBuffer`.
+An application may begin recording commands to a `VkCommandBuffer` handle by calling `vezBeginCommandBuffer`. The only required parameter is `VkCommandBufferUsageFlags` which gives hints to the driver about how it will be used. See the https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkCommandBufferUsageFlagBits.html[Vulkan spec] for more details. Unlike native Vulkan, V-EZ's equivalent command buffer functions do not require the VkCommandBuffer handle be passed in. Rather, all vezCmd* functions are associated with the VkCommandBuffer passed to vezBeginCommandBuffer within the same application thread. Commands recorded across threads must indepdently call vezBeginCommandBuffer. An application ends recording by calling `vezEndCommandBuffer`.
 
-Like Vulkan, an application must wait for a previously submitted `VezCommandBuffer` object handle to not be in use before re-recording. Applications should track queue submissions with fences and query the fence status, or wait, before re-recording commands. See fences under <<Synchronization>>.
+Like Vulkan, an application must wait for a previously submitted `VkCommandBuffer` object handle to not be in use before re-recording. Applications should track queue submissions with fences and query the fence status, or wait, before re-recording commands. See fences under <<Synchronization>>.
 
 === Graphics State
 As described in <<Pipelines>>, V-EZ removes all graphics state specification from pipeline creation. In V-EZ, graphics state is set dynamically while recording a command buffer. Furthermore, all available https://www.khronos.org/registry/vulkan/specs/1.0/man/html/VkDynamicState.html[dynamic states] from Vulkan are enabled by default and their corresponding command buffer functions made available in V-EZ. States are not required to be set within a render pass. The following is a list of states available to be set.
@@ -209,29 +209,29 @@ All state blocks are set together, therefore default values must still be set wh
 vezBeginCommandBuffer(commandBuffer, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
 VkViewport viewport = { 0.0f, 0.0f, width, height, 0.0f, 1.0f };
-vezCmdSetViewport(commandBuffer, 0, 1, &viewport);
-vezCmdSetViewportState(commandBuffer, 1);
+vezCmdSetViewport(0, 1, &viewport);
+vezCmdSetViewportState(1);
 
 VezInputAssemblyState inputAssemblyState = {};
 inputAssemblyState.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
 inputAssemblyState.primitiveRestartEnable = VK_FALSE;
-vezCmdSetInputAssemblyState(commandBuffer, &inputAssemblyState);
+vezCmdSetInputAssemblyState(&inputAssemblyState);
 
 VezRasterizationState rasterizationState = {};
 rasterizationState.polygonMode = VK_POLGYON_MODE_FILL;
 rasterizationState.cullMode = VK_CULL_MODE_BACK_BIT;
 rasterizationState.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-vezCmdSetRasterizationState(commandBuffer, &rasterizationState);
+vezCmdSetRasterizationState(&rasterizationState);
 
 VezDepthStencilState depthStencilState = {};
 depthStencilState.depthTestEnable = VK_TRUE;
 depthStencilState.depthWriteEnable = VK_FALSE;
 depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-vezCmdSetDepthStencilState(commandBuffer, &depthStencilState);
+vezCmdSetDepthStencilState(&depthStencilState);
 
 // Draw commands
 
-vezEndCommandBuffer(commandBuffer);
+vezEndCommandBuffer();
 ----
 
 === Resource Binding
@@ -241,13 +241,13 @@ Each binding function for different resource types requires the set number, bind
 
 [source,c++]
 ----
-void vezCmdBindBuffer(VezCommandBuffer commandBuffer, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range, uint32_t set, uint32_t binding, uint32_t arrayElement)
+void vezCmdBindBuffer(VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range, uint32_t set, uint32_t binding, uint32_t arrayElement)
 
-void vezCmdBindBufferView(VezCommandBuffer commandBuffer, VkBufferView bufferView, uint32_t set, uint32_t binding, uint32_t arrayElement)
+void vezCmdBindBufferView(VkBufferView bufferView, uint32_t set, uint32_t binding, uint32_t arrayElement)
 
-void vezCmdBindImageView(VezCommandBuffer commandBuffer, VkImageView imageView, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);
+void vezCmdBindImageView(VkImageView imageView, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);
 
-void vezCmdBindSampler(VezCommandBuffer commandBuffer, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);
+void vezCmdBindSampler(VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);
 ----
 
 NOTE: The preprocessor macro `VK_WHOLE_SIZE` may be passed to the `range` parameter of `vezCmdBindBuffer` when an application desires to bind the entire buffer and not a sub range.

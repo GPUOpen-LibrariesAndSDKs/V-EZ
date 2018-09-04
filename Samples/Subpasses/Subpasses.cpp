@@ -379,9 +379,9 @@ void Subpasses::CreateCommandBuffer()
     AppBase::GetWindowSize(&width, &height);
     VkViewport viewport = { 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
     VkRect2D scissor = { { 0, 0 },{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) } };
-    vezCmdSetViewport(m_commandBuffer, 0, 1, &viewport);
-    vezCmdSetScissor(m_commandBuffer, 0, 1, &scissor);
-    vezCmdSetViewportState(m_commandBuffer, 1);
+    vezCmdSetViewport(0, 1, &viewport);
+    vezCmdSetScissor(0, 1, &scissor);
+    vezCmdSetViewportState(1);
 
     // Define clear values for the framebuffer attachments.
     std::array<VezAttachmentReference, 5> attachmentReferences = { {
@@ -399,52 +399,52 @@ void Subpasses::CreateCommandBuffer()
     beginInfo.framebuffer = m_framebuffer.handle;
     beginInfo.attachmentCount = static_cast<uint32_t>(attachmentReferences.size());
     beginInfo.pAttachments = attachmentReferences.data();
-    vezCmdBeginRenderPass(m_commandBuffer, &beginInfo);
+    vezCmdBeginRenderPass(&beginInfo);
  
     // Bind the pipeline and associated resources.
-    vezCmdBindPipeline(m_commandBuffer, m_subPass0Pipeline.pipeline);
-    vezCmdBindBuffer(m_commandBuffer, m_uniformBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
-    vezCmdBindImageView(m_commandBuffer, m_imageView, m_sampler, 0, 1, 0);
+    vezCmdBindPipeline(m_subPass0Pipeline.pipeline);
+    vezCmdBindBuffer(m_uniformBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
+    vezCmdBindImageView(m_imageView, m_sampler, 0, 1, 0);
 
     // Set depth stencil state.
     VezPipelineDepthStencilState depthStencilState = {};
     depthStencilState.depthTestEnable = VK_TRUE;
     depthStencilState.depthWriteEnable = VK_TRUE;
     depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-    vezCmdSetDepthStencilState(m_commandBuffer, &depthStencilState);
+    vezCmdSetDepthStencilState(&depthStencilState);
 
     // Bind the vertex buffer and index buffers.
     VkDeviceSize offset = 0;
-    vezCmdBindVertexBuffers(m_commandBuffer, 0, 1, &m_vertexBuffer, &offset);
-    vezCmdBindIndexBuffer(m_commandBuffer, m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    vezCmdBindVertexBuffers(0, 1, &m_vertexBuffer, &offset);
+    vezCmdBindIndexBuffer(m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
     // Draw the quad.
-    vezCmdDrawIndexed(m_commandBuffer, 6, 1, 0, 0, 0);
+    vezCmdDrawIndexed(6, 1, 0, 0, 0);
 
     // Begin the second subpass where the previous color attachment channels are combined into the final color output (attachment 0).
     // See SubapssesCombined.frag.
-    vezCmdNextSubpass(m_commandBuffer);
+    vezCmdNextSubpass();
 
     // Bind the pipeline.
-    vezCmdBindPipeline(m_commandBuffer, m_subPass1Pipeline.pipeline);
+    vezCmdBindPipeline(m_subPass1Pipeline.pipeline);
     
     // Disable depth test and write.
     depthStencilState.depthTestEnable = VK_FALSE;
     depthStencilState.depthWriteEnable = VK_FALSE;
-    vezCmdSetDepthStencilState(m_commandBuffer, &depthStencilState);
+    vezCmdSetDepthStencilState(&depthStencilState);
 
     // Set primitive topology to triangel strip.
     VezInputAssemblyState inputAssemblyState = {};
     inputAssemblyState.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
-    vezCmdSetInputAssemblyState(m_commandBuffer, &inputAssemblyState);
+    vezCmdSetInputAssemblyState(&inputAssemblyState);
 
     // Draw a fullscreen quad (does not use bound vertex or index buffers).
-    vezCmdDraw(m_commandBuffer, 4, 1, 0, 0);
+    vezCmdDraw(4, 1, 0, 0);
 
     // End the render pass.
-    vezCmdEndRenderPass(m_commandBuffer);
+    vezCmdEndRenderPass();
 
     // End command buffer recording.
-    if (vezEndCommandBuffer(m_commandBuffer) != VK_SUCCESS)
+    if (vezEndCommandBuffer() != VK_SUCCESS)
         FATAL("vkEndCommandBuffer failed");
 }

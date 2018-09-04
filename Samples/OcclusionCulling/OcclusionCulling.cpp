@@ -390,9 +390,9 @@ void OcclusionCulling::SceneRenderPass()
     // Set the viewport state and dimensions.    
     VkViewport viewport = { 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
     VkRect2D scissor = { { 0, 0 },{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) } };
-    vezCmdSetViewport(m_sceneRenderCmdBuf, 0, 1, &viewport);
-    vezCmdSetScissor(m_sceneRenderCmdBuf, 0, 1, &scissor);
-    vezCmdSetViewportState(m_sceneRenderCmdBuf, 1);
+    vezCmdSetViewport(0, 1, &viewport);
+    vezCmdSetScissor(0, 1, &scissor);
+    vezCmdSetViewportState(1);
 
     // Define clear values for the swapchain's color and depth attachments.
     std::array<VkClearValue, 2> clearValues = {};
@@ -415,41 +415,41 @@ void OcclusionCulling::SceneRenderPass()
     beginInfo.framebuffer = AppBase::GetFramebuffer();
     beginInfo.attachmentCount = static_cast<uint32_t>(attachmentReferences.size());
     beginInfo.pAttachments = attachmentReferences.data();
-    vezCmdBeginRenderPass(m_sceneRenderCmdBuf, &beginInfo);
+    vezCmdBeginRenderPass(&beginInfo);
 
     // Set rasterization state.
     VezRasterizationState rasterizationState = {};
     rasterizationState.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizationState.cullMode = VK_CULL_MODE_BACK_BIT;
     rasterizationState.frontFace = VK_FRONT_FACE_CLOCKWISE;
-    vezCmdSetRasterizationState(m_sceneRenderCmdBuf, &rasterizationState);
+    vezCmdSetRasterizationState(&rasterizationState);
 
     // Set depth stencil state.
     VezDepthStencilState depthStencilState = {};
     depthStencilState.depthTestEnable = VK_TRUE;
     depthStencilState.depthWriteEnable = VK_TRUE;
     depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-    vezCmdSetDepthStencilState(m_sceneRenderCmdBuf, &depthStencilState);
+    vezCmdSetDepthStencilState(&depthStencilState);
 
     // Draw the occluder quad.
-    vezCmdBindPipeline(m_sceneRenderCmdBuf, m_occluderPipeline.pipeline);
-    vezCmdBindBuffer(m_sceneRenderCmdBuf, m_cameraMatricesBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
+    vezCmdBindPipeline(m_occluderPipeline.pipeline);
+    vezCmdBindBuffer(m_cameraMatricesBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
     VkDeviceSize zero = 0;
-    vezCmdBindVertexBuffers(m_sceneRenderCmdBuf, 0, 1, &m_occluderBuffer, &zero);
-    vezCmdDraw(m_sceneRenderCmdBuf, 6, 1, 0, 0);
+    vezCmdBindVertexBuffers(0, 1, &m_occluderBuffer, &zero);
+    vezCmdDraw(6, 1, 0, 0);
 
     // Draw the model.
-    vezCmdBindPipeline(m_sceneRenderCmdBuf, m_occlusionScenePipeline.pipeline);
-    vezCmdBindBuffer(m_sceneRenderCmdBuf, m_cameraMatricesBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
-    vezCmdBindBuffer(m_sceneRenderCmdBuf, m_modelDataBuffer, 0, VK_WHOLE_SIZE, 0, 1, 0);
+    vezCmdBindPipeline(m_occlusionScenePipeline.pipeline);
+    vezCmdBindBuffer(m_cameraMatricesBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
+    vezCmdBindBuffer(m_modelDataBuffer, 0, VK_WHOLE_SIZE, 0, 1, 0);
     uint32_t visibleObjectsCount = 0;
     for (auto i = 0U; i < m_instanceCount; ++i)
     {
         bool visible = (!visibilityData || visibilityData[i] != 0);
         if (visible)
         {
-            vezCmdPushConstants(m_sceneRenderCmdBuf, 0, sizeof(uint32_t), &i);
-            m_model.Draw(m_sceneRenderCmdBuf);
+            vezCmdPushConstants(0, sizeof(uint32_t), &i);
+            m_model.Draw();
             ++visibleObjectsCount;
         }
     }
@@ -458,10 +458,10 @@ void OcclusionCulling::SceneRenderPass()
     AppBase::SetWindowTitle("Visible objects " + std::to_string(visibleObjectsCount));
 
     // End the render pass.
-    vezCmdEndRenderPass(m_sceneRenderCmdBuf);
+    vezCmdEndRenderPass();
 
     // End recording.
-    if (vezEndCommandBuffer(m_sceneRenderCmdBuf) != VK_SUCCESS)
+    if (vezEndCommandBuffer() != VK_SUCCESS)
         FATAL("vkEndCommandBuffer failed");
 
     // Unmap the visibility buffer and release the associated fence.
@@ -482,7 +482,7 @@ void OcclusionCulling::OcclusionTestPass()
         FATAL("vkBeginCommandBuffer failed");
 
     // Clear visibility buffer.
-    vezCmdFillBuffer(m_occlusionTestCmdBuf, m_visibilityBuffer, 0, sizeof(uint32_t) * m_instanceCount, 0U);
+    vezCmdFillBuffer(m_visibilityBuffer, 0, sizeof(uint32_t) * m_instanceCount, 0U);
 
     // Get the current window dimensions.
     int width, height;
@@ -491,9 +491,9 @@ void OcclusionCulling::OcclusionTestPass()
     // Set the viewport state and dimensions.    
     VkViewport viewport = { 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
     VkRect2D scissor = { { 0, 0 },{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) } };
-    vezCmdSetViewport(m_occlusionTestCmdBuf, 0, 1, &viewport);
-    vezCmdSetScissor(m_occlusionTestCmdBuf, 0, 1, &scissor);
-    vezCmdSetViewportState(m_occlusionTestCmdBuf, 1);
+    vezCmdSetViewport(0, 1, &viewport);
+    vezCmdSetScissor(0, 1, &scissor);
+    vezCmdSetViewportState(1);
 
     // Define clear values for the swapchain's color and depth attachments.
     std::array<VkClearValue, 2> clearValues = {};
@@ -516,48 +516,48 @@ void OcclusionCulling::OcclusionTestPass()
     beginInfo.framebuffer = AppBase::GetFramebuffer();
     beginInfo.attachmentCount = static_cast<uint32_t>(attachmentReferences.size());
     beginInfo.pAttachments = attachmentReferences.data();
-    vezCmdBeginRenderPass(m_occlusionTestCmdBuf, &beginInfo);
+    vezCmdBeginRenderPass(&beginInfo);
 
     // Bind pipeline and resources.
-    vezCmdBindPipeline(m_occlusionTestCmdBuf, m_occlusionTestPipeline.pipeline);
-    vezCmdBindBuffer(m_occlusionTestCmdBuf, m_cameraMatricesBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
-    vezCmdBindBuffer(m_occlusionTestCmdBuf, m_modelDataBuffer, 0, VK_WHOLE_SIZE, 0, 1, 0);
-    vezCmdBindBuffer(m_occlusionTestCmdBuf, m_visibilityBuffer, 0, VK_WHOLE_SIZE, 0, 2, 0);
+    vezCmdBindPipeline(m_occlusionTestPipeline.pipeline);
+    vezCmdBindBuffer(m_cameraMatricesBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
+    vezCmdBindBuffer(m_modelDataBuffer, 0, VK_WHOLE_SIZE, 0, 1, 0);
+    vezCmdBindBuffer(m_visibilityBuffer, 0, VK_WHOLE_SIZE, 0, 2, 0);
 
     // Set input assembly state.
     VezInputAssemblyState inputAssemblyState = {};
     inputAssemblyState.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
-    vezCmdSetInputAssemblyState(m_occlusionTestCmdBuf, &inputAssemblyState);
+    vezCmdSetInputAssemblyState(&inputAssemblyState);
 
     // Set rasterization state.
     VezRasterizationState rasterizationState = {};
     rasterizationState.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizationState.cullMode = VK_CULL_MODE_NONE;
     rasterizationState.frontFace = VK_FRONT_FACE_CLOCKWISE;
-    vezCmdSetRasterizationState(m_occlusionTestCmdBuf, &rasterizationState);
+    vezCmdSetRasterizationState(&rasterizationState);
 
     // Set depth stencil state.
     VezDepthStencilState depthStencilState = {};
     depthStencilState.depthTestEnable = VK_TRUE;
     depthStencilState.depthWriteEnable = VK_FALSE;
     depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-    vezCmdSetDepthStencilState(m_occlusionTestCmdBuf, &depthStencilState);
+    vezCmdSetDepthStencilState(&depthStencilState);
 
     // Set color blend state.
     VezColorBlendAttachmentState blendAttachmentState = {};    
     VezColorBlendState colorBlendState = {};
     colorBlendState.attachmentCount = 1;
     colorBlendState.pAttachments = &blendAttachmentState;
-    vezCmdSetColorBlendState(m_occlusionTestCmdBuf, &colorBlendState);
+    vezCmdSetColorBlendState(&colorBlendState);
 
     // Draw the model.
-    vezCmdDraw(m_occlusionTestCmdBuf, m_instanceCount, 1, 0, 0);
+    vezCmdDraw(m_instanceCount, 1, 0, 0);
 
     // End the render pass.
-    vezCmdEndRenderPass(m_occlusionTestCmdBuf);
+    vezCmdEndRenderPass();
 
     // End recording.
-    if (vezEndCommandBuffer(m_occlusionTestCmdBuf) != VK_SUCCESS)
+    if (vezEndCommandBuffer() != VK_SUCCESS)
         FATAL("vkEndCommandBuffer failed");
 }
 
@@ -572,9 +572,9 @@ void OcclusionCulling::VisibilityReadbackPass()
     region.srcOffset = 0;
     region.dstOffset = 0;
     region.size = sizeof(uint32_t) * m_instanceCount;
-    vezCmdCopyBuffer(m_visibilityReadbackCmdBuf, m_visibilityBuffer, m_visibilityReadbackBuffer, 1, &region);
+    vezCmdCopyBuffer(m_visibilityBuffer, m_visibilityReadbackBuffer, 1, &region);
 
     // End recording.
-    if (vezEndCommandBuffer(m_visibilityReadbackCmdBuf))
+    if (vezEndCommandBuffer())
         FATAL("vkEndCommandBuffer failed");
 }

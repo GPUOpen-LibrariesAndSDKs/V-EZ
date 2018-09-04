@@ -35,7 +35,7 @@ struct UniformBuffer
 };
 
 SimpleCompute::SimpleCompute()
-    : AppBase("SimpleCompute Sample", 800, 600, 0)
+    : AppBase("SimpleCompute Sample", 800, 600, 0, false)
 {
 
 }
@@ -72,8 +72,8 @@ void SimpleCompute::Draw()
     vezBeginCommandBuffer(m_commandBuffer, VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
 
     // Dispatch compute pipeline.
-    vezCmdBindPipeline(m_commandBuffer, m_computePipeline.pipeline);
-    vezCmdBindBuffer(m_commandBuffer, m_vertexBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
+    vezCmdBindPipeline(m_computePipeline.pipeline);
+    vezCmdBindBuffer(m_vertexBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
     
     struct
     {
@@ -83,10 +83,10 @@ void SimpleCompute::Draw()
 
     pushConstants.vertexCount = static_cast<int>(m_vertexCount);
     pushConstants.theta = m_elapsedTime * 0.5f;
-    vezCmdPushConstants(m_commandBuffer, 0, sizeof(pushConstants), reinterpret_cast<const void*>(&pushConstants));
+    vezCmdPushConstants(0, sizeof(pushConstants), reinterpret_cast<const void*>(&pushConstants));
 
     auto groupCountX = static_cast<uint32_t>(ceilf(m_vertexCount / 64.0f));
-    vezCmdDispatch(m_commandBuffer, groupCountX, 1, 1);
+    vezCmdDispatch(groupCountX, 1, 1);
 
     // Get the window dimensions.
     int width, height;
@@ -97,14 +97,14 @@ void SimpleCompute::Draw()
     UniformBuffer ub = {};
     ub.view = glm::mat4(1.0f);
     ub.projection = glm::ortho(-aspect, aspect, -1.0f, 1.0f);
-    vezCmdUpdateBuffer(m_commandBuffer, m_uniformBuffer, 0, sizeof(UniformBuffer), reinterpret_cast<const void*>(&ub));
+    vezCmdUpdateBuffer(m_uniformBuffer, 0, sizeof(UniformBuffer), reinterpret_cast<const void*>(&ub));
 
     // Set the viewport and scissor states.
     VkViewport viewport = { 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f };
     VkRect2D scissor = { { 0, 0 },{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) } };
-    vezCmdSetViewport(m_commandBuffer, 0, 1, &viewport);
-    vezCmdSetScissor(m_commandBuffer, 0, 1, &scissor);
-    vezCmdSetViewportState(m_commandBuffer, 1);
+    vezCmdSetViewport(0, 1, &viewport);
+    vezCmdSetScissor(0, 1, &scissor);
+    vezCmdSetViewportState(1);
 
     // Define clear values for the swapchain's color and depth attachments.
     std::array<VezAttachmentReference, 2> attachmentReferences = {};
@@ -120,29 +120,29 @@ void SimpleCompute::Draw()
     beginInfo.framebuffer = AppBase::GetFramebuffer();
     beginInfo.attachmentCount = static_cast<uint32_t>(attachmentReferences.size());
     beginInfo.pAttachments = attachmentReferences.data();
-    vezCmdBeginRenderPass(m_commandBuffer, &beginInfo);
+    vezCmdBeginRenderPass(&beginInfo);
 
     // Set the primitive topology to points.
     VezInputAssemblyState inputState = {};
     inputState.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
-    vezCmdSetInputAssemblyState(m_commandBuffer, &inputState);
+    vezCmdSetInputAssemblyState(&inputState);
 
     // Bind the pipeline and associated resources.
-    vezCmdBindPipeline(m_commandBuffer, m_graphicsPipeline.pipeline);
-    vezCmdBindBuffer(m_commandBuffer, m_uniformBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
+    vezCmdBindPipeline(m_graphicsPipeline.pipeline);
+    vezCmdBindBuffer(m_uniformBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
 
     // Bind the vertex buffer.
     VkDeviceSize offset = 0;
-    vezCmdBindVertexBuffers(m_commandBuffer, 0, 1, &m_vertexBuffer, &offset);
+    vezCmdBindVertexBuffers(0, 1, &m_vertexBuffer, &offset);
 
     // Draw the vertices.
-    vezCmdDraw(m_commandBuffer, m_vertexCount, 1, 0, 0);
+    vezCmdDraw(m_vertexCount, 1, 0, 0);
 
     // End the render pass.
-    vezCmdEndRenderPass(m_commandBuffer);
+    vezCmdEndRenderPass();
 
     // End command buffer recording.
-    vezEndCommandBuffer(m_commandBuffer);
+    vezEndCommandBuffer();
 
     // Submit the command buffer to the graphics queue.
     VezSubmitInfo submitInfo = {};
@@ -151,10 +151,12 @@ void SimpleCompute::Draw()
 
     // Request a wait semaphore to pass to present so it waits for rendering to complete.
     VkSemaphore semaphore = VK_NULL_HANDLE;
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &semaphore;
+    //submitInfo.signalSemaphoreCount = 1;
+    //submitInfo.pSignalSemaphores = &semaphore;
     if (vezQueueSubmit(m_graphicsQueue, 1, &submitInfo, nullptr) != VK_SUCCESS)
         FATAL("vkQueueSubmit failed");
+
+    vezDeviceWaitIdle(AppBase::GetDevice());
 
     // Present the swapchain framebuffer to the window.
     VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -162,9 +164,9 @@ void SimpleCompute::Draw()
     auto srcImage = AppBase::GetColorAttachment();
 
     VezPresentInfo presentInfo = {};
-    presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &semaphore;
-    presentInfo.pWaitDstStageMask = &waitDstStageMask;
+    //presentInfo.waitSemaphoreCount = 1;
+    //presentInfo.pWaitSemaphores = &semaphore;
+    //presentInfo.pWaitDstStageMask = &waitDstStageMask;
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = &swapchain;
     presentInfo.pImages = &srcImage;

@@ -27,45 +27,12 @@
 #include "../Common/AppBase.h"
 #include "../Common/Model.h"
 
-typedef struct PipelineDesc
-{
-    VezPipeline pipeline = VK_NULL_HANDLE;
-    std::vector<VkShaderModule> shaderModules;
-} PipelineDesc;
-
-class VulkanMemory : public AppBase
+class PipelineReflection : public AppBase
 {
 public:
-    VulkanMemory();
+    PipelineReflection();
 
 protected:
     void Initialize() final;
-    void Cleanup() final;
-    void Draw() final;
-    void OnResize(int width, int height) final;
-    void Update(float timeElapsed) final;
-
-private:
-    void CreateQuad();
-    void CreateTexture();
-    void CreateSampler();
-    void CreateUniformBuffer();
-    void CreatePipeline();
-    void CreateCommandBuffer();
-
-    struct Buffer
-    {
-        VkBuffer handle;
-        VkDeviceMemory memory;
-    };
-
-    VkQueue m_graphicsQueue = VK_NULL_HANDLE;
-    Buffer m_vertexBuffer = { VK_NULL_HANDLE, VK_NULL_HANDLE };
-    Buffer m_indexBuffer = { VK_NULL_HANDLE, VK_NULL_HANDLE };
-    VkImage m_image = VK_NULL_HANDLE;
-    VkImageView m_imageView = VK_NULL_HANDLE;
-    VkSampler m_sampler = VK_NULL_HANDLE;
-    VkBuffer m_uniformBuffer = VK_NULL_HANDLE;
-    PipelineDesc m_basicPipeline;
-    VkCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
+    void DisplayMember(uint32_t level, const VezMemberInfo* pMemberInfo);
 };

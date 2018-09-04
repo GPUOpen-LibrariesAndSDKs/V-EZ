@@ -64,7 +64,7 @@ private:
     VkBuffer m_uniformBuffer = VK_NULL_HANDLE;
     PipelineDesc m_subPass0Pipeline;
     PipelineDesc m_subPass1Pipeline;
-    VezCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
+    VkCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
 
     struct FramebufferAttachment {
         VkImage image;

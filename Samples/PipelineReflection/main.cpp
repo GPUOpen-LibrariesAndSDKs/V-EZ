@@ -15,18 +15,14 @@
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-#pragma once
+#include "PipelineReflection.h" 
 
-#include <vector>
-#include "VEZ.h"
-
-namespace vez
+int main(int argc, char** argv)
 {
-    extern bool SPIRVReflectResources(const std::vector<uint32_t>& spirv, VkShaderStageFlagBits stage, std::vector<VezPipelineResource>& shaderResources);
-
-    extern void DestroyMemberInfos(VezMemberInfo* pMemberInfo);
+    PipelineReflection app;
+    return app.Run();
 }

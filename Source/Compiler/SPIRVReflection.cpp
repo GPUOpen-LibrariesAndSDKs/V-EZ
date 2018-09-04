@@ -20,11 +20,71 @@
 // THE SOFTWARE.
 //
 #include <algorithm>
+#include <unordered_map>
 #include <spirv_glsl.hpp>
 #include "SPIRVReflection.h"
 
 namespace vez
 {
+    static std::unordered_map<spirv_cross::SPIRType::BaseType, VezBaseType> spirvTypeToVezBaseType = {
+        { spirv_cross::SPIRType::Boolean, VEZ_BASE_TYPE_BOOL },
+        { spirv_cross::SPIRType::Char, VEZ_BASE_TYPE_CHAR },
+        { spirv_cross::SPIRType::Int, VEZ_BASE_TYPE_INT },
+        { spirv_cross::SPIRType::UInt, VEZ_BASE_TYPE_UINT },
+        { spirv_cross::SPIRType::Half, VEZ_BASE_TYPE_HALF },
+        { spirv_cross::SPIRType::Float, VEZ_BASE_TYPE_FLOAT },
+        { spirv_cross::SPIRType::Double, VEZ_BASE_TYPE_DOUBLE },
+        { spirv_cross::SPIRType::Struct, VEZ_BASE_TYPE_STRUCT },
+    };
+
+    static VezMemberInfo* ParseMembers(spirv_cross::CompilerGLSL& compiler, const spirv_cross::SPIRType& spirType)
+    {
+        // Iterate over member hierarchy.
+        VezMemberInfo* pFirstMemberInfo = nullptr;
+        VezMemberInfo* pPrevMemberInfo = nullptr;
+        for (auto i = 0U; i < spirType.member_types.size(); ++i)
+        {
+            // Validate member is of a supported type.
+            const auto& memberType = compiler.get_type(spirType.member_types[i]);
+            if (spirvTypeToVezBaseType.find(memberType.basetype) == spirvTypeToVezBaseType.end())
+                continue;
+
+            // Create a new VezMemberInfo entry.
+            auto mi = new VezMemberInfo;
+            mi->baseType = spirvTypeToVezBaseType.at(memberType.basetype);
+            mi->offset = compiler.type_struct_member_offset(spirType, i);
+            mi->size = compiler.get_declared_struct_member_size(spirType, i);
+            mi->vecSize = memberType.vecsize;
+            mi->arraySize = (memberType.array.size() == 0) ? 1 : memberType.array[0];
+            mi->pNext = nullptr;
+            mi->pMembers = nullptr;
+            memset(mi->name, 0, VK_MAX_DESCRIPTION_SIZE);
+
+            const auto& name = compiler.get_member_name(spirType.self, i);
+            memcpy(mi->name, name.c_str(), name.size());
+
+            // Link current and last member infos.
+            if (pPrevMemberInfo == nullptr)
+                pPrevMemberInfo = mi;
+            else
+                pPrevMemberInfo->pNext = mi;
+
+            // Keep pointer to first member info.
+            if (pFirstMemberInfo == nullptr)
+                pFirstMemberInfo = mi;
+
+            // Update previous member.
+            pPrevMemberInfo = mi;
+
+            // Recursively process members that are structs.
+            if (memberType.basetype == spirv_cross::SPIRType::Struct)
+                mi->pMembers = ParseMembers(compiler, memberType);
+        }
+
+        // Return the first member info created.
+        return pFirstMemberInfo;
+    }
+
     class CustomCompiler : public spirv_cross::CompilerGLSL
     {
     public:
@@ -72,38 +132,21 @@ namespace vez
         // Extract per stage inputs.
         for (auto& resource : resources.stage_inputs)
         {
-            const auto& typeInfo = compiler.get_type_from_variable(resource.id);
+            const auto& spirType = compiler.get_type_from_variable(resource.id);
 
             VezPipelineResource pipelineResource = {};
             pipelineResource.stages = stage;
             pipelineResource.resourceType = VEZ_PIPELINE_RESOURCE_TYPE_INPUT;
             pipelineResource.access = VK_ACCESS_SHADER_READ_BIT;
             pipelineResource.location = compiler.get_decoration(resource.id, spv::DecorationLocation);
-            pipelineResource.vecSize = typeInfo.vecsize;
-            pipelineResource.arraySize = (typeInfo.array.size() == 0) ? 1 : typeInfo.array[0];
+            pipelineResource.vecSize = spirType.vecsize;
+            pipelineResource.arraySize = (spirType.array.size() == 0) ? 1 : spirType.array[0];
 
-            switch (typeInfo.basetype)
-            {
-            case spirv_cross::SPIRType::Int:
-                pipelineResource.baseType = VEZ_PIPELINE_RESOURCE_BASE_TYPE_INT;
-                break;
-
-            case spirv_cross::SPIRType::UInt:
-                pipelineResource.baseType = VEZ_PIPELINE_RESOURCE_BASE_TYPE_UINT;
-                break;
-
-            case spirv_cross::SPIRType::Float:
-                pipelineResource.baseType = VEZ_PIPELINE_RESOURCE_BASE_TYPE_FLOAT;
-                break;
-
-            case spirv_cross::SPIRType::Double:
-                pipelineResource.baseType = VEZ_PIPELINE_RESOURCE_BASE_TYPE_DOUBLE;
-                break;
-
-            default:
+            auto it = spirvTypeToVezBaseType.find(spirType.basetype);
+            if (it == spirvTypeToVezBaseType.end())
                 continue;
-            }
 
+            pipelineResource.baseType = it->second;
             memcpy(pipelineResource.name, resource.name.c_str(), std::min(sizeof(pipelineResource.name), resource.name.length()));
             shaderResources.push_back(pipelineResource);
         }
@@ -111,38 +154,21 @@ namespace vez
         // Extract per stage outputs.
         for (auto& resource : resources.stage_outputs)
         {
-            const auto& typeInfo = compiler.get_type_from_variable(resource.id);
+            const auto& spirType = compiler.get_type_from_variable(resource.id);
 
             VezPipelineResource pipelineResource = {};
             pipelineResource.stages = stage;
             pipelineResource.resourceType = VEZ_PIPELINE_RESOURCE_TYPE_OUTPUT;
             pipelineResource.access = VK_ACCESS_SHADER_WRITE_BIT;
             pipelineResource.location = compiler.get_decoration(resource.id, spv::DecorationLocation);
-            pipelineResource.vecSize = typeInfo.vecsize;
-            pipelineResource.arraySize = (typeInfo.array.size() == 0) ? 1 : typeInfo.array[0];
+            pipelineResource.vecSize = spirType.vecsize;
+            pipelineResource.arraySize = (spirType.array.size() == 0) ? 1 : spirType.array[0];
 
-            switch (typeInfo.basetype)
-            {
-            case spirv_cross::SPIRType::Int:
-                pipelineResource.baseType = VEZ_PIPELINE_RESOURCE_BASE_TYPE_INT;
-                break;
-
-            case spirv_cross::SPIRType::UInt:
-                pipelineResource.baseType = VEZ_PIPELINE_RESOURCE_BASE_TYPE_UINT;
-                break;
-
-            case spirv_cross::SPIRType::Float:
-                pipelineResource.baseType = VEZ_PIPELINE_RESOURCE_BASE_TYPE_FLOAT;
-                break;
-
-            case spirv_cross::SPIRType::Double:
-                pipelineResource.baseType = VEZ_PIPELINE_RESOURCE_BASE_TYPE_DOUBLE;
-                break;
-
-            default:
+            auto it = spirvTypeToVezBaseType.find(spirType.basetype);
+            if (it == spirvTypeToVezBaseType.end())
                 continue;
-            }
 
+            pipelineResource.baseType = it->second;
             memcpy(pipelineResource.name, resource.name.c_str(), std::min(sizeof(pipelineResource.name), resource.name.length()));
             shaderResources.push_back(pipelineResource);
         }
@@ -150,17 +176,7 @@ namespace vez
         // Extract uniform buffers.
         for (auto& resource : resources.uniform_buffers)
         {
-            const auto& typeInfo = compiler.get_type_from_variable(resource.id);
-
-            // Get the size of the uniform buffer block.
-            // TODO: drill through struct hiearchy to correctly compute size.
-            uint32_t size = 0;
-            for (auto i = 0U; i < typeInfo.member_types.size(); ++i)
-            {
-                auto memberType = compiler.get_type(typeInfo.member_types[i]);
-                uint32_t typeSize = (memberType.width >> 3);
-                size += typeSize * memberType.vecsize * ((memberType.array.size() == 0) ? 1 : memberType.array[0]);
-            }
+            const auto& spirType = compiler.get_type_from_variable(resource.id);
 
             VezPipelineResource pipelineResource = {};
             pipelineResource.stages = stage;
@@ -168,46 +184,35 @@ namespace vez
             pipelineResource.access = VK_ACCESS_UNIFORM_READ_BIT;
             pipelineResource.set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
             pipelineResource.binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
-            pipelineResource.arraySize = (typeInfo.array.size() == 0) ? 1 : typeInfo.array[0];
-            pipelineResource.size = size;
+            pipelineResource.arraySize = (spirType.array.size() == 0) ? 1 : spirType.array[0];
+            pipelineResource.size = compiler.get_declared_struct_size(spirType);
             memcpy(pipelineResource.name, resource.name.c_str(), std::min(sizeof(pipelineResource.name), resource.name.length()));
+            pipelineResource.pMembers = ParseMembers(compiler, spirType);
             shaderResources.push_back(pipelineResource);
         }
 
         // Extract storage buffers.
         for (auto& resource : resources.storage_buffers)
         {
-            const auto& typeInfo = compiler.get_type_from_variable(resource.id);
-
-            // Get access flags for variable.
-            auto access = compiler.GetAccessFlags(typeInfo);
-
-            // Get the size of the storage buffer block.
-            // TODO: drill through struct hierarchy to correctly compute size.
-            uint32_t size = 0;
-            for (auto i = 0U; i < typeInfo.member_types.size(); ++i)
-            {
-                auto memberType = compiler.get_type(typeInfo.member_types[i]);
-                uint32_t typeSize = (memberType.width >> 3);
-                size += typeSize * memberType.vecsize * ((memberType.array.size() == 0) ? 1 : memberType.array[0]);
-            }
+            const auto& spirType = compiler.get_type_from_variable(resource.id);
 
             VezPipelineResource pipelineResource = {};
             pipelineResource.stages = stage;
             pipelineResource.resourceType = VEZ_PIPELINE_RESOURCE_TYPE_STORAGE_BUFFER;
-            pipelineResource.access = access;
+            pipelineResource.access = compiler.GetAccessFlags(spirType);
             pipelineResource.set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
             pipelineResource.binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
-            pipelineResource.arraySize = (typeInfo.array.size() == 0) ? 1 : typeInfo.array[0];
-            pipelineResource.size = size;
+            pipelineResource.arraySize = (spirType.array.size() == 0) ? 1 : spirType.array[0];
+            pipelineResource.size = compiler.get_declared_struct_size(spirType);
             memcpy(pipelineResource.name, resource.name.c_str(), std::min(sizeof(pipelineResource.name), resource.name.length()));
+            pipelineResource.pMembers = ParseMembers(compiler, spirType);
             shaderResources.push_back(pipelineResource);
         }
 
         // Extract separate samplers.
         for (auto& resource : resources.separate_samplers)
         {
-            const auto& typeInfo = compiler.get_type_from_variable(resource.id);
+            const auto& spirType = compiler.get_type_from_variable(resource.id);
 
             VezPipelineResource pipelineResource = {};
             pipelineResource.stages = stage;
@@ -215,7 +220,7 @@ namespace vez
             pipelineResource.access = VK_ACCESS_SHADER_READ_BIT;
             pipelineResource.set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
             pipelineResource.binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
-            pipelineResource.arraySize = (typeInfo.array.size() == 0) ? 1 : typeInfo.array[0];
+            pipelineResource.arraySize = (spirType.array.size() == 0) ? 1 : spirType.array[0];
             memcpy(pipelineResource.name, resource.name.c_str(), std::min(sizeof(pipelineResource.name), resource.name.length()));
             shaderResources.push_back(pipelineResource);
         }
@@ -223,15 +228,15 @@ namespace vez
         // Extract sampled images (combined sampler + image or texture buffers).
         for (auto& resource : resources.sampled_images)
         {
-            const auto& typeInfo = compiler.get_type_from_variable(resource.id);
+            const auto& spirType = compiler.get_type_from_variable(resource.id);
 
             VezPipelineResource pipelineResource = {};
             pipelineResource.stages = stage;
-            pipelineResource.resourceType = (typeInfo.image.dim == spv::Dim::DimBuffer) ? VEZ_PIPELINE_RESOURCE_TYPE_UNIFORM_TEXEL_BUFFER : VEZ_PIPELINE_RESOURCE_TYPE_COMBINED_IMAGE_SAMPLER;
+            pipelineResource.resourceType = (spirType.image.dim == spv::Dim::DimBuffer) ? VEZ_PIPELINE_RESOURCE_TYPE_UNIFORM_TEXEL_BUFFER : VEZ_PIPELINE_RESOURCE_TYPE_COMBINED_IMAGE_SAMPLER;
             pipelineResource.access = VK_ACCESS_SHADER_READ_BIT;
             pipelineResource.set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
             pipelineResource.binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
-            pipelineResource.arraySize = (typeInfo.array.size() == 0) ? 1 : typeInfo.array[0];
+            pipelineResource.arraySize = (spirType.array.size() == 0) ? 1 : spirType.array[0];
             memcpy(pipelineResource.name, resource.name.c_str(), std::min(sizeof(pipelineResource.name), resource.name.length()));
             shaderResources.push_back(pipelineResource);
         }
@@ -239,7 +244,7 @@ namespace vez
         // Extract seperate images ('sampled' in vulkan terminology or no sampler attached).
         for (auto& resource : resources.separate_images)
         {
-            const auto& typeInfo = compiler.get_type_from_variable(resource.id);
+            const auto& spirType = compiler.get_type_from_variable(resource.id);
 
             VezPipelineResource pipelineResource = {};
             pipelineResource.stages = stage;
@@ -247,7 +252,7 @@ namespace vez
             pipelineResource.access = VK_ACCESS_SHADER_READ_BIT;
             pipelineResource.set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
             pipelineResource.binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
-            pipelineResource.arraySize = (typeInfo.array.size() == 0) ? 1 : typeInfo.array[0];
+            pipelineResource.arraySize = (spirType.array.size() == 0) ? 1 : spirType.array[0];
             memcpy(pipelineResource.name, resource.name.c_str(), std::min(sizeof(pipelineResource.name), resource.name.length()));
             shaderResources.push_back(pipelineResource);
         }
@@ -261,15 +266,15 @@ namespace vez
             if (nonReadable) access = VK_ACCESS_SHADER_WRITE_BIT;
             else if (nonWriteable) access = VK_ACCESS_SHADER_READ_BIT;
 
-            const auto& typeInfo = compiler.get_type_from_variable(resource.id);
+            const auto& spirType = compiler.get_type_from_variable(resource.id);
 
             VezPipelineResource pipelineResource = {};
             pipelineResource.stages = stage;
-            pipelineResource.resourceType = (typeInfo.image.dim == spv::Dim::DimBuffer) ? VEZ_PIPELINE_RESOURCE_TYPE_STORAGE_TEXEL_BUFFER : VEZ_PIPELINE_RESOURCE_TYPE_STORAGE_IMAGE;
+            pipelineResource.resourceType = (spirType.image.dim == spv::Dim::DimBuffer) ? VEZ_PIPELINE_RESOURCE_TYPE_STORAGE_TEXEL_BUFFER : VEZ_PIPELINE_RESOURCE_TYPE_STORAGE_IMAGE;
             pipelineResource.access = access;
             pipelineResource.set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
             pipelineResource.binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
-            pipelineResource.arraySize = (typeInfo.array.size() == 0) ? 1 : typeInfo.array[0];
+            pipelineResource.arraySize = (spirType.array.size() == 0) ? 1 : spirType.array[0];
             memcpy(pipelineResource.name, resource.name.c_str(), std::min(sizeof(pipelineResource.name), resource.name.length()));
             shaderResources.push_back(pipelineResource);
         }
@@ -292,17 +297,14 @@ namespace vez
         // Extract push constants.
         for (auto& resource : resources.push_constant_buffers)
         {
-            const auto& typeInfo = compiler.get_type_from_variable(resource.id);
+            const auto& spirType = compiler.get_type_from_variable(resource.id);
 
-            // Get the offset and size of the given push constant buffer.
+            // Get the start offset of the push constant buffer since this will differ between shader stages.
             uint32_t offset = ~0;
-            uint32_t size = 0;
-            for (auto i = 0U; i < typeInfo.member_types.size(); ++i)
+            for (auto i = 0U; i < spirType.member_types.size(); ++i)
             {
-                auto memberType = compiler.get_type(typeInfo.member_types[i]);
-                uint32_t typeSize = (memberType.width >> 3);
-                offset = std::min(offset, compiler.get_member_decoration(typeInfo.self, i, spv::DecorationOffset));
-                size += typeSize * memberType.vecsize * memberType.columns * ((memberType.array.size() == 0) ? 1 : memberType.array[0]);
+                auto memberType = compiler.get_type(spirType.member_types[i]);
+                offset = std::min(offset, compiler.get_member_decoration(spirType.self, i, spv::DecorationOffset));
             }
 
             VezPipelineResource pipelineResource = {};
@@ -310,11 +312,26 @@ namespace vez
             pipelineResource.resourceType = VEZ_PIPELINE_RESOURCE_TYPE_PUSH_CONSTANT_BUFFER;
             pipelineResource.access = VK_ACCESS_SHADER_READ_BIT;
             pipelineResource.offset = offset;
-            pipelineResource.size = size;
+            pipelineResource.size = compiler.get_declared_struct_size(spirType);
             memcpy(pipelineResource.name, resource.name.c_str(), std::min(sizeof(pipelineResource.name), resource.name.length()));
+            pipelineResource.pMembers = ParseMembers(compiler, spirType);
             shaderResources.push_back(pipelineResource);
         }
 
         return true;
-    }    
+    }   
+
+    void DestroyMemberInfos(VezMemberInfo* pMemberInfo)
+    {
+        if (!pMemberInfo)
+            return;
+
+        if (pMemberInfo->pMembers)
+            DestroyMemberInfos(const_cast<VezMemberInfo*>(pMemberInfo->pMembers));
+
+        if (pMemberInfo->pNext)
+            DestroyMemberInfos(const_cast<VezMemberInfo*>(pMemberInfo->pNext));
+
+        delete pMemberInfo;
+    }
 }

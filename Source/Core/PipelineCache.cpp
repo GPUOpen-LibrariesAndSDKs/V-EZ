@@ -182,7 +182,15 @@ namespace vez
                 uint32_t typeSize = 0;
                 switch (input.baseType)
                 {
-                case VEZ_PIPELINE_RESOURCE_BASE_TYPE_INT:
+                case VEZ_BASE_TYPE_CHAR:
+                    typeSize = sizeof(char);
+                    if (input.vecSize == 1) attributeDescription.format = VK_FORMAT_R8_SINT;
+                    else if (input.vecSize == 2) attributeDescription.format = VK_FORMAT_R8G8_SINT;
+                    else if (input.vecSize == 3) attributeDescription.format = VK_FORMAT_R8G8B8_SINT;
+                    else if (input.vecSize == 4) attributeDescription.format = VK_FORMAT_R8G8B8A8_SINT;
+                    break;
+
+                case VEZ_BASE_TYPE_INT:
                     typeSize = sizeof(int32_t);
                     if (input.vecSize == 1) attributeDescription.format = VK_FORMAT_R32_SINT;
                     else if (input.vecSize == 2) attributeDescription.format = VK_FORMAT_R32G32_SINT;
@@ -190,7 +198,7 @@ namespace vez
                     else if (input.vecSize == 4) attributeDescription.format = VK_FORMAT_R32G32B32A32_SINT;
                     break;
 
-                case VEZ_PIPELINE_RESOURCE_BASE_TYPE_UINT:
+                case VEZ_BASE_TYPE_UINT:
                     typeSize = sizeof(uint32_t);
                     if (input.vecSize == 1) attributeDescription.format = VK_FORMAT_R32_UINT;
                     else if (input.vecSize == 2) attributeDescription.format = VK_FORMAT_R32G32_UINT;
@@ -198,7 +206,23 @@ namespace vez
                     else if (input.vecSize == 4) attributeDescription.format = VK_FORMAT_R32G32B32A32_UINT;
                     break;
 
-                case VEZ_PIPELINE_RESOURCE_BASE_TYPE_FLOAT:
+                case VEZ_BASE_TYPE_UINT64:
+                    typeSize = sizeof(uint64_t);
+                    if (input.vecSize == 1) attributeDescription.format = VK_FORMAT_R64_UINT;
+                    else if (input.vecSize == 2) attributeDescription.format = VK_FORMAT_R64G64_UINT;
+                    else if (input.vecSize == 3) attributeDescription.format = VK_FORMAT_R64G64B64_UINT;
+                    else if (input.vecSize == 4) attributeDescription.format = VK_FORMAT_R64G64B64A64_UINT;
+                    break;
+
+                case VEZ_BASE_TYPE_HALF:
+                    typeSize = sizeof(uint16_t);
+                    if (input.vecSize == 1) attributeDescription.format = VK_FORMAT_R16_SFLOAT;
+                    else if (input.vecSize == 2) attributeDescription.format = VK_FORMAT_R16G16_SFLOAT;
+                    else if (input.vecSize == 3) attributeDescription.format = VK_FORMAT_R16G16B16_SFLOAT;
+                    else if (input.vecSize == 4) attributeDescription.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+                    break;
+
+                case VEZ_BASE_TYPE_FLOAT:
                     typeSize = sizeof(float);
                     if (input.vecSize == 1) attributeDescription.format = VK_FORMAT_R32_SFLOAT;
                     else if (input.vecSize == 2) attributeDescription.format = VK_FORMAT_R32G32_SFLOAT;
@@ -206,7 +230,7 @@ namespace vez
                     else if (input.vecSize == 4) attributeDescription.format = VK_FORMAT_R32G32B32A32_SFLOAT;
                     break;
 
-                case VEZ_PIPELINE_RESOURCE_BASE_TYPE_DOUBLE:
+                case VEZ_BASE_TYPE_DOUBLE:
                     typeSize = sizeof(double);
                     if (input.vecSize == 1) attributeDescription.format = VK_FORMAT_R64_SFLOAT;
                     else if (input.vecSize == 2) attributeDescription.format = VK_FORMAT_R64G64_SFLOAT;

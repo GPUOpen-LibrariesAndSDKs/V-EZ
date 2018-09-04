@@ -1,0 +1,40 @@
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
+
+#define MAX_LIGHTS 8
+
+layout(push_constant) uniform PushConstants
+{
+    mat4 viewProj;
+} pushConstants;
+
+struct Light
+{
+    vec4 position;
+    vec4 direction;
+    vec4 color;
+};
+
+struct Material
+{
+    vec4 diffuse;
+    vec4 specular;
+};
+
+struct Mesh
+{
+    Material material;
+    mat4 transform;
+};
+
+layout(std430, binding = 0) restrict buffer StorageBuffer
+{
+    Light lights[MAX_LIGHTS];
+    Mesh meshes[];
+};
+
+layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+void main()
+{
+
+}

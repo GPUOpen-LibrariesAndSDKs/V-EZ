@@ -65,17 +65,14 @@ namespace vez
 
         // Fill native Vulkan data structures.
         std::vector<VkSubmitInfo> submitInfos(submitCount);
-        std::vector<VkCommandBuffer> commandBuffers(totalCommandBuffers);
         std::vector<VkSemaphore> waitSemaphores(totalWaitSemaphores);
         std::vector<VkPipelineStageFlags> waitDstStageMasks(totalWaitSemaphores);
         std::vector<VkSemaphore> signalSemaphores(totalSignalSemaphores);
 
-        VkCommandBuffer* pNextCommandBuffer = nullptr;
         VkSemaphore* pNextWaitSemaphore = nullptr;
         VkPipelineStageFlags* pNextWaitDstStageMask = nullptr;
         VkSemaphore* pNextSignalSemaphore = nullptr;
 
-        if (commandBuffers.size() > 0) pNextCommandBuffer = &commandBuffers[0];
         if (waitSemaphores.size() > 0) pNextWaitSemaphore = &waitSemaphores[0];
         if (waitDstStageMasks.size() > 0) pNextWaitDstStageMask = &waitDstStageMasks[0];
         if (signalSemaphores.size() > 0) pNextSignalSemaphore = &signalSemaphores[0];
@@ -86,20 +83,9 @@ namespace vez
             // Set submit info parameters to default values.
             submitInfos[i] = {};
             submitInfos[i].sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-            // Copy command buffer handles.
-            for (auto k = 0U; k < pSubmits[i].commandBufferCount; ++k)
-            {
-                if (!submitInfos[i].pCommandBuffers)
-                    submitInfos[i].pCommandBuffers = pNextCommandBuffer;
-
-                auto cmdBuffer = reinterpret_cast<CommandBuffer*>(pSubmits[i].pCommandBuffers[k]);
-                *pNextCommandBuffer = cmdBuffer->GetHandle();
-
-                ++pNextCommandBuffer;
-                ++submitInfos[i].commandBufferCount;
-            }
-
+            submitInfos[i].commandBufferCount = pSubmits[i].commandBufferCount;
+            submitInfos[i].pCommandBuffers = pSubmits[i].pCommandBuffers;
+           
             // Copy wait semaphores.
             for (auto k = 0U; k < pSubmits[i].waitSemaphoreCount; ++k)
             {
@@ -235,9 +221,10 @@ namespace vez
         }
 
         // Submit command buffer to queue.
+        auto cmdBufferHandle = commandBuffer->GetHandle();
         VezSubmitInfo submitInfo = {};
         submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = reinterpret_cast<const VezCommandBuffer*>(&commandBuffer);
+        submitInfo.pCommandBuffers = &cmdBufferHandle;
         submitInfo.waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size());
         submitInfo.pWaitSemaphores = waitSemaphores.data();
         submitInfo.pWaitDstStageMask = waitDstStageMasks.data();
@@ -245,12 +232,12 @@ namespace vez
         std::vector<VkSemaphore> signalSemaphores(1 + pPresentInfo->signalSemaphoreCount, VK_NULL_HANDLE);
         submitInfo.signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size());
         submitInfo.pSignalSemaphores = signalSemaphores.data();
-
+        
         VkFence fence = VK_NULL_HANDLE;
         result = Submit(1, &submitInfo, &fence);
         if (result != VK_SUCCESS)
             return result;
-
+   
         // Push command buffer and fence onto queue.
         m_presentCmdBuffers.push(std::make_tuple(commandBuffer, fence));
 

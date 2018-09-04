@@ -57,7 +57,7 @@ private:
     VkBuffer m_uniformBuffer = VK_NULL_HANDLE;
     PipelineDesc m_computePipeline;
     PipelineDesc m_graphicsPipeline;
-    VezCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
+    VkCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
     float m_elapsedTime = 0.0f;
     const uint32_t m_vertexCount = 2000;
 };

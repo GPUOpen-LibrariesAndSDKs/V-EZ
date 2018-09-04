@@ -81,6 +81,7 @@ namespace vez
         OBJECT_LOOKUP_DEFINITION(VkDevice, Device);
         OBJECT_LOOKUP_DEFINITION(VkQueue, Queue);
         OBJECT_LOOKUP_DEFINITION(VkSwapchainKHR, Swapchain);
+        OBJECT_LOOKUP_DEFINITION(VkCommandBuffer, CommandBuffer);
         OBJECT_LOOKUP_DEFINITION(VkShaderModule, ShaderModule);
         OBJECT_LOOKUP_DEFINITION(VkBuffer, Buffer);
         OBJECT_LOOKUP_DEFINITION(VkBufferView, BufferView);

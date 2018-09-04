@@ -29,7 +29,6 @@ extern "C" {
 #endif
 
 VK_DEFINE_NON_DISPATCHABLE_HANDLE(VezSwapchain)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VezCommandBuffer)
 VK_DEFINE_NON_DISPATCHABLE_HANDLE(VezPipeline)
 VK_DEFINE_NON_DISPATCHABLE_HANDLE(VezFramebuffer)
 VK_DEFINE_NON_DISPATCHABLE_HANDLE(VezVertexInputFormat)
@@ -44,6 +43,19 @@ typedef enum VezMemoryFlagsBits
     VEZ_MEMORY_NO_ALLOCATION = 0x000000010,
 } VezMemoryFlagsBits;
 typedef VkFlags VezMemoryFlags;
+
+typedef enum VezBaseType
+{
+    VEZ_BASE_TYPE_BOOL = 0,
+    VEZ_BASE_TYPE_CHAR = 1,
+    VEZ_BASE_TYPE_INT = 2,
+    VEZ_BASE_TYPE_UINT = 3,
+    VEZ_BASE_TYPE_UINT64 = 4,
+    VEZ_BASE_TYPE_HALF = 5,
+    VEZ_BASE_TYPE_FLOAT = 6,
+    VEZ_BASE_TYPE_DOUBLE = 7,
+    VEZ_BASE_TYPE_STRUCT = 8,
+} VezBaseType;
 
 typedef enum VezPipelineResourceType
 {
@@ -60,14 +72,6 @@ typedef enum VezPipelineResourceType
     VEZ_PIPELINE_RESOURCE_TYPE_INPUT_ATTACHMENT = 10,
     VEZ_PIPELINE_RESOURCE_TYPE_PUSH_CONSTANT_BUFFER = 11,
 } VezPipelineResourceType;
-
-typedef enum VezPipelineResourceBaseType
-{
-    VEZ_PIPELINE_RESOURCE_BASE_TYPE_INT = 0,
-    VEZ_PIPELINE_RESOURCE_BASE_TYPE_UINT = 1,
-    VEZ_PIPELINE_RESOURCE_BASE_TYPE_FLOAT = 2,
-    VEZ_PIPELINE_RESOURCE_BASE_TYPE_DOUBLE = 3,
-} VezPipelineResourceBaseType;
 
 typedef struct VezClearAttachment
 {
@@ -118,7 +122,7 @@ typedef struct VezSubmitInfo
     const VkSemaphore* pWaitSemaphores;
     const VkPipelineStageFlags* pWaitDstStageMask;
     uint32_t commandBufferCount;
-    const VezCommandBuffer* pCommandBuffers;
+    const VkCommandBuffer* pCommandBuffers;
     uint32_t signalSemaphoreCount;
     VkSemaphore* pSignalSemaphores;
 } VezSubmitInfo;
@@ -183,11 +187,23 @@ typedef struct VezComputePipelineCreateInfo
     const VezPipelineShaderStageCreateInfo* pStage;
 } VezComputePipelineCreateInfo;
 
+typedef struct VezMemberInfo
+{
+    VezBaseType baseType;
+    uint32_t offset;
+    uint32_t size;
+    uint32_t vecSize;
+    uint32_t arraySize;
+    char name[VK_MAX_DESCRIPTION_SIZE];
+    const VezMemberInfo* pNext;
+    const VezMemberInfo* pMembers;
+} VezMemberInfo;
+
 typedef struct VezPipelineResource
 {
     VkShaderStageFlags stages;
     VezPipelineResourceType resourceType;
-    VezPipelineResourceBaseType baseType;
+    VezBaseType baseType;
     VkAccessFlags access;
     uint32_t set;
     uint32_t binding;
@@ -196,8 +212,9 @@ typedef struct VezPipelineResource
     uint32_t vecSize;
     uint32_t arraySize;
     uint32_t offset;
-    uint32_t size;
+    uint32_t size;    
     char name[VK_MAX_DESCRIPTION_SIZE];
+    const VezMemberInfo* pMembers;
 } VezPipelineResource;
 
 typedef struct VezVertexInputFormatCreateInfo
@@ -520,7 +537,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vezGetShaderModuleBinary(VkShaderModule shaderMod
 VKAPI_ATTR VkResult VKAPI_CALL vezCreateGraphicsPipeline(VkDevice device, const VezGraphicsPipelineCreateInfo* pCreateInfo, VezPipeline* pPipeline);
 VKAPI_ATTR VkResult VKAPI_CALL vezCreateComputePipeline(VkDevice device, const VezComputePipelineCreateInfo* pCreateInfo, VezPipeline* pPipeline);
 VKAPI_ATTR void VKAPI_CALL vezDestroyPipeline(VkDevice device, VezPipeline pipeline);
-VKAPI_ATTR VkResult VKAPI_CALL vezEnumeratePipelineResources(VezPipeline pipeline, uint32_t* pResourceCount, VezPipelineResource* pResources);
+VKAPI_ATTR VkResult VKAPI_CALL vezEnumeratePipelineResources(VezPipeline pipeline, uint32_t* pResourceCount, VezPipelineResource* ppResources);
 VKAPI_ATTR VkResult VKAPI_CALL vezGetPipelineResource(VezPipeline pipeline, const char* name, VezPipelineResource* pResource);
 
 // Vertex input format functions.
@@ -554,57 +571,57 @@ VKAPI_ATTR VkResult VKAPI_CALL vezCreateFramebuffer(VkDevice device, const VezFr
 VKAPI_ATTR void VKAPI_CALL vezDestroyFramebuffer(VkDevice device, VezFramebuffer framebuffer);
 
 // Command buffer functions.
-VKAPI_ATTR VkResult VKAPI_CALL vezAllocateCommandBuffers(VkDevice device, const VezCommandBufferAllocateInfo* pAllocateInfo, VezCommandBuffer* pCommandBuffers);
-VKAPI_ATTR void VKAPI_CALL vezFreeCommandBuffers(VkDevice device, uint32_t commandBufferCount, const VezCommandBuffer* pCommandBuffers);
-VKAPI_ATTR VkResult VKAPI_CALL vezBeginCommandBuffer(VezCommandBuffer commandBuffer, VkCommandBufferUsageFlags flags);
-VKAPI_ATTR VkResult VKAPI_CALL vezEndCommandBuffer(VezCommandBuffer commandBuffer);
-VKAPI_ATTR VkResult VKAPI_CALL vezResetCommandBuffer(VezCommandBuffer commandBuffer);
-VKAPI_ATTR void VKAPI_CALL vezCmdBeginRenderPass(VezCommandBuffer commandBuffer, const VezRenderPassBeginInfo* pBeginInfo);
-VKAPI_ATTR void VKAPI_CALL vezCmdNextSubpass(VezCommandBuffer commandBuffer);
-VKAPI_ATTR void VKAPI_CALL vezCmdEndRenderPass(VezCommandBuffer commandBuffer);
-VKAPI_ATTR void VKAPI_CALL vezCmdBindPipeline(VezCommandBuffer commandBuffer, VezPipeline pipeline);
-VKAPI_ATTR void VKAPI_CALL vezCmdPushConstants(VezCommandBuffer commandBuffer, uint32_t offset, uint32_t size, const void* pValues);
-VKAPI_ATTR void VKAPI_CALL vezCmdBindBuffer(VezCommandBuffer commandBuffer, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range, uint32_t set, uint32_t binding, uint32_t arrayElement);
-VKAPI_ATTR void VKAPI_CALL vezCmdBindBufferView(VezCommandBuffer commandBuffer, VkBufferView bufferView, uint32_t set, uint32_t binding, uint32_t arrayElement);
-VKAPI_ATTR void VKAPI_CALL vezCmdBindImageView(VezCommandBuffer commandBuffer, VkImageView imageView, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);
-VKAPI_ATTR void VKAPI_CALL vezCmdBindSampler(VezCommandBuffer commandBuffer, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);
-VKAPI_ATTR void VKAPI_CALL vezCmdBindVertexBuffers(VezCommandBuffer commandBuffer, uint32_t firstBinding, uint32_t bindingCount, const VkBuffer* pBuffers, const VkDeviceSize* pOffsets);
-VKAPI_ATTR void VKAPI_CALL vezCmdBindIndexBuffer(VezCommandBuffer commandBuffer, VkBuffer buffer, VkDeviceSize offset, VkIndexType indexType);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetVertexInputFormat(VezCommandBuffer commandBuffer, VezVertexInputFormat format);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetViewportState(VezCommandBuffer commandBuffer, uint32_t viewportCount);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetInputAssemblyState(VezCommandBuffer commandBuffer, const VezInputAssemblyState* pStateInfo);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetRasterizationState(VezCommandBuffer commandBuffer, const VezRasterizationState* pStateInfo);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetMultisampleState(VezCommandBuffer commandBuffer, const VezMultisampleState* pStateInfo);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetDepthStencilState(VezCommandBuffer commandBuffer, const VezDepthStencilState* pStateInfo);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetColorBlendState(VezCommandBuffer commandBuffer, const VezColorBlendState* pStateInfo);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetViewport(VezCommandBuffer commandBuffer, uint32_t firstViewport, uint32_t viewportCount, const VkViewport* pViewports);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetScissor(VezCommandBuffer commandBuffer, uint32_t firstScissor, uint32_t scissorCount, const VkRect2D* pScissors);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetLineWidth(VezCommandBuffer commandBuffer, float lineWidth);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetDepthBias(VezCommandBuffer commandBuffer, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetBlendConstants(VezCommandBuffer commandBuffer, const float blendConstants[4]);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetDepthBounds(VezCommandBuffer commandBuffer, float minDepthBounds, float maxDepthBounds);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetStencilCompareMask(VezCommandBuffer commandBuffer, VkStencilFaceFlags faceMask, uint32_t compareMask);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetStencilWriteMask(VezCommandBuffer commandBuffer, VkStencilFaceFlags faceMask, uint32_t writeMask);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetStencilReference(VezCommandBuffer commandBuffer, VkStencilFaceFlags faceMask, uint32_t reference);
-VKAPI_ATTR void VKAPI_CALL vezCmdDraw(VezCommandBuffer commandBuffer, uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
-VKAPI_ATTR void VKAPI_CALL vezCmdDrawIndexed(VezCommandBuffer commandBuffer, uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance);
-VKAPI_ATTR void VKAPI_CALL vezCmdDrawIndirect(VezCommandBuffer commandBuffer, VkBuffer buffer, VkDeviceSize offset, uint32_t drawCount, uint32_t stride);
-VKAPI_ATTR void VKAPI_CALL vezCmdDrawIndexedIndirect(VezCommandBuffer commandBuffer, VkBuffer buffer, VkDeviceSize offset, uint32_t drawCount, uint32_t stride);
-VKAPI_ATTR void VKAPI_CALL vezCmdDispatch(VezCommandBuffer commandBuffer, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ);
-VKAPI_ATTR void VKAPI_CALL vezCmdDispatchIndirect(VezCommandBuffer commandBuffer, VkBuffer buffer, VkDeviceSize offset);
-VKAPI_ATTR void VKAPI_CALL vezCmdCopyBuffer(VezCommandBuffer commandBuffer, VkBuffer srcBuffer, VkBuffer dstBuffer, uint32_t regionCount, const VezBufferCopy* pRegions);
-VKAPI_ATTR void VKAPI_CALL vezCmdCopyImage(VezCommandBuffer commandBuffer, VkImage srcImage, VkImage dstImage, uint32_t regionCount, const VezImageCopy* pRegions);
-VKAPI_ATTR void VKAPI_CALL vezCmdBlitImage(VezCommandBuffer commandBuffer, VkImage srcImage, VkImage dstImage, uint32_t regionCount, const VezImageBlit* pRegions, VkFilter filter);
-VKAPI_ATTR void VKAPI_CALL vezCmdCopyBufferToImage(VezCommandBuffer commandBuffer, VkBuffer srcBuffer, VkImage dstImage, uint32_t regionCount, const VezBufferImageCopy* pRegions);
-VKAPI_ATTR void VKAPI_CALL vezCmdCopyImageToBuffer(VezCommandBuffer commandBuffer, VkImage srcImage, VkBuffer dstBuffer, uint32_t regionCount, const VezBufferImageCopy* pRegions);
-VKAPI_ATTR void VKAPI_CALL vezCmdUpdateBuffer(VezCommandBuffer commandBuffer, VkBuffer dstBuffer, VkDeviceSize dstOffset, VkDeviceSize dataSize, const void* pData);
-VKAPI_ATTR void VKAPI_CALL vezCmdFillBuffer(VezCommandBuffer commandBuffer, VkBuffer dstBuffer, VkDeviceSize dstOffset, VkDeviceSize size, uint32_t data);
-VKAPI_ATTR void VKAPI_CALL vezCmdClearColorImage(VezCommandBuffer commandBuffer, VkImage image,  const VkClearColorValue* pColor, uint32_t rangeCount, const VezImageSubresourceRange* pRanges);
-VKAPI_ATTR void VKAPI_CALL vezCmdClearDepthStencilImage(VezCommandBuffer commandBuffer, VkImage image, const VkClearDepthStencilValue* pDepthStencil, uint32_t rangeCount, const VezImageSubresourceRange* pRanges);
-VKAPI_ATTR void VKAPI_CALL vezCmdClearAttachments(VezCommandBuffer commandBuffer, uint32_t attachmentCount, const VezClearAttachment* pAttachments, uint32_t rectCount, const VkClearRect* pRects);
-VKAPI_ATTR void VKAPI_CALL vezCmdResolveImage(VezCommandBuffer commandBuffer, VkImage srcImage, VkImage dstImage, uint32_t regionCount, const VezImageResolve* pRegions);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetEvent(VezCommandBuffer commandBuffer, VkEvent event, VkPipelineStageFlags stageMask);
-VKAPI_ATTR void VKAPI_CALL vezCmdResetEvent(VezCommandBuffer commandBuffer, VkEvent event, VkPipelineStageFlags stageMask);
+VKAPI_ATTR VkResult VKAPI_CALL vezAllocateCommandBuffers(VkDevice device, const VezCommandBufferAllocateInfo* pAllocateInfo, VkCommandBuffer* pCommandBuffers);
+VKAPI_ATTR void VKAPI_CALL vezFreeCommandBuffers(VkDevice device, uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers);
+VKAPI_ATTR VkResult VKAPI_CALL vezBeginCommandBuffer(VkCommandBuffer commandBuffer, VkCommandBufferUsageFlags flags);
+VKAPI_ATTR VkResult VKAPI_CALL vezEndCommandBuffer();
+VKAPI_ATTR VkResult VKAPI_CALL vezResetCommandBuffer(VkCommandBuffer commandBuffer);
+VKAPI_ATTR void VKAPI_CALL vezCmdBeginRenderPass(const VezRenderPassBeginInfo* pBeginInfo);
+VKAPI_ATTR void VKAPI_CALL vezCmdNextSubpass();
+VKAPI_ATTR void VKAPI_CALL vezCmdEndRenderPass();
+VKAPI_ATTR void VKAPI_CALL vezCmdBindPipeline(VezPipeline pipeline);
+VKAPI_ATTR void VKAPI_CALL vezCmdPushConstants(uint32_t offset, uint32_t size, const void* pValues);
+VKAPI_ATTR void VKAPI_CALL vezCmdBindBuffer(VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range, uint32_t set, uint32_t binding, uint32_t arrayElement);
+VKAPI_ATTR void VKAPI_CALL vezCmdBindBufferView(VkBufferView bufferView, uint32_t set, uint32_t binding, uint32_t arrayElement);
+VKAPI_ATTR void VKAPI_CALL vezCmdBindImageView(VkImageView imageView, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);
+VKAPI_ATTR void VKAPI_CALL vezCmdBindSampler(VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement);
+VKAPI_ATTR void VKAPI_CALL vezCmdBindVertexBuffers(uint32_t firstBinding, uint32_t bindingCount, const VkBuffer* pBuffers, const VkDeviceSize* pOffsets);
+VKAPI_ATTR void VKAPI_CALL vezCmdBindIndexBuffer(VkBuffer buffer, VkDeviceSize offset, VkIndexType indexType);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetVertexInputFormat(VezVertexInputFormat format);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetViewportState(uint32_t viewportCount);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetInputAssemblyState(const VezInputAssemblyState* pStateInfo);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetRasterizationState(const VezRasterizationState* pStateInfo);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetMultisampleState(const VezMultisampleState* pStateInfo);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetDepthStencilState(const VezDepthStencilState* pStateInfo);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetColorBlendState(const VezColorBlendState* pStateInfo);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetViewport(uint32_t firstViewport, uint32_t viewportCount, const VkViewport* pViewports);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetScissor(uint32_t firstScissor, uint32_t scissorCount, const VkRect2D* pScissors);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetLineWidth(float lineWidth);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetBlendConstants(const float blendConstants[4]);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetDepthBounds(float minDepthBounds, float maxDepthBounds);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetStencilCompareMask(VkStencilFaceFlags faceMask, uint32_t compareMask);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetStencilWriteMask(VkStencilFaceFlags faceMask, uint32_t writeMask);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetStencilReference(VkStencilFaceFlags faceMask, uint32_t reference);
+VKAPI_ATTR void VKAPI_CALL vezCmdDraw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
+VKAPI_ATTR void VKAPI_CALL vezCmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance);
+VKAPI_ATTR void VKAPI_CALL vezCmdDrawIndirect(VkBuffer buffer, VkDeviceSize offset, uint32_t drawCount, uint32_t stride);
+VKAPI_ATTR void VKAPI_CALL vezCmdDrawIndexedIndirect(VkBuffer buffer, VkDeviceSize offset, uint32_t drawCount, uint32_t stride);
+VKAPI_ATTR void VKAPI_CALL vezCmdDispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ);
+VKAPI_ATTR void VKAPI_CALL vezCmdDispatchIndirect(VkBuffer buffer, VkDeviceSize offset);
+VKAPI_ATTR void VKAPI_CALL vezCmdCopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, uint32_t regionCount, const VezBufferCopy* pRegions);
+VKAPI_ATTR void VKAPI_CALL vezCmdCopyImage(VkImage srcImage, VkImage dstImage, uint32_t regionCount, const VezImageCopy* pRegions);
+VKAPI_ATTR void VKAPI_CALL vezCmdBlitImage(VkImage srcImage, VkImage dstImage, uint32_t regionCount, const VezImageBlit* pRegions, VkFilter filter);
+VKAPI_ATTR void VKAPI_CALL vezCmdCopyBufferToImage(VkBuffer srcBuffer, VkImage dstImage, uint32_t regionCount, const VezBufferImageCopy* pRegions);
+VKAPI_ATTR void VKAPI_CALL vezCmdCopyImageToBuffer(VkImage srcImage, VkBuffer dstBuffer, uint32_t regionCount, const VezBufferImageCopy* pRegions);
+VKAPI_ATTR void VKAPI_CALL vezCmdUpdateBuffer(VkBuffer dstBuffer, VkDeviceSize dstOffset, VkDeviceSize dataSize, const void* pData);
+VKAPI_ATTR void VKAPI_CALL vezCmdFillBuffer(VkBuffer dstBuffer, VkDeviceSize dstOffset, VkDeviceSize size, uint32_t data);
+VKAPI_ATTR void VKAPI_CALL vezCmdClearColorImage(VkImage image,  const VkClearColorValue* pColor, uint32_t rangeCount, const VezImageSubresourceRange* pRanges);
+VKAPI_ATTR void VKAPI_CALL vezCmdClearDepthStencilImage(VkImage image, const VkClearDepthStencilValue* pDepthStencil, uint32_t rangeCount, const VezImageSubresourceRange* pRanges);
+VKAPI_ATTR void VKAPI_CALL vezCmdClearAttachments(uint32_t attachmentCount, const VezClearAttachment* pAttachments, uint32_t rectCount, const VkClearRect* pRects);
+VKAPI_ATTR void VKAPI_CALL vezCmdResolveImage(VkImage srcImage, VkImage dstImage, uint32_t regionCount, const VezImageResolve* pRegions);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetEvent(VkEvent event, VkPipelineStageFlags stageMask);
+VKAPI_ATTR void VKAPI_CALL vezCmdResetEvent(VkEvent event, VkPipelineStageFlags stageMask);
 
 #ifdef __cplusplus
 }
