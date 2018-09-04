@@ -141,6 +141,7 @@ namespace vez
             pipelineResource.access = VK_ACCESS_SHADER_READ_BIT;
             pipelineResource.location = compiler.get_decoration(resource.id, spv::DecorationLocation);
             pipelineResource.vecSize = spirType.vecsize;
+            pipelineResource.columns = spirType.columns;
             pipelineResource.arraySize = (spirType.array.size() == 0) ? 1 : spirType.array[0];
 
             auto it = spirvTypeToVezBaseType.find(spirType.basetype);
@@ -163,6 +164,7 @@ namespace vez
             pipelineResource.access = VK_ACCESS_SHADER_WRITE_BIT;
             pipelineResource.location = compiler.get_decoration(resource.id, spv::DecorationLocation);
             pipelineResource.vecSize = spirType.vecsize;
+            pipelineResource.columns = spirType.columns;
             pipelineResource.arraySize = (spirType.array.size() == 0) ? 1 : spirType.array[0];
 
             auto it = spirvTypeToVezBaseType.find(spirType.basetype);
