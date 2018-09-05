@@ -275,6 +275,7 @@ typedef struct VezBufferViewCreateInfo
 typedef struct VezImageCreateInfo
 {
     const void* pNext;
+    VkImageCreateFlags flags;
     VkImageType imageType;
     VkFormat format;
     VkExtent3D extent;

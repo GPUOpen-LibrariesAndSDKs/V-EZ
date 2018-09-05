@@ -496,6 +496,7 @@ namespace vez
         VkImageCreateInfo imageCreateInfo = {};
         imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageCreateInfo.pNext = pCreateInfo->pNext;
+        imageCreateInfo.flags = pCreateInfo->flags;
         imageCreateInfo.imageType = pCreateInfo->imageType;
         imageCreateInfo.format = pCreateInfo->format;
         memcpy(&imageCreateInfo.extent, &pCreateInfo->extent, sizeof(VkExtent3D));
