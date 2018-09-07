@@ -28,7 +28,7 @@
 #include <VEZ.h>
 #include <GLFW/glfw3.h>
 
-#define FATAL(msg) { std::cout << __FUNCTION__ << " (" << __LINE__ << ") " << msg << "\n"; system("pause"); exit(1); }
+#define FATAL(msg) { std::cout << __FUNCTION__ << " (" << __LINE__ << ") " << msg << "\n"; exit(1); }
 
 class Window
 {

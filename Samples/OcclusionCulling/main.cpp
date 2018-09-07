@@ -24,7 +24,5 @@
 int main(int argc, char** argv)
 {
     OcclusionCulling app;
-    auto result = app.Run();
-    system("pause");
-    return result;
+    return app.Run();
 }
