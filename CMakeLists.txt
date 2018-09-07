@@ -31,8 +31,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(VEZ_COMPILE_SAMPLES "Compile sample demos" ON)
 
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
 include(External/SPIRV-Cross.cmake)
 set_target_properties(spirv-cross-core PROPERTIES FOLDER External/SPIRV-Cross)
 set_target_properties(spirv-cross-glsl PROPERTIES FOLDER External/SPIRV-Cross)
@@ -48,4 +46,5 @@ add_subdirectory(Source)
 
 if(VEZ_COMPILE_SAMPLES)
     add_subdirectory(Samples)
+	file(COPY ${CMAKE_SOURCE_DIR}/Samples/Data/ DESTINATION ${CMAKE_BINARY_DIR}/Samples/Data/)
 endif()
