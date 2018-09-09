@@ -43,7 +43,7 @@ struct UniformBuffer
 };
 
 SimpleQuad::SimpleQuad()
-    : AppBase("SimpleQuad Sample", 500, 400, 0, false)
+    : AppBase("SimpleQuad Sample", 500, 400, 0, true)
 {
     
 }
@@ -325,10 +325,6 @@ void SimpleQuad::CreateCommandBuffer()
     vezCmdBindPipeline(m_basicPipeline.pipeline);
     vezCmdBindBuffer(m_uniformBuffer, 0, VK_WHOLE_SIZE, 0, 0, 0);
     vezCmdBindImageView(m_imageView, m_sampler, 0, 1, 0);
-
-    // Set push constants.
-    float blendColor[3] = { 1.0f, 1.0f, 1.0f };
-    vezCmdPushConstants(0, sizeof(float) * 3, &blendColor[0]);
 
     // Set depth stencil state.
     VezPipelineDepthStencilState depthStencilState = {};
