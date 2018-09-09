@@ -34,13 +34,13 @@ include_directories(
     ${VEZ_ROOT_DIR}/Source
     ${VEZ_ROOT_DIR}/Libs/Assimp/include
     ${VEZ_ROOT_DIR}/Libs/glfw/include
-    ${VEZ_ROOT_DIR}/Libs/glm/include    
+    ${VEZ_ROOT_DIR}/Libs/glm/include
     ${VEZ_ROOT_DIR}/Libs/stb/include
 )
 
 link_directories(
     ${VEZ_ROOT_DIR}/Libs/Assimp/lib/${PLATFORM_LIB}
-    ${VEZ_ROOT_DIR}/Libs/glfw/lib/${PLATFORM_LIB}    
+    ${VEZ_ROOT_DIR}/Libs/glfw/lib/${PLATFORM_LIB}
 )
 
 add_subdirectory(MultiWindow)
