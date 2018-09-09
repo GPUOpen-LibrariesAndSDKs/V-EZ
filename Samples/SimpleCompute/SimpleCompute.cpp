@@ -35,7 +35,7 @@ struct UniformBuffer
 };
 
 SimpleCompute::SimpleCompute()
-    : AppBase("SimpleCompute Sample", 800, 600, 0, false)
+    : AppBase("SimpleCompute Sample", 800, 600, 0, true)
 {
 
 }
