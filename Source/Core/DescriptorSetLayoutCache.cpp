@@ -48,6 +48,8 @@ namespace vez
             bitfield->descriptorType = setResources[i].resourceType;
             bitfield->descriptorCount = setResources[i].arraySize;
             bitfield->stageFlags = setResources[i].stages;
+            
+            ++bitfield;
         }
 
         return hash;
