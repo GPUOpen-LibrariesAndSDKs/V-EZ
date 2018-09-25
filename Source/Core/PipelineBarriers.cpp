@@ -22,7 +22,6 @@
 #include <cstring>
 #include <iostream>
 #include <algorithm>
-#include <bitset>>
 #include "Utility/VkHelpers.h"
 #include "Buffer.h"
 #include "Image.h"
