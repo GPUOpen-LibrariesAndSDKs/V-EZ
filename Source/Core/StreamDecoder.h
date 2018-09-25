@@ -21,6 +21,7 @@
 //
 #pragma once
 #include <vector>
+#include <unordered_map>
 #include "Utility/MemoryStream.h"
 #include "VEZ.h"
 
@@ -88,5 +89,5 @@ namespace vez
         typedef void(StreamDecoder::*EntryPoint)(CommandBuffer&, MemoryStream&);
         std::vector<EntryPoint> m_entryPoints;
         Framebuffer* m_framebuffer = nullptr;
-    };    
+    };
 }

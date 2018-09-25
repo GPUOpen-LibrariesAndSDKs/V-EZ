@@ -403,5 +403,11 @@ namespace vez
             blockSize = blockHeight = pixelHeight = 0U;
             break;
         }
-    }    
+    }
+
+    inline uint32_t FindLSB(uint32_t x)
+    {
+        float f = (float)(x & -(int32_t)x);
+        return (*(uint32_t *)&f >> 23) - 0x7f;
+    }
 }

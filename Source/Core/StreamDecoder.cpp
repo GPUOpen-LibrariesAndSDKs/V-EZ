@@ -163,7 +163,7 @@ namespace vez
                     // Bind the pipeline.
                     vkCmdBindPipeline(commandBuffer.GetHandle(), nextPipelineBinding->bindPoint, nextPipelineBinding->pipeline);
 
-                    // Move to the next pipelien bindingin in the list.
+                    // Move to the next pipelien binding in the list.
                     ++nextPipelineBinding;
                 }
             }
@@ -506,6 +506,9 @@ namespace vez
         stream >> pSrcImage >> pDstImage >> regionCount;
         auto pRegions = stream.ReadPtr<const VezImageCopy>(regionCount);
 
+        VkImageLayout srcLayout, dstLayout;
+        stream >> srcLayout >> dstLayout;
+
         // Call native Vulkan function.
         std::vector<VkImageCopy> regions(regionCount);
         for (auto i = 0U; i < regionCount; ++i)
@@ -524,10 +527,7 @@ namespace vez
             region.dstSubresource.layerCount = pRegions[i].dstSubresource.layerCount;
         }
 
-        vkCmdCopyImage(commandBuffer.GetHandle(),
-            pSrcImage->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-            pDstImage->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            regionCount, regions.data());
+        vkCmdCopyImage(commandBuffer.GetHandle(), pSrcImage->GetHandle(), srcLayout, pDstImage->GetHandle(), dstLayout, regionCount, regions.data());
     }
 
     void StreamDecoder::CmdBlitImage(CommandBuffer& commandBuffer, MemoryStream& stream)
@@ -540,6 +540,9 @@ namespace vez
         stream >> pSrcImage >> pDstImage >> regionCount;
         auto pRegions = stream.ReadPtr<const VezImageBlit>(regionCount);
         stream >> filter;
+
+        VkImageLayout srcLayout, dstLayout;
+        stream >> srcLayout >> dstLayout;
 
         // Call native Vulkan function.
         std::vector<VkImageBlit> regions(regionCount);
@@ -560,10 +563,7 @@ namespace vez
             region.dstSubresource.layerCount = pRegions[i].dstSubresource.layerCount;
         }
 
-        vkCmdBlitImage(commandBuffer.GetHandle(),
-            pSrcImage->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-            pDstImage->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            regionCount, regions.data(), static_cast<VkFilter>(filter));
+        vkCmdBlitImage(commandBuffer.GetHandle(), pSrcImage->GetHandle(), srcLayout, pDstImage->GetHandle(), dstLayout, regionCount, regions.data(), static_cast<VkFilter>(filter));
     }
 
     void StreamDecoder::CmdCopyBufferToImage(CommandBuffer& commandBuffer, MemoryStream& stream)
@@ -591,9 +591,7 @@ namespace vez
             region.imageSubresource.layerCount = pRegions[i].imageSubresource.layerCount;
         }
 
-        vkCmdCopyBufferToImage(commandBuffer.GetHandle(), pSrcBuffer->GetHandle(),
-            pDstImage->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            regionCount, regions.data());
+        vkCmdCopyBufferToImage(commandBuffer.GetHandle(), pSrcBuffer->GetHandle(), pDstImage->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, regionCount, regions.data());
     }
 
     void StreamDecoder::CmdCopyImageToBuffer(CommandBuffer& commandBuffer, MemoryStream& stream)
@@ -621,9 +619,7 @@ namespace vez
             region.imageSubresource.layerCount = pRegions[i].imageSubresource.layerCount;
         }
 
-        vkCmdCopyImageToBuffer(commandBuffer.GetHandle(),
-            pSrcImage->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            pDstBuffer->GetHandle(), regionCount, regions.data());
+        vkCmdCopyImageToBuffer(commandBuffer.GetHandle(), pSrcImage->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, pDstBuffer->GetHandle(), regionCount, regions.data());
     }
 
     void StreamDecoder::CmdUpdateBuffer(CommandBuffer& commandBuffer, MemoryStream& stream)
@@ -672,9 +668,7 @@ namespace vez
             range.layerCount = pRanges[i].layerCount;
         }
 
-        vkCmdClearColorImage(commandBuffer.GetHandle(),
-            pImage->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            reinterpret_cast<const VkClearColorValue*>(pColor), rangeCount, ranges.data());
+        vkCmdClearColorImage(commandBuffer.GetHandle(), pImage->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, reinterpret_cast<const VkClearColorValue*>(pColor), rangeCount, ranges.data());
     }
 
     void StreamDecoder::CmdClearDepthStencilImage(CommandBuffer& commandBuffer, MemoryStream& stream)
@@ -699,9 +693,7 @@ namespace vez
             range.layerCount = pRanges[i].layerCount;
         }
 
-        vkCmdClearDepthStencilImage(commandBuffer.GetHandle(),
-            pImage->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            reinterpret_cast<const VkClearDepthStencilValue*>(pDepthStencil), rangeCount, ranges.data());
+        vkCmdClearDepthStencilImage(commandBuffer.GetHandle(), pImage->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, reinterpret_cast<const VkClearDepthStencilValue*>(pDepthStencil), rangeCount, ranges.data());
 
     }
 
@@ -755,10 +747,7 @@ namespace vez
             region.dstSubresource.layerCount = pRegions[i].dstSubresource.layerCount;
         }
 
-        vkCmdResolveImage(commandBuffer.GetHandle(),
-            pSrcImage->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-            pDstImage->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            regionCount, regions.data());
+        vkCmdResolveImage(commandBuffer.GetHandle(), pSrcImage->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, pDstImage->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, regionCount, regions.data());
 
     }
 

@@ -423,7 +423,7 @@ void AppBase::Exit()
     vezDestroyInstance(m_instance);
 
     // Destroy AppBase instance.
-    delete this;
+    //delete this;
 
     // Force exit the process.
     exit(-1);

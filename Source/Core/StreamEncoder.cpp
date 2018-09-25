@@ -84,36 +84,36 @@ namespace vez
             pipelineBarrier.streamPosition = m_stream.TellP();
             for (auto itr : imageAccesses)
             {
-                // If image layout is the same as the default one, skip it.
-                auto image = reinterpret_cast<Image*>(itr.first);
-                auto& imageAccess = itr.second;
-                if (imageAccess.layout == image->GetDefaultImageLayout())
-                    continue;
+                // Extract the image object from the key.
+                auto image = reinterpret_cast<Image*>(itr.first[0]);
 
-                // Image's layout must be transitioned.
-                VkImageMemoryBarrier barrier = {};
-                barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-                barrier.srcAccessMask = static_cast<VkAccessFlags>(imageAccess.accessMask);
-                barrier.dstAccessMask = barrier.srcAccessMask;
-                barrier.oldLayout = imageAccess.layout;
-                barrier.newLayout = image->GetDefaultImageLayout();
-                barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                barrier.image = image->GetHandle();
-                barrier.subresourceRange.aspectMask = GetImageAspectFlags(image->GetCreateInfo().format);
-                barrier.subresourceRange.baseMipLevel = imageAccess.subresourceRange.baseMipLevel;
-                barrier.subresourceRange.levelCount = imageAccess.subresourceRange.levelCount;
-                barrier.subresourceRange.baseArrayLayer = imageAccess.subresourceRange.baseArrayLayer;
-                barrier.subresourceRange.layerCount = imageAccess.subresourceRange.layerCount;
-                pipelineBarrier.imageBarriers.push_back(barrier);
+                // Every access to the image within the command buffer is transitioned back to the default layout independently of other accesses.
+                auto& accessList = itr.second;
+                for (auto& entry : accessList)
+                {
+                    if (entry.layout == image->GetDefaultImageLayout())
+                        continue;
 
-                // Combine bits for src stage mask.
-                pipelineBarrier.srcStageMask |= imageAccess.stageMask;
+                    VkImageMemoryBarrier barrier = {};
+                    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+                    barrier.dstAccessMask = barrier.srcAccessMask;
+                    barrier.oldLayout = entry.layout;
+                    barrier.newLayout = image->GetDefaultImageLayout();
+                    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                    barrier.image = image->GetHandle();
+                    barrier.subresourceRange.aspectMask = GetImageAspectFlags(image->GetCreateInfo().format);
+                    barrier.subresourceRange.baseMipLevel = entry.subresourceRange.baseMipLevel;
+                    barrier.subresourceRange.levelCount = entry.subresourceRange.levelCount;
+                    barrier.subresourceRange.baseArrayLayer = entry.subresourceRange.baseArrayLayer;
+                    barrier.subresourceRange.layerCount = entry.subresourceRange.layerCount;
+                    pipelineBarrier.imageBarriers.push_back(barrier);
+                    pipelineBarrier.srcStageMask |= entry.stageMask;
+                }
             }
 
             // All final image transitions should block any proceeding commands until the top of the pipeline stage is reached.
             pipelineBarrier.dstStageMask = pipelineBarrier.srcStageMask;
-            //pipelineBarrier.dstStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 
             // If any image barriers were added, add pipeline barrier to stream encoder at current write position.
             if (pipelineBarrier.imageBarriers.size() > 0)
@@ -167,7 +167,7 @@ namespace vez
             attachment.storeOp = pBeginInfo->pAttachments[i].storeOp;
             attachment.stencilLoadOp = pBeginInfo->pAttachments[i].loadOp;
             attachment.stencilStoreOp = pBeginInfo->pAttachments[i].storeOp;
-            attachment.initialLayout = m_pipelineBarriers.GetImageLayout(imageView->GetImage());
+            attachment.initialLayout = m_pipelineBarriers.GetImageLayout(imageView);
 
             // For now, reset final layout to initial layout so as to keep command stream state well defined.
             // Later this should be refactored so finalLayout is stored in the PipelineBarriers object.
@@ -175,7 +175,6 @@ namespace vez
 
             // Copy application supplied information into VkClearValue object.
             auto& clearValue = renderPassDesc.clearValues[i];
-            //memcpy(&clearValue, &pBeginInfo->pAttachments[i].clearValue, sizeof(VkClearValue));
             if (IsDepthStencilFormat(attachment.format))
             {
                 clearValue.depthStencil.depth = pBeginInfo->pAttachments[i].clearValue.depthStencil.depth;
@@ -606,6 +605,12 @@ namespace vez
 
     void StreamEncoder::CmdCopyImage(Image* pSrcImage, Image* pDstImage, uint32_t regionCount, const VezImageCopy* pRegions)
     {
+        // If source and destination images are the same, layouts must be equal.
+        VkImageLayout srcLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        VkImageLayout dstLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        if (pSrcImage == pDstImage)
+            srcLayout = dstLayout = VK_IMAGE_LAYOUT_GENERAL;
+
         // Add image accesses to PipelineBarriers.
         for (auto i = 0U; i < regionCount; ++i)
         {
@@ -615,22 +620,29 @@ namespace vez
             subresourceRange.levelCount = 1;
             subresourceRange.baseArrayLayer = pRegions[i].srcSubresource.baseArrayLayer;
             subresourceRange.layerCount = pRegions[i].srcSubresource.layerCount;
-            m_pipelineBarriers.ImageAccess(m_stream.TellP(), pSrcImage, &subresourceRange, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+            m_pipelineBarriers.ImageAccess(m_stream.TellP(), pSrcImage, &subresourceRange, srcLayout, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
             // Destination image access.
             subresourceRange.baseMipLevel = pRegions[i].dstSubresource.mipLevel;
             subresourceRange.baseArrayLayer = pRegions[i].dstSubresource.baseArrayLayer;
             subresourceRange.layerCount = pRegions[i].dstSubresource.layerCount;
-            m_pipelineBarriers.ImageAccess(m_stream.TellP(), pDstImage, &subresourceRange, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_ACCESS_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+            m_pipelineBarriers.ImageAccess(m_stream.TellP(), pDstImage, &subresourceRange, dstLayout, VK_ACCESS_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
         }
 
         // Encode the command to the memory stream.
         m_stream << COPY_IMAGE << pSrcImage << pDstImage << regionCount;
         m_stream.Write(pRegions, sizeof(VezImageCopy) * regionCount);
+        m_stream << srcLayout << dstLayout;
     }
 
     void StreamEncoder::CmdBlitImage(Image* pSrcImage, Image* pDstImage, uint32_t regionCount, const VezImageBlit* pRegions, VkFilter filter)
     {
+        // If source and destination images are the same, layouts must be equal.
+        VkImageLayout srcLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        VkImageLayout dstLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        if (pSrcImage == pDstImage)
+            srcLayout = dstLayout = VK_IMAGE_LAYOUT_GENERAL;
+        
         // Add image accesses to PipelineBarriers.
         for (auto i = 0U; i < regionCount; ++i)
         {
@@ -640,19 +652,19 @@ namespace vez
             subresourceRange.levelCount = 1;
             subresourceRange.baseArrayLayer = pRegions[i].srcSubresource.baseArrayLayer;
             subresourceRange.layerCount = pRegions[i].srcSubresource.layerCount;
-            m_pipelineBarriers.ImageAccess(m_stream.TellP(), pSrcImage, &subresourceRange, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+            m_pipelineBarriers.ImageAccess(m_stream.TellP(), pSrcImage, &subresourceRange, srcLayout, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
             // Destination image access.
             subresourceRange.baseMipLevel = pRegions[i].dstSubresource.mipLevel;
             subresourceRange.baseArrayLayer = pRegions[i].dstSubresource.baseArrayLayer;
             subresourceRange.layerCount = pRegions[i].dstSubresource.layerCount;
-            m_pipelineBarriers.ImageAccess(m_stream.TellP(), pDstImage, &subresourceRange, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_ACCESS_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+            m_pipelineBarriers.ImageAccess(m_stream.TellP(), pDstImage, &subresourceRange, dstLayout, VK_ACCESS_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
         }
 
         // Encode the command to the memory stream.
         m_stream << BLIT_IMAGE << pSrcImage << pDstImage << regionCount;
         m_stream.Write(pRegions, sizeof(VezImageBlit) * regionCount);
-        m_stream << filter;
+        m_stream << filter << srcLayout << dstLayout;
     }
 
     void StreamEncoder::CmdCopyBufferToImage(Buffer* pSrcBuffer, Image* pDstImage, uint32_t regionCount, const VezBufferImageCopy* pRegions)
@@ -925,13 +937,14 @@ namespace vez
                                 if (bindingInfo.pImageView)
                                 {
                                     imageInfo.imageView = bindingInfo.pImageView->GetHandle();
-
+                                    imageInfo.imageLayout = m_pipelineBarriers.GetImageLayout(bindingInfo.pImageView);
+                                    
                                     switch (dsWrite.descriptorType)
                                     {
                                     case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
                                     case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
-                                        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                                        m_pipelineBarriers.ImageAccess(m_stream.TellP(), bindingInfo.pImageView->GetImage(), &bindingInfo.pImageView->GetSubresourceRange(), imageInfo.imageLayout, accessMask, stageMask);
+                                        //imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                                        //m_pipelineBarriers.ImageAccess(m_stream.TellP(), bindingInfo.pImageView->GetImage(), &bindingInfo.pImageView->GetSubresourceRange(), imageInfo.imageLayout, accessMask, stageMask);
                                         break;
 
                                     case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT:

@@ -19,10 +19,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-#include "SimpleQuad.h" 
+#include "MipmapGeneration.h" 
 
 int main(int argc, char** argv)
 {
-    SimpleQuad app;
+    MipmapGeneration app;
     return app.Run();
 }

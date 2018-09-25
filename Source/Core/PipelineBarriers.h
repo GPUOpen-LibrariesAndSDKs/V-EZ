@@ -21,8 +21,10 @@
 //
 #pragma once
 
+#include <array>
 #include <vector>
 #include <list>
+#include <map>
 #include <unordered_map>
 #include "VEZ.h"
 
@@ -37,13 +39,27 @@ namespace vez
         std::vector<VkImageMemoryBarrier> imageBarriers;
     };
 
+    /* IMPLEMENTATION NOTES:    
+        This class handles tracking resource usages within the same command buffer for automated pipeline barrier insertion.
+    
+        Buffer accesses are tracked per region with read-combining and write-combining done on adjacent 1D ranges.
+        Buffer accesses are stored in an STL map keyed by the buffer's memory address, offset and range.
+    
+        Image accesses are tracked per array layer and mip level ranges.  Read and write combining are performed between 2D ranges where
+        the array layer is treated as the x-coordinate and mip level as the y-coordinate. If two accesses' rectangles intersect, then either
+        their regions are merged into a larger rectangle or a pipeline barrier is inserted if the accesses require it.
+        Images are stored in an STL unordered_map keyed by the image's memory address and value being a linked list of all accesses.
+    
+        This implementation likely needs to be optimized and improved to handle the cases of random scattered accesses across images and buffers as
+        the process of merging and pipeline barrier insertion could become quite expensive.  However in the ideal case where accesses and linear and semi-coallesced,
+        the performance should not be an issue.
+    */
     class PipelineBarriers
     {
     public:
         struct AccessInfo
         {
             uint64_t streamPos;
-            int32_t pipelineBarrierIndex;
             VkAccessFlags accessMask;
             VkPipelineStageFlags stageMask;
         };
@@ -60,24 +76,27 @@ namespace vez
             VezImageSubresourceRange subresourceRange;
         };
 
+        typedef std::array<uint64_t, 3> BufferAccessKey;
+        typedef std::array<uint64_t, 2> ImageAccessKey;
+        typedef std::list<ImageAccessInfo> ImageAccessList;
+
         PipelineBarriers();
+
+        std::map<ImageAccessKey, ImageAccessList>& GetImageAccesses() { return m_imageAccesses; }
 
         std::list<PipelineBarrier>& GetBarriers() { return m_barriers; }
 
-        std::unordered_map<Image*, ImageAccessInfo>& GetImageAccesses() { return m_imageAccesses; }
-
-        VkImageLayout GetImageLayout(Image* pImage);
+        VkImageLayout GetImageLayout(ImageView* pImageView);
 
         void BufferAccess(uint64_t streamPos, Buffer* pBuffer, VkDeviceSize offset, VkDeviceSize range, VkAccessFlags accessMask, VkPipelineStageFlags stageMask);
 
         void ImageAccess(uint64_t streamPos, Image* pImage, const VezImageSubresourceRange* pSubresourceRange, VkImageLayout layout, VkAccessFlags accessMask, VkPipelineStageFlags stageMask);
 
-
         void Clear();
 
     private:
-        std::unordered_map<Buffer*, BufferAccessInfo> m_bufferAccesses;
-        std::unordered_map<Image*, ImageAccessInfo> m_imageAccesses;
+        std::map<BufferAccessKey, BufferAccessInfo> m_bufferAccesses;
+        std::map<ImageAccessKey, ImageAccessList> m_imageAccesses;
         std::list<PipelineBarrier> m_barriers;
     };    
 }

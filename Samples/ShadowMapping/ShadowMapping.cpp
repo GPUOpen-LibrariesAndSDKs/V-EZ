@@ -39,7 +39,7 @@ struct LightMatrices
 };
 
 ShadowMapping::ShadowMapping()
-    : AppBase("ShadowMapping Sample", 500, 400, 0)
+    : AppBase("ShadowMapping Sample", 500, 400, 0, true)
 {
 
 }

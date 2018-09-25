@@ -21,35 +21,24 @@
 #  SOFTWARE.
 # #######################################################################################################################
 
-if(WIN32)
-    set(PLATFORM_LIB win64) 
-    file(COPY ${VEZ_ROOT_DIR}/Libs/assimp/bin/win64/assimp-vc140-mt.dll DESTINATION ${OUTPUT_DIRECTORY})
-elseif(APPLE)
-    set(PLATFORM_LIB osx64)
-elseif(UNIX)
-    set(PLATFORM_LIB linux64)
-endif(WIN32)
+set(COMMON_SOURCES ../Common/AppBase.cpp ../Common/AppBase.h)
+set(SOURCES main.cpp MipmapGeneration.cpp MipmapGeneration.h)
 
-include_directories(
-    ${VEZ_ROOT_DIR}/Source
-    ${VEZ_ROOT_DIR}/Libs/Assimp/include
-    ${VEZ_ROOT_DIR}/Libs/glfw/include
-    ${VEZ_ROOT_DIR}/Libs/glm/include    
-    ${VEZ_ROOT_DIR}/Libs/stb/include
+source_group("Common" FILES ${COMMON_SOURCES})
+source_group("" FILES ${SOURCES})
+
+add_executable(MipmapGeneration ${COMMON_SOURCES} ${SOURCES})
+
+target_link_libraries(MipmapGeneration
+    PRIVATE glfw
+    PRIVATE Vulkan::Vulkan
+    PRIVATE VEZ
 )
 
-link_directories(
-    ${VEZ_ROOT_DIR}/Libs/Assimp/lib/${PLATFORM_LIB}
-    ${VEZ_ROOT_DIR}/Libs/glfw/lib/${PLATFORM_LIB}    
-)
+target_compile_features(MipmapGeneration PRIVATE cxx_std_14)
 
-add_subdirectory(MipmapGeneration)
-add_subdirectory(MultiWindow)
-add_subdirectory(OcclusionCulling)
-add_subdirectory(PipelineReflection)
-add_subdirectory(ShadowMapping)
-add_subdirectory(SimpleCompute)
-add_subdirectory(SimpleQuad)
-add_subdirectory(SoftwareRasterization)
-add_subdirectory(Subpasses)
-add_subdirectory(VulkanMemory)
+target_compile_definitions(MipmapGeneration PUBLIC _CRT_SECURE_NO_WARNINGS STB_IMAGE_IMPLEMENTATION)
+
+set_target_properties(MipmapGeneration PROPERTIES FOLDER Samples)
+
+set_target_properties(MipmapGeneration PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${OUTPUT_DIRECTORY}")
