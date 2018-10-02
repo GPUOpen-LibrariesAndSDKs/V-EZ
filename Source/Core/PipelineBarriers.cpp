@@ -259,7 +259,11 @@ namespace vez
     void PipelineBarriers::ImageAccess(uint64_t streamPos, Image* pImage, const VezImageSubresourceRange* pSubresourceRange, VkImageLayout layout, VkAccessFlags accessMask, VkPipelineStageFlags stageMask)
     {
         // Per image accesses per layer are stored/merged independently.
-        for (auto layer = pSubresourceRange->baseArrayLayer; layer < pSubresourceRange->layerCount; ++layer)
+        auto layerCount = pSubresourceRange->layerCount;
+        if (layerCount == VK_REMAINING_ARRAY_LAYERS)
+            layerCount = pImage->GetCreateInfo().arrayLayers - pSubresourceRange->baseArrayLayer;
+
+        for (auto layer = pSubresourceRange->baseArrayLayer; layer < pSubresourceRange->baseArrayLayer + layerCount; ++layer)
         {
             // Check if a previous access to buffer has already been stored.  If none exists, insert entry with empty access list.
             auto key = ImageAccessKey{ reinterpret_cast<uint64_t>(pImage), static_cast<uint64_t>(layer) };
@@ -267,7 +271,11 @@ namespace vez
             if (entry != m_imageAccesses.end())
             {
                 // Mip level access bit mask.
-                auto mipLevelAccessMask = ((1U << pSubresourceRange->levelCount) - 1U) << pSubresourceRange->baseMipLevel;
+                auto levelCount = pSubresourceRange->levelCount;
+                if (levelCount == VK_REMAINING_MIP_LEVELS)
+                    levelCount = pImage->GetCreateInfo().mipLevels - pSubresourceRange->baseMipLevel;
+
+                auto mipLevelAccessMask = ((1U << levelCount) - 1U) << pSubresourceRange->baseMipLevel;
                 auto mipLevelBarrierMask = mipLevelAccessMask;
 
                 // List of new accesses to add after iteration (old accesses that were split).
@@ -287,12 +295,12 @@ namespace vez
                     {
                         // Check to see if previous and new access overlap across mip level range.
                         auto min = std::min(pSubresourceRange->baseMipLevel, iter->subresourceRange.baseMipLevel);
-                        auto max = std::max(pSubresourceRange->baseMipLevel + pSubresourceRange->levelCount, iter->subresourceRange.baseMipLevel + iter->subresourceRange.levelCount);
-                        if (max - min < pSubresourceRange->levelCount + iter->subresourceRange.levelCount)
+                        auto max = std::max(pSubresourceRange->baseMipLevel + levelCount, iter->subresourceRange.baseMipLevel + iter->subresourceRange.levelCount);
+                        if (max - min < levelCount + iter->subresourceRange.levelCount)
                         {
                             // Calculate min and max mip level range for intersection.
                             auto baseMipLevelMin = std::max(iter->subresourceRange.baseMipLevel, pSubresourceRange->baseMipLevel);
-                            auto baseMipLevelMax = std::min(iter->subresourceRange.baseMipLevel + iter->subresourceRange.levelCount, pSubresourceRange->baseMipLevel + pSubresourceRange->levelCount);
+                            auto baseMipLevelMax = std::min(iter->subresourceRange.baseMipLevel + iter->subresourceRange.levelCount, pSubresourceRange->baseMipLevel + levelCount);
                             auto levelCount = baseMipLevelMax - baseMipLevelMin;
 
                             // Try and merge barriers if they're occuring at the same command stream position.  Else create a new barrier entry.
@@ -495,6 +503,8 @@ namespace vez
                 imageAccessInfo.subresourceRange.layerCount = 1;
                 imageAccessInfo.subresourceRange.baseMipLevel = pSubresourceRange->baseMipLevel;
                 imageAccessInfo.subresourceRange.levelCount = pSubresourceRange->levelCount;
+                if (imageAccessInfo.subresourceRange.levelCount == VK_REMAINING_MIP_LEVELS)
+                    imageAccessInfo.subresourceRange.levelCount = pImage->GetCreateInfo().mipLevels - pSubresourceRange->baseMipLevel;
 
                 ImageAccessList accessList = { imageAccessInfo };
                 m_imageAccesses.emplace(key, std::move(accessList));
