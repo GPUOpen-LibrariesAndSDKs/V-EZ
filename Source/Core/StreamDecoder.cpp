@@ -112,20 +112,16 @@ namespace vez
             // Get current stream read position.
             auto streamPosition = stream.TellG();
 
-            // Check to see if there are any pipeline barriers to be inserted.
-            if (nextPipelineBarrier != encoder.GetPipelineBarriers().cend())
+            // Check to see if there are any pipeline barriers to be inserted at or before current stream position.
+            while ((nextPipelineBarrier != encoder.GetPipelineBarriers().cend()) && (nextPipelineBarrier->streamPosition <= streamPosition))
             {
-                // Next pipeline barrier's stream position must be equal to the current read position.
-                if (nextPipelineBarrier->streamPosition == streamPosition)
-                {
-                    // Insert Vulkan pipeline barrier.
-                    vkCmdPipelineBarrier(commandBuffer.GetHandle(), nextPipelineBarrier->srcStageMask, nextPipelineBarrier->dstStageMask, 0, 0, nullptr,
-                        static_cast<uint32_t>(nextPipelineBarrier->bufferBarriers.size()), nextPipelineBarrier->bufferBarriers.data(),
-                        static_cast<uint32_t>(nextPipelineBarrier->imageBarriers.size()), nextPipelineBarrier->imageBarriers.data());
+                // Insert Vulkan pipeline barrier.
+                vkCmdPipelineBarrier(commandBuffer.GetHandle(), nextPipelineBarrier->srcStageMask, nextPipelineBarrier->dstStageMask, 0, 0, nullptr,
+                    static_cast<uint32_t>(nextPipelineBarrier->bufferBarriers.size()), nextPipelineBarrier->bufferBarriers.data(),
+                    static_cast<uint32_t>(nextPipelineBarrier->imageBarriers.size()), nextPipelineBarrier->imageBarriers.data());
 
-                    // Move to the next pipeline barrier in the list.
-                    ++nextPipelineBarrier;
-                }
+                // Move to the next pipeline barrier in the list.
+                ++nextPipelineBarrier;
             }
 
             // Check to see if there are any render passes to be inserted.
