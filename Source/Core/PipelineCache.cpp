@@ -291,10 +291,10 @@ namespace vez
         rasterizationState.cullMode = static_cast<VkCullModeFlags>(pState->GetRasterizationState().cullMode);
         rasterizationState.frontFace = static_cast<VkFrontFace>(pState->GetRasterizationState().frontFace);
         rasterizationState.depthBiasEnable = pState->GetRasterizationState().depthBiasEnable;
-        rasterizationState.depthBiasConstantFactor = pState->GetRasterizationState().depthBiasConstantFactor;
-        rasterizationState.depthBiasClamp = pState->GetRasterizationState().depthBiasClamp;
-        rasterizationState.depthBiasSlopeFactor = pState->GetRasterizationState().depthBiasSlopeFactor;
-
+        rasterizationState.depthBiasConstantFactor = 0.0f;
+        rasterizationState.depthBiasClamp = 1.0f;
+        rasterizationState.depthBiasSlopeFactor = 1.0f;
+        
         // Get the multisample state.
         VkPipelineMultisampleStateCreateInfo multisampleState = {};
         multisampleState.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;

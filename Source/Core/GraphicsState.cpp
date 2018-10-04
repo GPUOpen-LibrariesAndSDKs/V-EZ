@@ -40,10 +40,7 @@ namespace vez
         VK_POLYGON_MODE_FILL,
         VK_CULL_MODE_NONE,
         VK_FRONT_FACE_COUNTER_CLOCKWISE,
-        false,
-        0.0f,
-        1.0f,
-        1.0f
+        false
     };
 
     static VezMultisampleState defaultMultisampleState = {

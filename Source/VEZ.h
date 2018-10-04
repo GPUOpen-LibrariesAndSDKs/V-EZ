@@ -347,9 +347,6 @@ typedef struct VezRasterizationState
     VkCullModeFlags cullMode;
     VkFrontFace frontFace;
     VkBool32 depthBiasEnable;
-    float depthBiasConstantFactor;
-    float depthBiasClamp;
-    float depthBiasSlopeFactor;
 } VezRasterizationState;
 
 typedef struct VezMultisampleState
