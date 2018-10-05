@@ -30,6 +30,8 @@ extern "C" {
 
 VKAPI_ATTR VkResult VKAPI_CALL vezImportVkImage(VkDevice device, VkImage image, VkFormat format, VkExtent3D extent, VkSampleCountFlagBits samples, VkImageLayout imageLayout);
 
+VKAPI_ATTR VkResult VKAPI_CALL vezRemoveImportedVkImage(VkDevice device, VkImage image);
+
 VKAPI_ATTR VkResult VKAPI_CALL vezGetImageLayout(VkDevice device, VkImage image, VkImageLayout* pImageLayout);
 
 

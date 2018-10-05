@@ -43,12 +43,16 @@ namespace vez
 
         void Add(Key key, Type object)
         {
+            m_spinLock.Lock();
             m_objects.emplace(key, object);
+            m_spinLock.Unlock();
         }
 
         void Remove(Key key)
         {
+            m_spinLock.Lock();
             m_objects.erase(key);
+            m_spinLock.Unlock();
         }
 
     private:
