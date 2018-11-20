@@ -39,9 +39,9 @@ namespace vez
     class Fence;
 
     #define OBJECT_LOOKUP_DECLARATION(Handle, Impl)\
-    extern vez::Impl* GetObjectImpl(Handle handle);\
+    extern vez::Impl* GetImpl##Impl(Handle handle);\
     extern void AddObjectImpl(Handle handle, vez::Impl* object);\
-    extern void RemoveObjectImpl(Handle handle);
+    extern void RemoveImpl##Impl(Handle handle);
 
     namespace ObjectLookup
     {
@@ -57,5 +57,5 @@ namespace vez
         OBJECT_LOOKUP_DECLARATION(VkImage, Image);
         OBJECT_LOOKUP_DECLARATION(VkImageView, ImageView);
         OBJECT_LOOKUP_DECLARATION(VkFence, Fence);
-    }    
+    }
 }

@@ -88,24 +88,24 @@ VkResult VKAPI_CALL vezCreateInstance(const VezInstanceCreateInfo* pCreateInfo, 
 void VKAPI_CALL vezDestroyInstance(VkInstance instance)
 {
     // Lookup object handle.
-    auto instanceImpl = vez::ObjectLookup::GetObjectImpl(instance);
+    auto instanceImpl = vez::ObjectLookup::GetImplInstance(instance);
     if (instanceImpl)
     {
         // Remove instance's physical devices from ObjectLookup.
         const auto& physicalDevices = instanceImpl->GetPhysicalDevices();
         for (auto pd : physicalDevices)
-            vez::ObjectLookup::RemoveObjectImpl(pd->GetHandle());
+            vez::ObjectLookup::RemoveImplPhysicalDevice(pd->GetHandle());
 
         // Destroy Instance object and remove from ObjectLookup.
         vez::Instance::Destroy(instanceImpl);
-        vez::ObjectLookup::RemoveObjectImpl(instance);
+        vez::ObjectLookup::RemoveImplInstance(instance);
     }
 }
 
 VkResult VKAPI_CALL vezEnumeratePhysicalDevices(VkInstance instance, uint32_t* pPhysicalDeviceCount, VkPhysicalDevice* pPhysicalDevices)
 {
     // Lookup Instance object handle.
-    auto instanceImpl = vez::ObjectLookup::GetObjectImpl(instance);
+    auto instanceImpl = vez::ObjectLookup::GetImplInstance(instance);
     if (!instanceImpl)
         return VK_INCOMPLETE;
 
@@ -175,7 +175,7 @@ VkResult VKAPI_CALL vezEnumerateDeviceLayerProperties(VkPhysicalDevice physicalD
 VkResult VKAPI_CALL vezCreateDevice(VkPhysicalDevice physicalDevice, const VezDeviceCreateInfo* pCreateInfo, VkDevice* pDevice)
 {
     // Lookup PhysicalDevice object handle.
-    auto physicalDeviceImpl = vez::ObjectLookup::GetObjectImpl(physicalDevice);
+    auto physicalDeviceImpl = vez::ObjectLookup::GetImplPhysicalDevice(physicalDevice);
     if (!physicalDeviceImpl)
         return VK_INCOMPLETE;
 
@@ -204,25 +204,25 @@ VkResult VKAPI_CALL vezCreateDevice(VkPhysicalDevice physicalDevice, const VezDe
 void VKAPI_CALL vezDestroyDevice(VkDevice device)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl)
     {
         // Remove devices's queues from ObjectLookup.
         const auto& queueFamilies = deviceImpl->GetQueueFamilies();
         for (auto family : queueFamilies)
             for (auto queue : family)
-                vez::ObjectLookup::RemoveObjectImpl(reinterpret_cast<VkQueue>(queue->GetHandle()));
+                vez::ObjectLookup::RemoveImplQueue(reinterpret_cast<VkQueue>(queue->GetHandle()));
 
         // Destroy Device object and remove from ObjectLookup.
         vez::Device::Destroy(deviceImpl);
-        vez::ObjectLookup::RemoveObjectImpl(device);
+        vez::ObjectLookup::RemoveImplDevice(device);
     }
 }
 
 VkResult VKAPI_CALL vezDeviceWaitIdle(VkDevice device)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
@@ -233,7 +233,7 @@ VkResult VKAPI_CALL vezDeviceWaitIdle(VkDevice device)
 void VKAPI_CALL vezGetDeviceQueue(VkDevice device, uint32_t queueFamilyIndex, uint32_t queueIndex, VkQueue* pQueue)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl)
     {
         // Get the queue for the specified family and index.
@@ -247,7 +247,7 @@ void VKAPI_CALL vezGetDeviceQueue(VkDevice device, uint32_t queueFamilyIndex, ui
 void VKAPI_CALL vezGetDeviceGraphicsQueue(VkDevice device, uint32_t queueIndex, VkQueue* pQueue)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl)
     {
         // Get the queue for the specified family and index.
@@ -261,7 +261,7 @@ void VKAPI_CALL vezGetDeviceGraphicsQueue(VkDevice device, uint32_t queueIndex, 
 void VKAPI_CALL vezGetDeviceComputeQueue(VkDevice device, uint32_t queueIndex, VkQueue* pQueue)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl)
     {
         // Get the queue for the specified family and index.
@@ -275,7 +275,7 @@ void VKAPI_CALL vezGetDeviceComputeQueue(VkDevice device, uint32_t queueIndex, V
 void VKAPI_CALL vezGetDeviceTransferQueue(VkDevice device, uint32_t queueIndex, VkQueue* pQueue)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl)
     {
         // Get the queue for the specified family and index.
@@ -289,7 +289,7 @@ void VKAPI_CALL vezGetDeviceTransferQueue(VkDevice device, uint32_t queueIndex, 
 VkResult VKAPI_CALL vezCreateSwapchain(VkDevice device, const VezSwapchainCreateInfo* pCreateInfo, VezSwapchain* pSwapchain)
 {
     // Lookup Device object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!device)
         return VK_INCOMPLETE;
 
@@ -309,7 +309,7 @@ VkResult VKAPI_CALL vezCreateSwapchain(VkDevice device, const VezSwapchainCreate
 void VKAPI_CALL vezDestroySwapchain(VkDevice device, VezSwapchain swapchain)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl)
     {
         // Destroy swapchain.
@@ -331,7 +331,7 @@ VkResult VKAPI_CALL vezSwapchainSetVSync(VezSwapchain swapchain, VkBool32 enable
 VkResult VKAPI_CALL vezQueueSubmit(VkQueue queue, uint32_t submitCount, const VezSubmitInfo* pSubmits, VkFence* pFence)
 {
     // Lookup Queue object handle.
-    auto queueImpl = vez::ObjectLookup::GetObjectImpl(queue);
+    auto queueImpl = vez::ObjectLookup::GetImplQueue(queue);
     if (!queueImpl)
         return VK_INCOMPLETE;
 
@@ -342,7 +342,7 @@ VkResult VKAPI_CALL vezQueueSubmit(VkQueue queue, uint32_t submitCount, const Ve
 VkResult VKAPI_CALL vezQueuePresent(VkQueue queue, const VezPresentInfo* pPresentInfo)
 {
     // Lookup Queue object handle.
-    auto queueImpl = vez::ObjectLookup::GetObjectImpl(queue);
+    auto queueImpl = vez::ObjectLookup::GetImplQueue(queue);
     if (!queueImpl)
         return VK_INCOMPLETE;
 
@@ -353,7 +353,7 @@ VkResult VKAPI_CALL vezQueuePresent(VkQueue queue, const VezPresentInfo* pPresen
 VkResult VKAPI_CALL vezQueueWaitIdle(VkQueue queue)
 {
     // Lookup Queue object handle.
-    auto queueImpl = vez::ObjectLookup::GetObjectImpl(queue);
+    auto queueImpl = vez::ObjectLookup::GetImplQueue(queue);
     if (!queueImpl)
         return VK_INCOMPLETE;
 
@@ -363,11 +363,11 @@ VkResult VKAPI_CALL vezQueueWaitIdle(VkQueue queue)
 void VKAPI_CALL vezDestroyFence(VkDevice device, VkFence fence)
 {
     // Lookup device object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl)
     {
         // Lookup fence object handle.
-        auto fenceImpl = vez::ObjectLookup::GetObjectImpl(fence);
+        auto fenceImpl = vez::ObjectLookup::GetImplFence(fence);
         if (fenceImpl)
             deviceImpl->DestroyFence(fenceImpl);
     }
@@ -376,7 +376,7 @@ void VKAPI_CALL vezDestroyFence(VkDevice device, VkFence fence)
 VkResult VKAPI_CALL vezGetFenceStatus(VkDevice device, VkFence fence)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl) return static_cast<VkResult>(vkGetFenceStatus(deviceImpl->GetHandle(), reinterpret_cast<VkFence>(fence)));
     else return VK_INCOMPLETE;
 }
@@ -384,7 +384,7 @@ VkResult VKAPI_CALL vezGetFenceStatus(VkDevice device, VkFence fence)
 VkResult VKAPI_CALL vezWaitForFences(VkDevice device, uint32_t fenceCount, const VkFence* pFences, VkBool32 waitAll, uint64_t timeout)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl) return vkWaitForFences(deviceImpl->GetHandle(), fenceCount, reinterpret_cast<const VkFence*>(pFences), waitAll, timeout);
     else return VK_INCOMPLETE;
 }
@@ -392,7 +392,7 @@ VkResult VKAPI_CALL vezWaitForFences(VkDevice device, uint32_t fenceCount, const
 void VKAPI_CALL vezDestroySemaphore(VkDevice device, VkSemaphore semaphore)
 {
     // Lookup device object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl)
         deviceImpl->DestroySemaphore(semaphore);
 }
@@ -400,7 +400,7 @@ void VKAPI_CALL vezDestroySemaphore(VkDevice device, VkSemaphore semaphore)
 VkResult VKAPI_CALL vezCreateEvent(VkDevice device, VkEvent* pEvent)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
@@ -413,7 +413,7 @@ VkResult VKAPI_CALL vezCreateEvent(VkDevice device, VkEvent* pEvent)
 void VKAPI_CALL vezDestroyEvent(VkDevice device, VkEvent event)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl)
         vkDestroyEvent(deviceImpl->GetHandle(), event, nullptr);
 }
@@ -421,7 +421,7 @@ void VKAPI_CALL vezDestroyEvent(VkDevice device, VkEvent event)
 VkResult VKAPI_CALL vezGetEventStatus(VkDevice device, VkEvent event)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl) return vkGetEventStatus(deviceImpl->GetHandle(), event);
     else return VK_INCOMPLETE;
 }
@@ -429,7 +429,7 @@ VkResult VKAPI_CALL vezGetEventStatus(VkDevice device, VkEvent event)
 VkResult VKAPI_CALL vezSetEvent(VkDevice device, VkEvent event)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl) return vkSetEvent(deviceImpl->GetHandle(), event);
     else return VK_INCOMPLETE;
 }
@@ -437,7 +437,7 @@ VkResult VKAPI_CALL vezSetEvent(VkDevice device, VkEvent event)
 VkResult VKAPI_CALL vezResetEvent(VkDevice device, VkEvent event)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl) vkResetEvent(deviceImpl->GetHandle(), event);
     return VK_INCOMPLETE;
 }
@@ -445,7 +445,7 @@ VkResult VKAPI_CALL vezResetEvent(VkDevice device, VkEvent event)
 VkResult VKAPI_CALL vezCreateQueryPool(VkDevice device, const VezQueryPoolCreateInfo* pCreateInfo, VkQueryPool* pQueryPool)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
@@ -462,7 +462,7 @@ VkResult VKAPI_CALL vezCreateQueryPool(VkDevice device, const VezQueryPoolCreate
 void VKAPI_CALL vezDestroyQueryPool(VkDevice device, VkQueryPool queryPool)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl)
         vkDestroyQueryPool(deviceImpl->GetHandle(), queryPool, nullptr);
 }
@@ -470,7 +470,7 @@ void VKAPI_CALL vezDestroyQueryPool(VkDevice device, VkQueryPool queryPool)
 VkResult VKAPI_CALL vezGetQueryPoolResults(VkDevice device, VkQueryPool queryPool, uint32_t firstQuery, uint32_t queryCount, size_t dataSize, void* pData, VkDeviceSize stride, VkQueryResultFlags flags)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl) return vkGetQueryPoolResults(deviceImpl->GetHandle(), queryPool, firstQuery, queryCount, dataSize, pData, stride, flags);
     else return VK_INCOMPLETE;
 
@@ -479,7 +479,7 @@ VkResult VKAPI_CALL vezGetQueryPoolResults(VkDevice device, VkQueryPool queryPoo
 VkResult VKAPI_CALL vezCreateShaderModule(VkDevice device, const VezShaderModuleCreateInfo* pCreateInfo, VkShaderModule* pShaderModule)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
@@ -504,10 +504,10 @@ VkResult VKAPI_CALL vezCreateShaderModule(VkDevice device, const VezShaderModule
 void VKAPI_CALL vezDestroyShaderModule(VkDevice device, VkShaderModule shaderModule)
 {
     // Lookup object handle.
-    auto shaderModuleImpl = vez::ObjectLookup::GetObjectImpl(shaderModule);
+    auto shaderModuleImpl = vez::ObjectLookup::GetImplShaderModule(shaderModule);
     if (shaderModuleImpl)
     {
-        vez::ObjectLookup::RemoveObjectImpl(shaderModule);
+        vez::ObjectLookup::RemoveImplShaderModule(shaderModule);
         delete shaderModuleImpl;
     }
 }
@@ -515,7 +515,7 @@ void VKAPI_CALL vezDestroyShaderModule(VkDevice device, VkShaderModule shaderMod
 void VKAPI_CALL vezGetShaderModuleInfoLog(VkShaderModule shaderModule, uint32_t* pLength, char* pInfoLog)
 {
     // Lookup object handle.
-    auto shaderModuleImpl = vez::ObjectLookup::GetObjectImpl(shaderModule);
+    auto shaderModuleImpl = vez::ObjectLookup::GetImplShaderModule(shaderModule);
     if (shaderModuleImpl)
     {
         const std::string& infoLog = shaderModuleImpl->GetInfoLog();
@@ -528,7 +528,7 @@ void VKAPI_CALL vezGetShaderModuleInfoLog(VkShaderModule shaderModule, uint32_t*
 VkResult VKAPI_CALL vezGetShaderModuleBinary(VkShaderModule shaderModule, uint32_t* pLength, uint32_t* pBinary)
 {
     // Lookup object handle.
-    auto shaderModuleImpl = vez::ObjectLookup::GetObjectImpl(shaderModule);
+    auto shaderModuleImpl = vez::ObjectLookup::GetImplShaderModule(shaderModule);
     if (!shaderModuleImpl)
         return VK_INCOMPLETE;
 
@@ -538,7 +538,7 @@ VkResult VKAPI_CALL vezGetShaderModuleBinary(VkShaderModule shaderModule, uint32
 VkResult VKAPI_CALL vezCreateGraphicsPipeline(VkDevice device, const VezGraphicsPipelineCreateInfo* pCreateInfo, VezPipeline* pPipeline)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
@@ -549,7 +549,7 @@ VkResult VKAPI_CALL vezCreateGraphicsPipeline(VkDevice device, const VezGraphics
 VkResult VKAPI_CALL vezCreateComputePipeline(VkDevice device, const VezComputePipelineCreateInfo* pCreateInfo, VezPipeline* pPipeline)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
@@ -585,7 +585,7 @@ void VKAPI_CALL vezDestroyVertexInputFormat(VkDevice device, VezVertexInputForma
 VkResult VKAPI_CALL vezCreateSampler(VkDevice device, const VezSamplerCreateInfo* pCreateInfo, VkSampler* pSampler)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
@@ -613,7 +613,7 @@ VkResult VKAPI_CALL vezCreateSampler(VkDevice device, const VezSamplerCreateInfo
 void VKAPI_CALL vezDestroySampler(VkDevice device, VkSampler sampler)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl)
         vkDestroySampler(deviceImpl->GetHandle(), sampler, nullptr);
 }
@@ -621,7 +621,7 @@ void VKAPI_CALL vezDestroySampler(VkDevice device, VkSampler sampler)
 VkResult VKAPI_CALL vezCreateBuffer(VkDevice device, VezMemoryFlags memFlags, const VezBufferCreateInfo* pCreateInfo, VkBuffer* pBuffer)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
@@ -644,15 +644,15 @@ VkResult VKAPI_CALL vezCreateBuffer(VkDevice device, VezMemoryFlags memFlags, co
 void VKAPI_CALL vezDestroyBuffer(VkDevice device, VkBuffer buffer)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl)
     {
         // Lookup Buffer object handle.
-        auto bufferImpl = vez::ObjectLookup::GetObjectImpl(buffer);
+        auto bufferImpl = vez::ObjectLookup::GetImplBuffer(buffer);
         if (bufferImpl)
         {
             // Remove the Buffer object from ObjectLookup and destroy the instance.
-            vez::ObjectLookup::RemoveObjectImpl(buffer);
+            vez::ObjectLookup::RemoveImplBuffer(buffer);
             deviceImpl->DestroyBuffer(bufferImpl);
         }
     }
@@ -661,12 +661,12 @@ void VKAPI_CALL vezDestroyBuffer(VkDevice device, VkBuffer buffer)
 VkResult VKAPI_CALL vezBufferSubData(VkDevice device, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize size, const void* pData)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
     // Lookup Buffer object handle.
-    auto bufferImpl = vez::ObjectLookup::GetObjectImpl(buffer);
+    auto bufferImpl = vez::ObjectLookup::GetImplBuffer(buffer);
     if (!bufferImpl)
         return VK_INCOMPLETE;
 
@@ -677,12 +677,12 @@ VkResult VKAPI_CALL vezBufferSubData(VkDevice device, VkBuffer buffer, VkDeviceS
 VkResult VKAPI_CALL vezMapBuffer(VkDevice device, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize size, void** ppData)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
     // Lookup Buffer object handle.
-    auto bufferImpl = vez::ObjectLookup::GetObjectImpl(buffer);
+    auto bufferImpl = vez::ObjectLookup::GetImplBuffer(buffer);
     if (!bufferImpl)
         return VK_INCOMPLETE;
 
@@ -693,12 +693,12 @@ VkResult VKAPI_CALL vezMapBuffer(VkDevice device, VkBuffer buffer, VkDeviceSize 
 void VKAPI_CALL vezUnmapBuffer(VkDevice device, VkBuffer buffer)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return;
 
     // Lookup Buffer object handle.
-    auto bufferImpl = vez::ObjectLookup::GetObjectImpl(buffer);
+    auto bufferImpl = vez::ObjectLookup::GetImplBuffer(buffer);
     if (!bufferImpl)
         return;
 
@@ -709,7 +709,7 @@ void VKAPI_CALL vezUnmapBuffer(VkDevice device, VkBuffer buffer)
 VkResult VKAPI_CALL vezFlushMappedBufferRanges(VkDevice device, uint32_t bufferRangeCount, const VezMappedBufferRange* pBufferRanges)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl) return deviceImpl->FlushMappedBufferRanges(bufferRangeCount, pBufferRanges);
     else return VK_INCOMPLETE;
 }
@@ -717,7 +717,7 @@ VkResult VKAPI_CALL vezFlushMappedBufferRanges(VkDevice device, uint32_t bufferR
 VkResult VKAPI_CALL vezInvalidateMappedBufferRanges(VkDevice device, uint32_t bufferRangeCount, const VezMappedBufferRange* pBufferRanges)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (deviceImpl) return deviceImpl->InvalidateMappedBufferRanges(bufferRangeCount, pBufferRanges);
     else return VK_INCOMPLETE;
 }
@@ -725,11 +725,11 @@ VkResult VKAPI_CALL vezInvalidateMappedBufferRanges(VkDevice device, uint32_t bu
 VkResult VKAPI_CALL vezCreateBufferView(VkDevice device, const VezBufferViewCreateInfo* pCreateInfo, VkBufferView* pView)
 {
     // Lookup Device object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl) return VK_INCOMPLETE;
 
     // Lookup Buffer object handle.
-    auto bufferImpl = vez::ObjectLookup::GetObjectImpl(pCreateInfo->buffer);
+    auto bufferImpl = vez::ObjectLookup::GetImplBuffer(pCreateInfo->buffer);
 
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
@@ -754,11 +754,11 @@ VkResult VKAPI_CALL vezCreateBufferView(VkDevice device, const VezBufferViewCrea
 void VKAPI_CALL vezDestroyBufferView(VkDevice device, VkBufferView bufferView)
 {
     // Lookup BufferView object handle.
-    auto bufferViewImpl = vez::ObjectLookup::GetObjectImpl(bufferView);
+    auto bufferViewImpl = vez::ObjectLookup::GetImplBufferView(bufferView);
     if (bufferViewImpl)
     {
         // Remove BufferView object from ObjectLookup and destroy the instance.
-        vez::ObjectLookup::RemoveObjectImpl(bufferView);
+        vez::ObjectLookup::RemoveImplBufferView(bufferView);
         delete bufferViewImpl;
     }
 }
@@ -766,7 +766,7 @@ void VKAPI_CALL vezDestroyBufferView(VkDevice device, VkBufferView bufferView)
 VkResult VKAPI_CALL vezCreateImage(VkDevice device, VezMemoryFlags memFlags, const VezImageCreateInfo* pCreateInfo, VkImage* pImage)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
@@ -789,11 +789,11 @@ VkResult VKAPI_CALL vezCreateImage(VkDevice device, VezMemoryFlags memFlags, con
 void VKAPI_CALL vezDestroyImage(VkDevice device, VkImage image)
 {
     // Lookup Image object handle.
-    auto imageImpl = vez::ObjectLookup::GetObjectImpl(image);
+    auto imageImpl = vez::ObjectLookup::GetImplImage(image);
     if (imageImpl)
     {
         // Remove the Image object from the ObjectLookup and destroy the instance.
-        vez::ObjectLookup::RemoveObjectImpl(image);
+        vez::ObjectLookup::RemoveImplImage(image);
         imageImpl->GetDevice()->DestroyImage(imageImpl);
     }
 }
@@ -801,12 +801,12 @@ void VKAPI_CALL vezDestroyImage(VkDevice device, VkImage image)
 VkResult VKAPI_CALL vezImageSubData(VkDevice device, VkImage image, const VezImageSubDataInfo* pSubDataInfo, const void* pData)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
     // Lookup Image object handle.
-    auto imageImpl = vez::ObjectLookup::GetObjectImpl(image);
+    auto imageImpl = vez::ObjectLookup::GetImplImage(image);
     if (!imageImpl)
         return VK_INCOMPLETE;
 
@@ -817,7 +817,7 @@ VkResult VKAPI_CALL vezImageSubData(VkDevice device, VkImage image, const VezIma
 VkResult VKAPI_CALL vezCreateImageView(VkDevice device, const VezImageViewCreateInfo* pCreateInfo, VkImageView* pView)
 {
     // Lookup Image object handle.
-    auto imageImpl = vez::ObjectLookup::GetObjectImpl(pCreateInfo->image);
+    auto imageImpl = vez::ObjectLookup::GetImplImage(pCreateInfo->image);
     if (!imageImpl)
         return VK_INCOMPLETE;
 
@@ -840,19 +840,19 @@ VkResult VKAPI_CALL vezCreateImageView(VkDevice device, const VezImageViewCreate
 void VKAPI_CALL vezDestroyImageView(VkDevice device, VkImageView imageView)
 {
     // Lookup ImageView object handle.
-    auto imageViewImpl = vez::ObjectLookup::GetObjectImpl(imageView);
+    auto imageViewImpl = vez::ObjectLookup::GetImplImageView(imageView);
     if (!imageViewImpl)
         return;
 
     // Remove the ImageView object from ObjectLookup and destroy the instance.
-    vez::ObjectLookup::RemoveObjectImpl(imageView);
+    vez::ObjectLookup::RemoveImplImageView(imageView);
     delete imageViewImpl;
 }
 
 VkResult VKAPI_CALL vezCreateFramebuffer(VkDevice device, const VezFramebufferCreateInfo* pCreateInfo, VezFramebuffer* pFramebuffer)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
@@ -868,12 +868,12 @@ void VKAPI_CALL vezDestroyFramebuffer(VkDevice device, VezFramebuffer framebuffe
 VkResult VKAPI_CALL vezAllocateCommandBuffers(VkDevice device, const VezCommandBufferAllocateInfo* pAllocateInfo, VkCommandBuffer* pCommandBuffers)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
     // Lookup the Queue object handle.
-    auto queueImpl = vez::ObjectLookup::GetObjectImpl(pAllocateInfo->queue);
+    auto queueImpl = vez::ObjectLookup::GetImplQueue(pAllocateInfo->queue);
     if (!queueImpl)
         return VK_INCOMPLETE;
 
@@ -897,22 +897,22 @@ VkResult VKAPI_CALL vezAllocateCommandBuffers(VkDevice device, const VezCommandB
 void VKAPI_CALL vezFreeCommandBuffers(VkDevice device, uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers)
 {
     // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return;
 
     // Free command buffers and remove command buffers from ObjectLookup.
     for (auto i = 0U; i < commandBufferCount; ++i)
     {
-        auto cmdBufferImpl = vez::ObjectLookup::GetObjectImpl(pCommandBuffers[i]);
+        auto cmdBufferImpl = vez::ObjectLookup::GetImplCommandBuffer(pCommandBuffers[i]);
         deviceImpl->FreeCommandBuffers(1, &cmdBufferImpl);
-        vez::ObjectLookup::RemoveObjectImpl(pCommandBuffers[i]);
+        vez::ObjectLookup::RemoveImplCommandBuffer(pCommandBuffers[i]);
     }
 }
 
 VkResult VKAPI_CALL vezBeginCommandBuffer(VkCommandBuffer commandBuffer, VkCommandBufferUsageFlags flags)
 {
-    auto cmdBufferImpl = vez::ObjectLookup::GetObjectImpl(commandBuffer);
+    auto cmdBufferImpl = vez::ObjectLookup::GetImplCommandBuffer(commandBuffer);
     if (!cmdBufferImpl)
         return VK_INCOMPLETE;
 
@@ -932,7 +932,7 @@ VkResult VKAPI_CALL vezEndCommandBuffer()
 
 VkResult VKAPI_CALL vezResetCommandBuffer(VkCommandBuffer commandBuffer)
 {
-    auto cmdBufferImpl = vez::ObjectLookup::GetObjectImpl(commandBuffer);
+    auto cmdBufferImpl = vez::ObjectLookup::GetImplCommandBuffer(commandBuffer);
     if (!cmdBufferImpl) return VK_INCOMPLETE;
     else return cmdBufferImpl->Reset();
 }
@@ -965,7 +965,7 @@ void VKAPI_CALL vezCmdPushConstants(uint32_t offset, uint32_t size, const void* 
 void VKAPI_CALL vezCmdBindBuffer(VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range, uint32_t set, uint32_t binding, uint32_t arrayElement)
 {
     // Lookup Buffer object handle.
-    auto bufferImpl = vez::ObjectLookup::GetObjectImpl(buffer);
+    auto bufferImpl = vez::ObjectLookup::GetImplBuffer(buffer);
 
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
@@ -978,7 +978,7 @@ void VKAPI_CALL vezCmdBindBuffer(VkBuffer buffer, VkDeviceSize offset, VkDeviceS
 void VKAPI_CALL vezCmdBindBufferView(VkBufferView bufferView, uint32_t set, uint32_t binding, uint32_t arrayElement)
 {
     // Lookup Buffer object handle.
-    auto bufferViewImpl = vez::ObjectLookup::GetObjectImpl(bufferView);
+    auto bufferViewImpl = vez::ObjectLookup::GetImplBufferView(bufferView);
     if (!bufferViewImpl)
         return;
 
@@ -989,7 +989,7 @@ void VKAPI_CALL vezCmdBindBufferView(VkBufferView bufferView, uint32_t set, uint
 void VKAPI_CALL vezCmdBindImageView(VkImageView imageView, VkSampler sampler, uint32_t set, uint32_t binding, uint32_t arrayElement)
 {
     // Lookup ImageView object handle.
-    auto imageViewImpl = vez::ObjectLookup::GetObjectImpl(imageView);
+    auto imageViewImpl = vez::ObjectLookup::GetImplImageView(imageView);
     if (!imageViewImpl)
         return;
 
@@ -1008,7 +1008,7 @@ void VKAPI_CALL vezCmdBindVertexBuffers(uint32_t firstBinding, uint32_t bindingC
     std::vector<vez::Buffer*> buffers(bindingCount);
     for (auto i = 0U; i < bindingCount; ++i)
     {
-        buffers[i] = vez::ObjectLookup::GetObjectImpl(pBuffers[i]);
+        buffers[i] = vez::ObjectLookup::GetImplBuffer(pBuffers[i]);
         
         // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
         // Create a new proxy Buffer class object and add it to the object lookup.
@@ -1022,7 +1022,7 @@ void VKAPI_CALL vezCmdBindVertexBuffers(uint32_t firstBinding, uint32_t bindingC
 void VKAPI_CALL vezCmdBindIndexBuffer(VkBuffer buffer, VkDeviceSize offset, VkIndexType indexType)
 {
     // Lookup Buffer object handle.
-    auto bufferImpl = vez::ObjectLookup::GetObjectImpl(buffer);
+    auto bufferImpl = vez::ObjectLookup::GetImplBuffer(buffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
@@ -1124,7 +1124,7 @@ void VKAPI_CALL vezCmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, u
 void VKAPI_CALL vezCmdDrawIndirect(VkBuffer buffer, VkDeviceSize offset, uint32_t drawCount, uint32_t stride)
 {
     // Lookup Buffer object handle.
-    auto bufferImpl = vez::ObjectLookup::GetObjectImpl(buffer);
+    auto bufferImpl = vez::ObjectLookup::GetImplBuffer(buffer);
     if (!bufferImpl)
         return;
 
@@ -1135,7 +1135,7 @@ void VKAPI_CALL vezCmdDrawIndirect(VkBuffer buffer, VkDeviceSize offset, uint32_
 void VKAPI_CALL vezCmdDrawIndexedIndirect(VkBuffer buffer, VkDeviceSize offset, uint32_t drawCount, uint32_t stride)
 {
     // Lookup Buffer object handle.
-    auto bufferImpl = vez::ObjectLookup::GetObjectImpl(buffer);
+    auto bufferImpl = vez::ObjectLookup::GetImplBuffer(buffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
@@ -1153,7 +1153,7 @@ void VKAPI_CALL vezCmdDispatch(uint32_t groupCountX, uint32_t groupCountY, uint3
 void VKAPI_CALL vezCmdDispatchIndirect(VkBuffer buffer, VkDeviceSize offset)
 {
     // Lookup Buffer object handle.
-    auto bufferImpl = vez::ObjectLookup::GetObjectImpl(buffer);
+    auto bufferImpl = vez::ObjectLookup::GetImplBuffer(buffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
@@ -1166,14 +1166,14 @@ void VKAPI_CALL vezCmdDispatchIndirect(VkBuffer buffer, VkDeviceSize offset)
 void VKAPI_CALL vezCmdCopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, uint32_t regionCount, const VezBufferCopy* pRegions)
 {
     // Lookup Buffer object handle.
-    auto srcBufferImpl = vez::ObjectLookup::GetObjectImpl(srcBuffer);
+    auto srcBufferImpl = vez::ObjectLookup::GetImplBuffer(srcBuffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
     if (!srcBufferImpl) srcBufferImpl = ImportVkBuffer(s_pActiveCommandBuffer->GetPool()->GetDevice(), srcBuffer);
 
     // Lookup Buffer object handle.
-    auto dstBufferImpl = vez::ObjectLookup::GetObjectImpl(dstBuffer);
+    auto dstBufferImpl = vez::ObjectLookup::GetImplBuffer(dstBuffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
@@ -1186,11 +1186,11 @@ void VKAPI_CALL vezCmdCopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, uint32_
 void VKAPI_CALL vezCmdCopyImage(VkImage srcImage, VkImage dstImage, uint32_t regionCount, const VezImageCopy* pRegions)
 {
     // Lookup Image object handles.
-    auto srcImageImpl = vez::ObjectLookup::GetObjectImpl(srcImage);
+    auto srcImageImpl = vez::ObjectLookup::GetImplImage(srcImage);
     if (!srcImageImpl)
         return;
 
-    auto dstImageImpl = vez::ObjectLookup::GetObjectImpl(dstImage);
+    auto dstImageImpl = vez::ObjectLookup::GetImplImage(dstImage);
     if (!dstImageImpl)
         return;
 
@@ -1201,11 +1201,11 @@ void VKAPI_CALL vezCmdCopyImage(VkImage srcImage, VkImage dstImage, uint32_t reg
 void VKAPI_CALL vezCmdBlitImage(VkImage srcImage, VkImage dstImage, uint32_t regionCount, const VezImageBlit* pRegions, VkFilter filter)
 {
     // Lookup Image object handles.
-    auto srcImageImpl = vez::ObjectLookup::GetObjectImpl(srcImage);
+    auto srcImageImpl = vez::ObjectLookup::GetImplImage(srcImage);
     if (!srcImageImpl)
         return;
 
-    auto dstImageImpl = vez::ObjectLookup::GetObjectImpl(dstImage);
+    auto dstImageImpl = vez::ObjectLookup::GetImplImage(dstImage);
     if (!dstImageImpl)
         return;
 
@@ -1216,13 +1216,13 @@ void VKAPI_CALL vezCmdBlitImage(VkImage srcImage, VkImage dstImage, uint32_t reg
 void VKAPI_CALL vezCmdCopyBufferToImage(VkBuffer srcBuffer, VkImage dstImage, uint32_t regionCount, const VezBufferImageCopy* pRegions)
 {
     // Lookup Buffer and Image object handles.
-    auto srcBufferImpl = vez::ObjectLookup::GetObjectImpl(srcBuffer);
+    auto srcBufferImpl = vez::ObjectLookup::GetImplBuffer(srcBuffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
     if (!srcBufferImpl) srcBufferImpl = ImportVkBuffer(s_pActiveCommandBuffer->GetPool()->GetDevice(), srcBuffer);
 
-    auto dstImageImpl = vez::ObjectLookup::GetObjectImpl(dstImage);
+    auto dstImageImpl = vez::ObjectLookup::GetImplImage(dstImage);
     if (!dstImageImpl)
         return;
 
@@ -1233,11 +1233,11 @@ void VKAPI_CALL vezCmdCopyBufferToImage(VkBuffer srcBuffer, VkImage dstImage, ui
 void VKAPI_CALL vezCmdCopyImageToBuffer(VkImage srcImage, VkBuffer dstBuffer, uint32_t regionCount, const VezBufferImageCopy* pRegions)
 {
     // Lookup Buffer and Image object handles.
-    auto srcImageImpl = vez::ObjectLookup::GetObjectImpl(srcImage);
+    auto srcImageImpl = vez::ObjectLookup::GetImplImage(srcImage);
     if (!srcImageImpl)
         return;
 
-    auto dstBufferImpl = vez::ObjectLookup::GetObjectImpl(dstBuffer);
+    auto dstBufferImpl = vez::ObjectLookup::GetImplBuffer(dstBuffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
@@ -1250,7 +1250,7 @@ void VKAPI_CALL vezCmdCopyImageToBuffer(VkImage srcImage, VkBuffer dstBuffer, ui
 void VKAPI_CALL vezCmdUpdateBuffer(VkBuffer dstBuffer, VkDeviceSize dstOffset, VkDeviceSize dataSize, const void* pData)
 {
     // Lookup Buffer object handle.
-    auto dstBufferImpl = vez::ObjectLookup::GetObjectImpl(dstBuffer);
+    auto dstBufferImpl = vez::ObjectLookup::GetImplBuffer(dstBuffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
@@ -1263,7 +1263,7 @@ void VKAPI_CALL vezCmdUpdateBuffer(VkBuffer dstBuffer, VkDeviceSize dstOffset, V
 void VKAPI_CALL vezCmdFillBuffer(VkBuffer dstBuffer, VkDeviceSize dstOffset, VkDeviceSize size, uint32_t data)
 {
     // Lookup Buffer object handle.
-    auto dstBufferImpl = vez::ObjectLookup::GetObjectImpl(dstBuffer);
+    auto dstBufferImpl = vez::ObjectLookup::GetImplBuffer(dstBuffer);
     
     // If Buffer class object was not found, assume the VkBuffer handle comes from native Vulkan.
     // Create a new proxy Buffer class object and add it to the object lookup.
@@ -1276,7 +1276,7 @@ void VKAPI_CALL vezCmdFillBuffer(VkBuffer dstBuffer, VkDeviceSize dstOffset, VkD
 void VKAPI_CALL vezCmdClearColorImage(VkImage image, const VkClearColorValue* pColor, uint32_t rangeCount, const VezImageSubresourceRange* pRanges)
 {
     // Lookup Image object handle.
-    auto imageImpl = vez::ObjectLookup::GetObjectImpl(image);
+    auto imageImpl = vez::ObjectLookup::GetImplImage(image);
     if (!imageImpl)
         return;
 
@@ -1287,7 +1287,7 @@ void VKAPI_CALL vezCmdClearColorImage(VkImage image, const VkClearColorValue* pC
 void VKAPI_CALL vezCmdClearDepthStencilImage(VkImage image, const VkClearDepthStencilValue* pDepthStencil, uint32_t rangeCount, const VezImageSubresourceRange* pRanges)
 {
     // Lookup Image object handle.
-    auto imageImpl = vez::ObjectLookup::GetObjectImpl(image);
+    auto imageImpl = vez::ObjectLookup::GetImplImage(image);
     if (!imageImpl)
         return;
 
@@ -1303,11 +1303,11 @@ void VKAPI_CALL vezCmdClearAttachments(uint32_t attachmentCount, const VezClearA
 void VKAPI_CALL vezCmdResolveImage(VkImage srcImage, VkImage dstImage, uint32_t regionCount, const VezImageResolve* pRegions)
 {
     // Lookup Image object handles.
-    auto srcImageImpl = vez::ObjectLookup::GetObjectImpl(srcImage);
+    auto srcImageImpl = vez::ObjectLookup::GetImplImage(srcImage);
     if (!srcImageImpl)
         return;
 
-    auto dstImageImpl = vez::ObjectLookup::GetObjectImpl(dstImage);
+    auto dstImageImpl = vez::ObjectLookup::GetImplImage(dstImage);
     if (!dstImageImpl)
         return;
 

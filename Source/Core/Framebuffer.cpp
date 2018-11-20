@@ -37,7 +37,7 @@ namespace vez
         std::vector<ImageView*> attachments;
         for (auto i = 0U; i < pCreateInfo->attachmentCount; ++i)
         {
-            auto imageView = ObjectLookup::GetObjectImpl(pCreateInfo->pAttachments[i]);
+            auto imageView = ObjectLookup::GetImplImageView(pCreateInfo->pAttachments[i]);
             if (!imageView)
                 return VK_INCOMPLETE;
 

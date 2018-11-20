@@ -45,7 +45,7 @@ namespace vez
         std::vector<ShaderModule*> shaderModules(pCreateInfo->stageCount);
         for (auto i = 0U; i < pCreateInfo->stageCount; ++i)
         {
-            shaderModules[i] = ObjectLookup::GetObjectImpl(pCreateInfo->pStages[i].module);
+            shaderModules[i] = ObjectLookup::GetImplShaderModule(pCreateInfo->pStages[i].module);
             if (shaderModules[i]->GetStage() == VK_SHADER_STAGE_COMPUTE_BIT)
                 return VK_INCOMPLETE;
         }
@@ -155,7 +155,7 @@ namespace vez
     VkResult Pipeline::Create(Device* pDevice, const VezComputePipelineCreateInfo* pCreateInfo, Pipeline** ppPipeline)
     {
         // Validate shader module was successfully created.
-        auto shaderModule = ObjectLookup::GetObjectImpl(pCreateInfo->pStage->module);
+        auto shaderModule = ObjectLookup::GetImplShaderModule(pCreateInfo->pStage->module);
         if (shaderModule->GetHandle() == VK_NULL_HANDLE)
             return VK_INCOMPLETE;
 

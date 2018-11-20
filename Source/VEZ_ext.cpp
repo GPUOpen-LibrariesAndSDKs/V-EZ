@@ -29,7 +29,7 @@
 VkResult VKAPI_CALL vezImportVkImage(VkDevice device, VkImage image, VkFormat format, VkExtent3D extent, VkSampleCountFlagBits samples, VkImageLayout imageLayout)
 {
     // Lookup device object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
@@ -50,24 +50,24 @@ VkResult VKAPI_CALL vezImportVkImage(VkDevice device, VkImage image, VkFormat fo
 VKAPI_ATTR VkResult VKAPI_CALL vezRemoveImportedVkImage(VkDevice device, VkImage image)
 {
     // Lookup device object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
     // Remove object.
-    vez::ObjectLookup::RemoveObjectImpl(image);
+    vez::ObjectLookup::RemoveImplImage(image);
     return VK_SUCCESS;
 }
 
 VkResult VKAPI_CALL vezGetImageLayout(VkDevice device, VkImage image, VkImageLayout* pImageLayout)
 {
     // Lookup device object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
+    auto deviceImpl = vez::ObjectLookup::GetImplDevice(device);
     if (!deviceImpl)
         return VK_INCOMPLETE;
 
     // Lookup image object handle.
-    auto imageImpl = vez::ObjectLookup::GetObjectImpl(image);
+    auto imageImpl = vez::ObjectLookup::GetImplImage(image);
     if (!imageImpl)
         return VK_INCOMPLETE;
 
