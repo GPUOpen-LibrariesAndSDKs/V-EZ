@@ -33,3 +33,27 @@ V-EZ is not hardware vendor specific and should work on non-AMD hardware.
 `git submodule update`
 
 - Build V-EZ project.
+
+### Build for Android
+
+```
+export NDK_PATH=_YOUR_ABSOLUTE_PATH_/ndk-bundle/
+export CMAKE_TOOLCHAIN=$NDK_PATH/build/cmake/android.toolchain.cmake
+
+mkdir build
+cd build
+
+cmake .. -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN} \
+-DCMAKE_SYSTEM_NAME=Android \
+-DCMAKE_ANDROID_NDK=${NDK_PATH} \
+-DANDROID_FORCE_ARM_BUILD=TRUE \
+-DANDROID_STL=c++_shared \
+-DANDROID_TOOLCHAIN=clang \
+-DANDROID_NATIVE_API_LEVEL=27 \
+-DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a \
+-DCMAKE_INSTALL_PREFIX=$PWD/install \
+-DVEZ_COMPILE_SAMPLES=OFF \
+-DCMAKE_BUILD_TYPE=Release
+
+make -j4 install
+```
