@@ -202,7 +202,7 @@ An application is not required to set these, as V-EZ sets default values when an
 |===
 {blankline}
 
-All state blocks are set together, therefore default values must still be set when the application only needs to set a single field. For example, when enabling backface culling, the polygonMode should still be set. The code listing below demonstrates setting setting the viewport, expected primitive topology and enabling backface culling and depth testing.
+All state blocks are set together, therefore default values must still be set when the application only needs to set a single field. For example, when enabling backface culling, the polygonMode should still be set. The code listing below demonstrates setting the viewport, expected primitive topology and enabling backface culling and depth testing.
 
 [source,c++,linenums]
 ----

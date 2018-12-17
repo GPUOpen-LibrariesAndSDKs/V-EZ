@@ -763,7 +763,7 @@ namespace vez
         // Determine pixel size of source buffer.
         auto pixelSize = GetUncompressedImageFormatSize(pImage->GetCreateInfo().format);
 
-        // Determine total number of pixel blocks that can be transfered at once.
+        // Determine total number of pixel blocks that can be transferred at once.
         auto pinnedMemoryBufferSize = m_pinnedMemoryBuffer->GetCreateInfo().size;
         auto numSlices = std::min(pSubDataInfo->imageExtent.depth, static_cast<uint32_t>(pinnedMemoryBufferSize / (pixelSize * pSubDataInfo->imageExtent.width * pSubDataInfo->imageExtent.height)));
         auto numRows = std::min(pSubDataInfo->imageExtent.height, static_cast<uint32_t>(pinnedMemoryBufferSize / (pixelSize * pSubDataInfo->imageExtent.width)));

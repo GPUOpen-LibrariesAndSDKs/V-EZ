@@ -106,7 +106,7 @@ auto result = vezCreateSwapchain(device, &swapchainCreateInfo, &swapchain);
 If the format specified in `VezSwapchainCreateInfo` was not supported, V-EZ will choose a default one. An application may query the final image format by calling `vezGetSwapchainSurfaceFormat`.
 
 === Putting It All Together
-Below is a coding listing demonstrating each preceeding section.
+Below is a coding listing demonstrating each preceding section.
 
 [source,c++,linenums]
 ----
