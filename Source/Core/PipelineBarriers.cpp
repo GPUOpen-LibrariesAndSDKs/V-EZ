@@ -303,7 +303,7 @@ namespace vez
                             auto baseMipLevelMax = std::min(iter->subresourceRange.baseMipLevel + iter->subresourceRange.levelCount, pSubresourceRange->baseMipLevel + levelCount);
                             auto levelCount = baseMipLevelMax - baseMipLevelMin;
 
-                            // Try and merge barriers if they're occuring at the same command stream position.  Else create a new barrier entry.
+                            // Try and merge barriers if they're occurring at the same command stream position.  Else create a new barrier entry.
                             if (m_barriers.size() == 0 || m_barriers.back().streamPosition != streamPos)
                                 m_barriers.push_back({ streamPos, iter->stageMask, stageMask, {}, {} });
 

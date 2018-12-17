@@ -65,7 +65,7 @@ namespace vez
             memcpy(shaderModule->m_spirv.data(), pCreateInfo->pCode, pCreateInfo->codeSize);
         }
 
-        // If GLSL compilation was successfull, or it wasn't needed, move onto the SPIR-V.
+        // If GLSL compilation was successful, or it wasn't needed, move onto the SPIR-V.
         if (result == VK_SUCCESS)
         {
             // Reflection all shader resouces.

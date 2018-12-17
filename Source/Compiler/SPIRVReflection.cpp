@@ -244,7 +244,7 @@ namespace vez
             shaderResources.push_back(pipelineResource);
         }
 
-        // Extract seperate images ('sampled' in vulkan terminology or no sampler attached).
+        // Extract separate images ('sampled' in vulkan terminology or no sampler attached).
         for (auto& resource : resources.separate_images)
         {
             const auto& spirType = compiler.get_type_from_variable(resource.id);
