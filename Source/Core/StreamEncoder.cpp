@@ -319,8 +319,8 @@ namespace vez
             auto stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
             if (IsDepthStencilFormat(imageView->GetFormat()))
             {
-                auto access = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-                auto stage = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+                access = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+                stage = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
             }
 
             m_pipelineBarriers.ImageAccess(endStreamPos + 1ULL, image, &subresourceRange, attachment.finalLayout, access, stage);
