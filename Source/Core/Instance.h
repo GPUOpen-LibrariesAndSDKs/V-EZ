@@ -38,14 +38,14 @@ namespace vez
 
         VkInstance GetHandle() const { return m_handle; }
 
-        const std::vector<PhysicalDevice*>& GetPhysicalDevices() { return m_physicalDevices; }
+        std::vector<PhysicalDevice>& GetPhysicalDevices() { return m_physicalDevices; }
 
         ThreadPool* GetThreadPool() { return m_threadPool; }
 
     private:
         VkInstance m_handle = VK_NULL_HANDLE;
         std::vector<std::string> m_validationLayers;
-        std::vector<PhysicalDevice*> m_physicalDevices;
+        std::vector<PhysicalDevice> m_physicalDevices;
         ThreadPool* m_threadPool = nullptr;
     };    
 }
