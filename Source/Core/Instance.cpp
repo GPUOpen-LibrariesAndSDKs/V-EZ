@@ -97,5 +97,6 @@ namespace vez
     {
         delete pInstance->m_threadPool;
         vkDestroyInstance(pInstance->GetHandle(), nullptr);
+        delete pInstance;
     }
 }

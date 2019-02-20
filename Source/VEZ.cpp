@@ -308,13 +308,8 @@ VkResult VKAPI_CALL vezCreateSwapchain(VkDevice device, const VezSwapchainCreate
 
 void VKAPI_CALL vezDestroySwapchain(VkDevice device, VezSwapchain swapchain)
 {
-    // Lookup object handle.
-    auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
-    if (deviceImpl)
-    {
-        // Destroy swapchain.
-        delete reinterpret_cast<vez::Swapchain*>(swapchain);
-    }
+    // Destroy swapchain.
+    delete reinterpret_cast<vez::Swapchain*>(swapchain);
 }
 
 void VKAPI_CALL vezGetSwapchainSurfaceFormat(VezSwapchain swapchain, VkSurfaceFormatKHR* pFormat)
