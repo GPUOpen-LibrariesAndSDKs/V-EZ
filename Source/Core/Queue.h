@@ -35,6 +35,9 @@ namespace vez
     {
     public:
         Queue(Device* device, VkQueue queue, uint32_t queueFamilyIndex, uint32_t index, const VkQueueFamilyProperties& propertiesd);
+        Queue(const Queue&) = delete;
+        Queue& operator=(const Queue&) = delete;
+        ~Queue();
 
         Device* GetDevice() const { return m_device; }
 

@@ -729,6 +729,15 @@ namespace vez
         if (m_renderPassCache)
             delete m_renderPassCache;
 
+        // Destroy queues
+        for (auto& family : m_queues)
+        {
+            for (auto queue : family)
+            {
+                delete queue;
+            }
+        }
+
         // Destroy per queue command pools.
         for (auto it : m_commandPools)
         {

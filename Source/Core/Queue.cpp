@@ -43,6 +43,16 @@ namespace vez
 
     }
 
+    Queue::~Queue()
+    {
+        while (!m_presentCmdBuffers.empty())
+        {
+            auto commandBuffer = std::get<0>(m_presentCmdBuffers.front());
+            m_device->FreeCommandBuffers(1, &commandBuffer);
+            m_presentCmdBuffers.pop();
+        }
+    }
+
     VkResult Queue::Submit(uint32_t submitCount, const VezSubmitInfo* pSubmits, VkFence* pFence)
     {
         // Create a fence for the submission if calling application requests one.

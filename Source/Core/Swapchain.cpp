@@ -146,6 +146,14 @@ namespace vez
 
     Swapchain::~Swapchain()
     {
+        FreeResources();
+
+        for (auto image : m_images)
+        {
+            delete image;
+            m_images.clear();
+        }
+
         if (m_handle)
             vkDestroySwapchainKHR(m_device->GetHandle(), m_handle, nullptr);
     }

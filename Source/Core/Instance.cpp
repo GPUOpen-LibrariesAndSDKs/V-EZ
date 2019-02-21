@@ -78,8 +78,7 @@ namespace vez
             // Wrap native Vulkan handles in PhysicalDevice class.
             for (auto& pd : physicalDevices)
             {
-                auto pdImpl = new PhysicalDevice(instance, pd);
-                instance->m_physicalDevices.push_back(pdImpl);
+                instance->m_physicalDevices.emplace_back(instance, pd);
             }
         }
 
@@ -98,5 +97,6 @@ namespace vez
     {
         delete pInstance->m_threadPool;
         vkDestroyInstance(pInstance->GetHandle(), nullptr);
+        delete pInstance;
     }
 }
