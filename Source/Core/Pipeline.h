@@ -29,6 +29,7 @@
 #include <unordered_map>
 #include "VEZ.h"
 #include "GraphicsState.h"
+#include "PipelineCache.h"
 
 namespace vez
 {
@@ -91,6 +92,7 @@ namespace vez
         std::unordered_map<uint32_t, std::vector<VezPipelineResource>> m_bindings;
         std::unordered_map<uint32_t, DescriptorSetLayout*> m_descriptorSetLayouts;
         std::unordered_map<uint64_t, VkAccessFlags> m_bindingAccessFlags;
+        std::vector<PipelineCache::PipelinePermutationHash> m_associatedHashes;
         
         VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
         
