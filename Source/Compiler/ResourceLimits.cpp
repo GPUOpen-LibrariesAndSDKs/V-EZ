@@ -125,17 +125,28 @@ const TBuiltInResource DefaultTBuiltInResource = {
     /* .MaxCullDistances = */ 8,
     /* .MaxCombinedClipAndCullDistances = */ 8,
     /* .MaxSamples = */ 4,
-    /* .limits = */ {
-        /* .nonInductiveForLoops = */ 1,
-        /* .whileLoops = */ 1,
-        /* .doWhileLoops = */ 1,
-        /* .generalUniformIndexing = */ 1,
-        /* .generalAttributeMatrixVectorIndexing = */ 1,
-        /* .generalVaryingIndexing = */ 1,
-        /* .generalSamplerIndexing = */ 1,
-        /* .generalVariableIndexing = */ 1,
-        /* .generalConstantMatrixVectorIndexing = */ 1,
-    }};
+	/* .MaxMeshOutputVerticesNV*/ 256,
+	/* .MaxMeshOutputPrimitivesNV*/ 512,
+	/* .MaxMeshWorkGroupSizeX_NV*/ 32,
+	/* .MaxMeshWorkGroupSizeY_NV*/ 1,
+	/* .MaxMeshWorkGroupSizeZ_NV*/ 1,
+	/* .MaxTaskWorkGroupSizeX_NV*/ 32,
+	/* .MaxTaskWorkGroupSizeY_NV*/ 1,
+	/* .MaxTaskWorkGroupSizeZ_NV*/ 1,
+	/* .MaxMeshViewCountNV*/ 4,
+	/* .limits = */
+	{
+		/* .nonInductiveForLoops = */ 1,
+		/* .whileLoops = */ 1,
+		/* .doWhileLoops = */ 1,
+		/* .generalUniformIndexing = */ 1,
+		/* .generalAttributeMatrixVectorIndexing = */ 1,
+		/* .generalVaryingIndexing = */ 1,
+		/* .generalSamplerIndexing = */ 1,
+		/* .generalVariableIndexing = */ 1,
+		/* .generalConstantMatrixVectorIndexing = */ 1,
+	} 
+};
 
 std::string GetDefaultTBuiltInResourceString()
 {
