@@ -24,12 +24,12 @@ V-EZ is not hardware vendor specific and should work on non-AMD hardware.
 
 ## Building V-EZ
 
-- Run cmake to generate Visual Studio solution files or Linux make files.  No specific settings need to be set.
-
 - Pull down submodules
 
 `git submodule init`
 
 `git submodule update`
+
+- Run cmake to generate Visual Studio solution files or Linux make files.  No specific settings need to be set.
 
 - Build V-EZ project.
