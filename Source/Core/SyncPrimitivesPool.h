@@ -39,11 +39,11 @@ namespace vez
 
         VkResult AcquireFence(VkFence* pFence);
         void ReleaseFence(VkFence fence);
-        bool Exists(VkFence fence);
+        // bool Exists(VkFence fence);
 
         VkResult AcquireSemaphore(uint32_t semaphoreCount, VkSemaphore* pSemaphores);
         void ReleaseSemaphores(uint32_t semaphoreCount, const VkSemaphore* pSemaphores);
-        bool Exists(VkSemaphore semaphore);
+        // bool Exists(VkSemaphore semaphore);
 
     private:
         Device* m_device = nullptr;

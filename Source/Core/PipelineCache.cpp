@@ -113,7 +113,7 @@ namespace vez
         std::unordered_map<VkShaderStageFlagBits, VkSpecializationInfo> specializationInfos;
         for (auto i = 0U; i < pipeline->m_stages.size(); ++i)
         {
-            auto shaderModule = ObjectLookup::GetObjectImpl(pipeline->m_stages[i].module);
+            auto shaderModule = ObjectLookup::GetImplShaderModule(pipeline->m_stages[i].module);
             auto stage = shaderModule->GetStage();
             auto it = pipeline->m_specializationInfo.find(stage);
             if (it != pipeline->m_specializationInfo.end())
@@ -132,7 +132,7 @@ namespace vez
         for (auto i = 0U; i < pipeline->m_stages.size(); ++i)
         {
             // Setup stage create info structure
-            auto shaderModule = ObjectLookup::GetObjectImpl(pipeline->m_stages[i].module);
+            auto shaderModule = ObjectLookup::GetImplShaderModule(pipeline->m_stages[i].module);
             stageCreateInfos[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             stageCreateInfos[i].stage = shaderModule->GetStage();
             stageCreateInfos[i].module = pipeline->m_stages[i].module;
@@ -389,7 +389,7 @@ namespace vez
     VkResult PipelineCache::CreateComputePipeline(const Pipeline* pipeline, VkPipeline* pHandle)
     {
         // Create the pipeline handle.
-        auto shaderModule = ObjectLookup::GetObjectImpl(pipeline->m_stages[0].module);
+        auto shaderModule = ObjectLookup::GetImplShaderModule(pipeline->m_stages[0].module);
         VkComputePipelineCreateInfo pipelineCreateInfo = {};
         pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
         pipelineCreateInfo.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;

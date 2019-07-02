@@ -452,7 +452,7 @@ namespace vez
         for (auto i = 0U; i < bufferRangeCount; ++i)
         {
             // Lookup Buffer object handle.
-            auto bufferImpl = ObjectLookup::GetObjectImpl(pBufferRanges[i].buffer);
+            auto bufferImpl = ObjectLookup::GetImplBuffer(pBufferRanges[i].buffer);
             if (!bufferImpl)
                 return VK_INCOMPLETE;
 
@@ -474,7 +474,7 @@ namespace vez
         for (auto i = 0U; i < bufferRangeCount; ++i)
         {
             // Lookup Buffer object handle.
-            auto bufferImpl = ObjectLookup::GetObjectImpl(pBufferRanges[i].buffer);
+            auto bufferImpl = ObjectLookup::GetImplBuffer(pBufferRanges[i].buffer);
             if (!bufferImpl)
                 return VK_INCOMPLETE;
 
@@ -681,7 +681,7 @@ namespace vez
     void Device::DestroyFence(Fence* pFence)
     {
         // Remove from ObjectLookup cache.
-        ObjectLookup::RemoveObjectImpl(pFence->GetHandle());
+        ObjectLookup::RemoveImplFence(pFence->GetHandle());
 
         // Return all semaphores to the sync primitives pool.
         const auto& semaphores = pFence->GetSemaphores();

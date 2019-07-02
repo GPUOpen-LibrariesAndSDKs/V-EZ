@@ -319,8 +319,8 @@ namespace vez
             auto stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
             if (IsDepthStencilFormat(imageView->GetFormat()))
             {
-                auto access = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-                auto stage = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+                access = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+                stage = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
             }
 
             m_pipelineBarriers.ImageAccess(endStreamPos + 1ULL, image, &subresourceRange, attachment.finalLayout, access, stage);
@@ -1065,7 +1065,7 @@ namespace vez
                                 // Add image access to resource bindings so the input attachment is bound to a descriptor set.
                                 auto framebuffer = reinterpret_cast<Framebuffer*>(m_renderPasses.back().framebuffer);
                                 auto imageView = framebuffer->GetAttachment(entry.inputAttachmentIndex);
-                                m_resourceBindings.BindImageView(imageView, nullptr, entry.set, entry.binding, 0);
+                                m_resourceBindings.BindImageView(imageView, VK_NULL_HANDLE, entry.set, entry.binding, 0);
 
                                 // Add input attachment index to current subpass.
                                 m_renderPasses.back().subpasses.back().inputAttachments.emplace(entry.inputAttachmentIndex);

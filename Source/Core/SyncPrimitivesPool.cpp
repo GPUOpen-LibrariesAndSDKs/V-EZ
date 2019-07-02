@@ -77,6 +77,7 @@ namespace vez
         m_fenceLock.Unlock();
     }
 
+    /*
     bool SyncPrimitivesPool::Exists(VkFence fence)
     {
         m_fenceLock.Lock();
@@ -84,6 +85,7 @@ namespace vez
         m_fenceLock.Unlock();
         return result;
     }
+    */
 
     VkResult SyncPrimitivesPool::AcquireSemaphore(uint32_t semaphoreCount, VkSemaphore* pSemaphores)
     {
@@ -129,6 +131,7 @@ namespace vez
         m_semaphoreLock.Unlock();
     }
 
+    /*
     bool SyncPrimitivesPool::Exists(VkSemaphore semaphore)
     {
         m_semaphoreLock.Lock();
@@ -136,4 +139,5 @@ namespace vez
         m_semaphoreLock.Unlock();
         return result;
     }
+    */
 }

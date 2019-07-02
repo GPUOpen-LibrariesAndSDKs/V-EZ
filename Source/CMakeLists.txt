@@ -136,12 +136,12 @@ target_link_libraries(VEZ
     PRIVATE spirv-cross-glsl
 )
 
-if(NOT WIN32)
+if(NOT WIN32 AND NOT ANDROID)
     target_link_libraries(VEZ
         PRIVATE dl
         PRIVATE pthread
     )
-endif(NOT WIN32)
+endif()
 
 target_compile_features(VEZ PRIVATE cxx_std_14)
 

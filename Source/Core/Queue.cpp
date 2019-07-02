@@ -170,7 +170,7 @@ namespace vez
         for (auto i = 0U; i < pPresentInfo->swapchainCount; ++i)
         {
             // Get class objects.
-            auto srcImage = ObjectLookup::GetObjectImpl(pPresentInfo->pImages[i]);
+            auto srcImage = ObjectLookup::GetImplImage(pPresentInfo->pImages[i]);
             auto swapchain = reinterpret_cast<Swapchain*>(pPresentInfo->pSwapchains[i]);
             auto dstImage = swapchain->GetImage(imageIndices[i]);
 
@@ -286,7 +286,7 @@ namespace vez
             auto status = vkGetFenceStatus(m_device->GetHandle(), fence);
             if (status == VK_SUCCESS)
             {
-                m_device->DestroyFence(vez::ObjectLookup::GetObjectImpl(fence));
+                m_device->DestroyFence(vez::ObjectLookup::GetImplFence(fence));
                 *pCommandBuffer = std::get<0>(m_presentCmdBuffers.front());
                 m_presentCmdBuffers.pop();
                 return VK_SUCCESS;
