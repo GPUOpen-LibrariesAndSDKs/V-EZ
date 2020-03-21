@@ -30,14 +30,14 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
 
-option(VEZ_COMPILE_SAMPLES "Compile sample demos" OFF)
-option(VEZ_OVERRIDE_OUT_DIR "Override Output Directory" OFF)
-
 set(VEZ_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
-if(VEZ_OVERRIDE_OUT_DIR)
-    set(VEZ_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}" CACHE PATH "directory where .lib and .dlls are placed")
+option(VEZ_COMPILE_SAMPLES "Compile sample demos" OFF)
 
+option(VEZ_OVERRIDE_OUT_DIR "Override Output Directory" OFF)
+set(VEZ_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}" CACHE PATH "directory where .lib and .dlls are placed")
+
+if(VEZ_OVERRIDE_OUT_DIR)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${VEZ_OUTPUT_DIRECTORY}")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${VEZ_OUTPUT_DIRECTORY}")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${VEZ_OUTPUT_DIRECTORY}")
