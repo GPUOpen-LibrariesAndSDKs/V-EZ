@@ -54,9 +54,6 @@ namespace vez
                 *ppShaderModule = shaderModule;
                 return VK_ERROR_INITIALIZATION_FAILED;
             }
-
-            // Save entry point name.
-            shaderModule->m_entryPoint = pCreateInfo->pEntryPoint;
         }
         // Copy the shaderModule->m_spirv data into a separate vector.
         else
@@ -64,6 +61,9 @@ namespace vez
             shaderModule->m_spirv.resize(pCreateInfo->codeSize / sizeof(uint32_t));
             memcpy(shaderModule->m_spirv.data(), pCreateInfo->pCode, pCreateInfo->codeSize);
         }
+
+        // Save entry point name.
+        shaderModule->m_entryPoint = pCreateInfo->pEntryPoint;
 
         // If GLSL compilation was successfull, or it wasn't needed, move onto the SPIR-V.
         if (result == VK_SUCCESS)
