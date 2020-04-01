@@ -79,7 +79,7 @@ namespace vez
         VezDepthStencilState m_depthStencilState;
         VezColorBlendState m_colorBlendState;
         VezColorBlendAttachmentState m_colorBlendAttachments[8];
-		VezTessellationState m_tessellationState;
+        VezTessellationState m_tessellationState;
         uint32_t m_subpassIndex = 0;
         Framebuffer* m_framebuffer = nullptr;
         Pipeline* m_pipeline = nullptr;

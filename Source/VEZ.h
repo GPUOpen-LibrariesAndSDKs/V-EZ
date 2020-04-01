@@ -403,8 +403,8 @@ typedef struct VezColorBlendState
 
 typedef struct VezTessellationState
 {
-	const void* pNext;
-	uint32_t patchControlPoints;
+    const void* pNext;
+    uint32_t patchControlPoints;
 } VezTessellationState;
 
 typedef struct VezAttachmentInfo

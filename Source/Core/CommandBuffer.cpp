@@ -201,10 +201,10 @@ namespace vez
         m_streamEncoder.CmdSetColorBlendState(pStateInfo);
     }
 
-	void CommandBuffer::CmdSetTessellationState(const VezTessellationState* pStateInfo)
-	{
-		m_streamEncoder.CmdSetTessellationState(pStateInfo);
-	}
+    void CommandBuffer::CmdSetTessellationState(const VezTessellationState* pStateInfo)
+    {
+        m_streamEncoder.CmdSetTessellationState(pStateInfo);
+    }
 
     void CommandBuffer::CmdSetViewport(uint32_t firstViewport, uint32_t viewportCount, const VkViewport* pViewports)
     {

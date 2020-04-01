@@ -381,10 +381,10 @@ namespace vez
         pipelineCreateInfo.renderPass = pRenderPass->GetHandle();
         pipelineCreateInfo.subpass = pState->GetSubpassIndex();
 
-		VkPipelineTessellationStateCreateInfo tessellationState = {};
+        VkPipelineTessellationStateCreateInfo tessellationState = {};
         tessellationState.sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
-		tessellationState.patchControlPoints =  pState->GetTessellationState().patchControlPoints;
-		pipelineCreateInfo.pTessellationState = &tessellationState;
+        tessellationState.patchControlPoints =  pState->GetTessellationState().patchControlPoints;
+        pipelineCreateInfo.pTessellationState = &tessellationState;
 
         // Create the Vulkan pipeline handle.
         auto result = vkCreateGraphicsPipelines(m_device->GetHandle(), m_vulkanPipelineCache, 1, &pipelineCreateInfo, nullptr, pHandle);
