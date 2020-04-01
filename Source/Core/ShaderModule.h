@@ -32,7 +32,7 @@ namespace vez
     class ShaderModule
     {
     public:
-        static VkResult Create(Device* pDevice, const VezShaderModuleCreateInfo* pCreateInfo, ShaderModule** ppShaderModule);
+        static VkResult Create(Device* pDevice, const VezShaderModuleCreateInfo* pCreateInfo, ShaderModule** ppShaderModule, DirStackFileIncluder* pIncluder = nullptr);
 
         ~ShaderModule();
 

@@ -530,7 +530,7 @@ VKAPI_ATTR void VKAPI_CALL vezDestroyQueryPool(VkDevice device, VkQueryPool quer
 VKAPI_ATTR VkResult VKAPI_CALL vezGetQueryPoolResults(VkDevice device, VkQueryPool queryPool, uint32_t firstQuery, uint32_t queryCount, size_t dataSize, void* pData, VkDeviceSize stride, VkQueryResultFlags flags);
 
 // Shader module and pipeline functions.
-VKAPI_ATTR VkResult VKAPI_CALL vezCreateShaderModule(VkDevice device, const VezShaderModuleCreateInfo* pCreateInfo, VkShaderModule* pShaderModule);
+VKAPI_ATTR VkResult VKAPI_CALL vezCreateShaderModule(VkDevice device, const VezShaderModuleCreateInfo* pCreateInfo, VkShaderModule* pShaderModule, class DirStackFileIncluder* pIncluder = nullptr);
 VKAPI_ATTR void VKAPI_CALL vezDestroyShaderModule(VkDevice device, VkShaderModule shaderModule);
 VKAPI_ATTR void VKAPI_CALL vezGetShaderModuleInfoLog(VkShaderModule shaderModule, uint32_t* pLength, char* pInfoLog);
 VKAPI_ATTR VkResult VKAPI_CALL vezGetShaderModuleBinary(VkShaderModule shaderModule, uint32_t* pLength, uint32_t* pBinary);
