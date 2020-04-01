@@ -85,6 +85,9 @@ namespace vez
         void CmdResolveImage(CommandBuffer& commandBuffer, MemoryStream& stream);
         void CmdSetEvent(CommandBuffer& commandBuffer, MemoryStream& stream);
         void CmdResetEvent(CommandBuffer& commandBuffer, MemoryStream& stream);
+        void CmdDebugMarkerBegin(CommandBuffer& commandBuffer, MemoryStream& stream);
+        void CmdDebugMarkerEnd(CommandBuffer& commandBuffer, MemoryStream& stream);
+        void CmdDebugMarkerInsert(CommandBuffer& commandBuffer, MemoryStream& stream);
 
         typedef void(StreamDecoder::*EntryPoint)(CommandBuffer&, MemoryStream&);
         std::vector<EntryPoint> m_entryPoints;

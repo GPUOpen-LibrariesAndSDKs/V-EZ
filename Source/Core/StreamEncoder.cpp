@@ -804,6 +804,31 @@ namespace vez
         m_stream << RESET_EVENT << event << stageMask;
     }
 
+    void StreamEncoder::CmdDebugMarkerBegin(const char* _szMarker, const float* _pColor)
+    {
+        // Encode the command to the memory stream.
+        m_stream << DEBUG_MARKER_BEGIN;
+        size_t len = strlen(_szMarker)+1;
+        m_stream << len;
+        m_stream.Write(_szMarker, len);
+        m_stream.Write(_pColor, 4 * sizeof(float));
+    }
+
+    void StreamEncoder::CmdDebugMarkerEnd()
+    {
+        // Encode the command to the memory stream.
+        m_stream << DEBUG_MARKER_END;
+    }
+
+    void StreamEncoder::CmdDebugMarkerInsert(const char* _szMarker, const float* _pColor)
+    {
+        // Encode the command to the memory stream.
+        m_stream << DEBUG_MARKER_INSERT;
+        size_t len = strlen(_szMarker) + 1;
+        m_stream << len;
+        m_stream.Write(_szMarker, len);
+        m_stream.Write(_pColor, 4 * sizeof(float));
+    }
     void StreamEncoder::BindDescriptorSet()
     {
         // A valid pipeline must be bound before descriptor sets can be updated.

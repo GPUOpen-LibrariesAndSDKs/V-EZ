@@ -40,6 +40,14 @@
 #include "Core/ImageView.h"
 #include "Core/Framebuffer.h"
 
+namespace vez
+{
+    extern PFN_vkDebugMarkerSetObjectTagEXT pfnDebugMarkerSetObjectTag;
+    extern PFN_vkDebugMarkerSetObjectNameEXT pfnDebugMarkerSetObjectName;
+
+    void SetupDebugMarkers(VkDevice device);
+}
+
 // Per thread command buffer currently being recorded.
 static thread_local vez::CommandBuffer* s_pActiveCommandBuffer = nullptr;
 
@@ -196,6 +204,13 @@ VkResult VKAPI_CALL vezCreateDevice(VkPhysicalDevice physicalDevice, const VezDe
     for (auto family : queueFamilies)
         for (auto queue : family)
             vez::ObjectLookup::AddObjectImpl(queue->GetHandle(), queue);
+
+    for (uint32_t i = 0; i < pCreateInfo->enabledExtensionCount; ++i)
+        if (strcmp(pCreateInfo->ppEnabledExtensionNames[i], VK_EXT_DEBUG_MARKER_EXTENSION_NAME) == 0)
+        {
+            vez::SetupDebugMarkers(*pDevice);
+            break;
+        }
 
     // Return success.
     return VK_SUCCESS;
@@ -1323,4 +1338,43 @@ void VKAPI_CALL vezCmdSetEvent(VkEvent event, VkPipelineStageFlags stageMask)
 void VKAPI_CALL vezCmdResetEvent(VkEvent event, VkPipelineStageFlags stageMask)
 {
     s_pActiveCommandBuffer->CmdResetEvent(event, stageMask);
+}
+
+void VKAPI_CALL vezCmdDebugMarkerBegin(const char* _szMarker, const float* _pColor)
+{
+    s_pActiveCommandBuffer->CmdDebugMarkerBegin(_szMarker, _pColor);
+}
+
+void VKAPI_CALL vezCmdDebugMarkerEnd()
+{
+    s_pActiveCommandBuffer->CmdDebugMarkerEnd();
+}
+
+void VKAPI_CALL vezCmdDebugMarkerInsert(const char* _szMarker, const float* _pColor)
+{
+    s_pActiveCommandBuffer->CmdDebugMarkerInsert(_szMarker, _pColor);
+}
+
+void VKAPI_CALL vezSetObjectName(VkDevice device, uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name)
+{
+    VkDebugMarkerObjectNameInfoEXT NameInfo;
+    NameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT;
+    NameInfo.pObjectName = name;
+    NameInfo.object = object;
+    NameInfo.objectType = objectType;
+    NameInfo.pNext = nullptr;
+    (*vez::pfnDebugMarkerSetObjectName)(device, &NameInfo);
+}
+
+void VKAPI_CALL vezSetObjectTag(VkDevice device, uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag)
+{
+    VkDebugMarkerObjectTagInfoEXT TagInfo;
+    TagInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_TAG_INFO_EXT;
+    TagInfo.objectType = objectType;
+    TagInfo.object = object;
+    TagInfo.tagSize = tagSize;
+    TagInfo.pTag = tag;
+    TagInfo.tagName = name;
+    TagInfo.pNext = nullptr;
+    (*vez::pfnDebugMarkerSetObjectTag)(device, &TagInfo);
 }

@@ -99,6 +99,9 @@ namespace vez
         void CmdResolveImage(Image* pSrcImage, Image* pDstImage, uint32_t regionCount, const VezImageResolve* pRegions);
         void CmdSetEvent(VkEvent event, VkPipelineStageFlags stageMask);
         void CmdResetEvent(VkEvent event, VkPipelineStageFlags stageMask);
+        void CmdDebugMarkerBegin(const char* _szMarker, const float* _pColor);
+        void CmdDebugMarkerEnd();
+        void CmdDebugMarkerInsert(const char* _szMarker, const float* _pColor);
 
     private:
         CommandPool* m_pool;
