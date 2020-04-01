@@ -39,6 +39,7 @@
 #include "Core/Image.h"
 #include "Core/ImageView.h"
 #include "Core/Framebuffer.h"
+#include "../External/glslang/StandAlone/DirStackFileIncluder.h"
 
 // Per thread command buffer currently being recorded.
 static thread_local vez::CommandBuffer* s_pActiveCommandBuffer = nullptr;
@@ -476,7 +477,7 @@ VkResult VKAPI_CALL vezGetQueryPoolResults(VkDevice device, VkQueryPool queryPoo
 
 }
 
-VkResult VKAPI_CALL vezCreateShaderModule(VkDevice device, const VezShaderModuleCreateInfo* pCreateInfo, VkShaderModule* pShaderModule)
+VkResult VKAPI_CALL vezCreateShaderModule(VkDevice device, const VezShaderModuleCreateInfo* pCreateInfo, VkShaderModule* pShaderModule, DirStackFileIncluder* pIncluder)
 {
     // Lookup object handle.
     auto deviceImpl = vez::ObjectLookup::GetObjectImpl(device);
@@ -485,7 +486,7 @@ VkResult VKAPI_CALL vezCreateShaderModule(VkDevice device, const VezShaderModule
 
     // Create the shader module.
     vez::ShaderModule* shaderModule = nullptr;
-    auto result = vez::ShaderModule::Create(deviceImpl, pCreateInfo, &shaderModule);
+    auto result = vez::ShaderModule::Create(deviceImpl, pCreateInfo, &shaderModule, pIncluder);
 
     // If shaderModule was successfully created, store it regardless of the return code since the GLSL compilation log must be retrievable.
     if (shaderModule)

@@ -28,7 +28,7 @@
 
 namespace vez
 {
-    VkResult ShaderModule::Create(Device* pDevice, const VezShaderModuleCreateInfo* pCreateInfo, ShaderModule** ppShaderModule)
+    VkResult ShaderModule::Create(Device* pDevice, const VezShaderModuleCreateInfo* pCreateInfo, ShaderModule** ppShaderModule, DirStackFileIncluder* pIncluder)
     {
         // Create a new instance of the ShaderModule class.
         auto shaderModule = new ShaderModule;
@@ -47,7 +47,7 @@ namespace vez
             }
 
             // Compile the GLSL source.
-            if (!CompileGLSL2SPIRV(pCreateInfo->stage, pCreateInfo->pGLSLSource, pCreateInfo->pEntryPoint, shaderModule->m_spirv, shaderModule->m_infoLog))
+            if (!CompileGLSL2SPIRV(pCreateInfo->stage, pCreateInfo->pGLSLSource, pCreateInfo->pEntryPoint, shaderModule->m_spirv, shaderModule->m_infoLog, pIncluder))
             {
                 // Store ShaderModule object address so shader log can be retrived.  Set the native Vulkan object handle to the same memory address.
                 shaderModule->m_handle = reinterpret_cast<VkShaderModule>(shaderModule);

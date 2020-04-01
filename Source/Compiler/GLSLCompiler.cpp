@@ -25,6 +25,7 @@
 #include <glslang/Include/revision.h>
 #include <glslang/Public/ShaderLang.h>
 #include <glslang/OSDependent/osinclude.h>
+#include <StandAlone/DirStackFileIncluder.h>
 #include <SPIRV/GlslangToSpv.h>
 #include <SPIRV/GLSL.std.450.h>
 #include "ResourceLimits.h"
@@ -134,7 +135,7 @@ EShLanguage MapShaderStage(VkShaderStageFlagBits stage)
 
 namespace vez
 {
-    bool CompileGLSL2SPIRV(VkShaderStageFlagBits stage, const std::string& source, const std::string& entryPoint, std::vector<uint32_t>& spirv, std::string& infoLog)
+    bool CompileGLSL2SPIRV(VkShaderStageFlagBits stage, const std::string& source, const std::string& entryPoint, std::vector<uint32_t>& spirv, std::string& infoLog, DirStackFileIncluder* pIncluder)
     {
         // Get default built in resource limits.
         auto resourceLimits = glslang::DefaultTBuiltInResource;
@@ -165,6 +166,15 @@ namespace vez
         shader.setFlattenUniformArrays(false);
         shader.setNoStorageFormat(false);
         if (!shader.parse(&resourceLimits, 100, false, messages))
+        {
+            infoLog = std::string(shader.getInfoLog()) + "\n" + std::string(shader.getInfoDebugLog());
+            return false;
+        }
+
+        bool bOk = pIncluder ? 
+            shader.parse(&resourceLimits, 100, false, messages, *pIncluder) :
+            shader.parse(&resourceLimits, 100, false, messages);
+        if (!bOk)
         {
             infoLog = std::string(shader.getInfoLog()) + "\n" + std::string(shader.getInfoDebugLog());
             return false;
