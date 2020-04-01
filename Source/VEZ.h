@@ -401,6 +401,12 @@ typedef struct VezColorBlendState
     const VezColorBlendAttachmentState* pAttachments;
 } VezColorBlendState;
 
+typedef struct VezTessellationState
+{
+	const void* pNext;
+	uint32_t patchControlPoints;
+} VezTessellationState;
+
 typedef struct VezAttachmentInfo
 {
     VkAttachmentLoadOp loadOp;
@@ -594,6 +600,7 @@ VKAPI_ATTR void VKAPI_CALL vezCmdSetRasterizationState(const VezRasterizationSta
 VKAPI_ATTR void VKAPI_CALL vezCmdSetMultisampleState(const VezMultisampleState* pStateInfo);
 VKAPI_ATTR void VKAPI_CALL vezCmdSetDepthStencilState(const VezDepthStencilState* pStateInfo);
 VKAPI_ATTR void VKAPI_CALL vezCmdSetColorBlendState(const VezColorBlendState* pStateInfo);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetTessellationState(const VezTessellationState* pStateInfo);
 VKAPI_ATTR void VKAPI_CALL vezCmdSetViewport(uint32_t firstViewport, uint32_t viewportCount, const VkViewport* pViewports);
 VKAPI_ATTR void VKAPI_CALL vezCmdSetScissor(uint32_t firstScissor, uint32_t scissorCount, const VkRect2D* pScissors);
 VKAPI_ATTR void VKAPI_CALL vezCmdSetLineWidth(float lineWidth);

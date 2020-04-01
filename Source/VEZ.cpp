@@ -1066,6 +1066,11 @@ void VKAPI_CALL vezCmdSetColorBlendState(const VezColorBlendState* pStateInfo)
     s_pActiveCommandBuffer->CmdSetColorBlendState(pStateInfo);
 }
 
+void VKAPI_CALL vezCmdSetTessellationState(const VezTessellationState* pStateInfo)
+{
+	s_pActiveCommandBuffer->CmdSetTessellationState(pStateInfo);
+}
+
 void VKAPI_CALL vezCmdSetViewport(uint32_t firstViewport, uint32_t viewportCount, const VkViewport* pViewports)
 {
     s_pActiveCommandBuffer->CmdSetViewport(firstViewport, viewportCount, pViewports);

@@ -93,12 +93,18 @@ namespace vez
         VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
     };
 
+	static VezTessellationState defaultTessellationState = {
+		nullptr,
+		4
+	};
+
     template <typename T>
     static bool operator != (const T& a, const T& b)
     {
         constexpr bool typeSupported = std::is_base_of<VezInputAssemblyState, T>::value |
             std::is_base_of<VezRasterizationState, T>::value |
             std::is_base_of<VezMultisampleState, T>::value |
+			std::is_base_of<VezTessellationState, T>::value |
             std::is_base_of<VezDepthStencilState, T>::value;
         static_assert(typeSupported, "Invalid type");
         return (memcmp(&a, &b, sizeof(T)) != 0);
@@ -255,6 +261,23 @@ namespace vez
             m_dirty = true;
         }
     }
+
+	void GraphicsState::SetTessellationState(const VezTessellationState* pStateInfo)
+	{
+		if (!pStateInfo)
+		{
+			if (m_tessellationState!= defaultTessellationState)
+			{
+				memcpy(&m_tessellationState, &defaultTessellationState, sizeof(VezTessellationState));
+				m_dirty = true;
+			}
+		}
+		else if (m_tessellationState != *pStateInfo)
+		{
+			memcpy(&m_tessellationState, pStateInfo, sizeof(VezTessellationState));
+			m_dirty = true;
+		}
+	}
 
     GraphicsStateHash GraphicsState::GetHash() const
     {

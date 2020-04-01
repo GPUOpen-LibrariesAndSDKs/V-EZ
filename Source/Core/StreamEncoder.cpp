@@ -448,6 +448,11 @@ namespace vez
         m_graphicsState.SetColorBlendState(pStateInfo);
     }
 
+	void StreamEncoder::CmdSetTessellationState(const VezTessellationState* pStateInfo)
+	{
+		m_graphicsState.SetTessellationState(pStateInfo);
+	}
+
     void StreamEncoder::CmdSetViewport(uint32_t firstViewport, uint32_t viewportCount, const VkViewport* pViewports)
     {
         // Encode the command to the memory stream.
