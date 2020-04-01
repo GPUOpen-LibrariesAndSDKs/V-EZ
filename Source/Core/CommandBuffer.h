@@ -71,6 +71,7 @@ namespace vez
         void CmdSetMultisampleState(const VezMultisampleState* pStateInfo);
         void CmdSetDepthStencilState(const VezDepthStencilState* pStateInfo);
         void CmdSetColorBlendState(const VezColorBlendState* pStateInfo);
+        void CmdSetTessellationState(const VezTessellationState* pStateInfo);
         void CmdSetViewport(uint32_t firstViewport, uint32_t viewportCount, const VkViewport* pViewports);
         void CmdSetScissor(uint32_t firstScissor, uint32_t scissorCount, const VkRect2D* pScissors);
         void CmdSetLineWidth(float lineWidth);

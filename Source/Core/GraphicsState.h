@@ -47,6 +47,7 @@ namespace vez
         void SetMultisampleState(const VezMultisampleState* pStateInfo);
         void SetColorBlendState(const VezColorBlendState* pStateInfo);
         void SetDepthStencilState(const VezDepthStencilState* pStateInfo);
+        void SetTessellationState(const VezTessellationState* pStateInfo);
         void SetSubpassIndex(uint32_t index);
         void SetFramebuffer(Framebuffer* pFramebuffer);
         void SetPipeline(Pipeline* pPipeline);
@@ -59,6 +60,7 @@ namespace vez
         const VezColorBlendState& GetColorBlendState() const { return m_colorBlendState; }
         const VezColorBlendAttachmentState* GetColorBlendAttachmentState() const { return &m_colorBlendAttachments[0]; }
         const VezDepthStencilState& GetDepthStencilState() const { return m_depthStencilState; };
+        const VezTessellationState& GetTessellationState() const { return m_tessellationState; }
         uint32_t GetSubpassIndex() const { return m_subpassIndex; }
         Framebuffer* GetFramebuffer() const { return m_framebuffer; }
         Pipeline* GetPipeline() const { return m_pipeline; }
@@ -77,6 +79,7 @@ namespace vez
         VezDepthStencilState m_depthStencilState;
         VezColorBlendState m_colorBlendState;
         VezColorBlendAttachmentState m_colorBlendAttachments[8];
+        VezTessellationState m_tessellationState;
         uint32_t m_subpassIndex = 0;
         Framebuffer* m_framebuffer = nullptr;
         Pipeline* m_pipeline = nullptr;
