@@ -84,6 +84,9 @@ namespace vez
         m_entryPoints[RESOLVE_IMAGE] = &StreamDecoder::CmdResolveImage;
         m_entryPoints[SET_EVENT] = &StreamDecoder::CmdSetEvent;
         m_entryPoints[RESET_EVENT] = &StreamDecoder::CmdResetEvent;
+        m_entryPoints[DEBUG_MARKER_BEGIN] = &StreamDecoder::CmdDebugMarkerBegin;
+        m_entryPoints[DEBUG_MARKER_END] = &StreamDecoder::CmdDebugMarkerEnd;
+        m_entryPoints[DEBUG_MARKER_INSERT] = &StreamDecoder::CmdDebugMarkerInsert;
     }
 
     void StreamDecoder::Decode(CommandBuffer& commandBuffer, StreamEncoder& encoder)
@@ -767,5 +770,65 @@ namespace vez
 
         // Call the native Vulkan function.
         vkCmdResetEvent(commandBuffer.GetHandle(), event, stageMask);
+    }
+
+    PFN_vkDebugMarkerSetObjectTagEXT pfnDebugMarkerSetObjectTag = nullptr;
+    PFN_vkDebugMarkerSetObjectNameEXT pfnDebugMarkerSetObjectName = nullptr;
+    PFN_vkCmdDebugMarkerBeginEXT pfnCmdDebugMarkerBegin = nullptr;
+    PFN_vkCmdDebugMarkerEndEXT pfnCmdDebugMarkerEnd = nullptr;
+    PFN_vkCmdDebugMarkerInsertEXT pfnCmdDebugMarkerInsert = nullptr;
+
+    // Get function pointers for the debug report extensions from the device
+    void SetupDebugMarkers(VkDevice device)
+    {
+        pfnDebugMarkerSetObjectTag = (PFN_vkDebugMarkerSetObjectTagEXT)vkGetDeviceProcAddr(device, "vkDebugMarkerSetObjectTagEXT");
+        pfnDebugMarkerSetObjectName = (PFN_vkDebugMarkerSetObjectNameEXT)vkGetDeviceProcAddr(device, "vkDebugMarkerSetObjectNameEXT");
+        pfnCmdDebugMarkerBegin = (PFN_vkCmdDebugMarkerBeginEXT)vkGetDeviceProcAddr(device, "vkCmdDebugMarkerBeginEXT");
+        pfnCmdDebugMarkerEnd = (PFN_vkCmdDebugMarkerEndEXT)vkGetDeviceProcAddr(device, "vkCmdDebugMarkerEndEXT");
+        pfnCmdDebugMarkerInsert = (PFN_vkCmdDebugMarkerInsertEXT)vkGetDeviceProcAddr(device, "vkCmdDebugMarkerInsertEXT");
+    }
+
+    void FillMarker(VkDebugMarkerMarkerInfoEXT& markerInfo, const char* _szMarkerName, const float* _Color)
+    {
+        markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
+        // Color to display this region with (if supported by debugger)
+        memcpy(markerInfo.color, _Color, sizeof(float) * 4);
+        // Name of the region displayed by the debugging application
+        markerInfo.pMarkerName = _szMarkerName;
+        markerInfo.pNext = nullptr;
+    }
+
+    void StreamDecoder::CmdDebugMarkerBegin(CommandBuffer& commandBuffer, MemoryStream& stream)
+    {
+        // Decode command parameters.
+        size_t len;
+        stream >> len;
+        const char* szMarker = stream.ReadPtr<char>(len);
+        float* pColor = stream.ReadPtr<float>(4);
+
+        // Call the native Vulkan function.
+        VkDebugMarkerMarkerInfoEXT markerInfo = {};
+        FillMarker(markerInfo, szMarker, pColor);
+        pfnCmdDebugMarkerBegin(commandBuffer.GetHandle(), &markerInfo);
+    }
+
+    void StreamDecoder::CmdDebugMarkerEnd(CommandBuffer& commandBuffer, MemoryStream& stream)
+    {
+        // Call the native Vulkan function.
+        pfnCmdDebugMarkerEnd(commandBuffer.GetHandle());
+    }
+
+    void StreamDecoder::CmdDebugMarkerInsert(CommandBuffer& commandBuffer, MemoryStream& stream)
+    {
+        // Decode command parameters.
+        size_t len;
+        stream >> len;
+        const char* szMarker = stream.ReadPtr<char>(len);
+        float* pColor = stream.ReadPtr<float>(4);
+
+        // Call the native Vulkan function.
+        VkDebugMarkerMarkerInfoEXT markerInfo = {};
+        FillMarker(markerInfo, szMarker, pColor);
+        pfnCmdDebugMarkerInsert(commandBuffer.GetHandle(), &markerInfo);
     }
 }

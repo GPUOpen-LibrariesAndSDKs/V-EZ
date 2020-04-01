@@ -90,6 +90,9 @@ namespace vez
         RESOLVE_IMAGE,
         SET_EVENT,
         RESET_EVENT,
+        DEBUG_MARKER_BEGIN,
+        DEBUG_MARKER_END,
+        DEBUG_MARKER_INSERT,
         COMMAND_ID_COUNT,
     } CommandID;
 
@@ -217,6 +220,9 @@ namespace vez
         void CmdResolveImage(Image* pSrcImage, Image* pDstImage, uint32_t regionCount, const VezImageResolve* pRegions);
         void CmdSetEvent(VkEvent event, VkPipelineStageFlags stageMask);
         void CmdResetEvent(VkEvent event, VkPipelineStageFlags stageMask);
+        void CmdDebugMarkerBegin(const char* _szMarker, const float* _pColor);
+        void CmdDebugMarkerEnd();
+        void CmdDebugMarkerInsert(const char* _szMarker, const float* _pColor);
 
     private:
         void BindDescriptorSet();

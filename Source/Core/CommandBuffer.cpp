@@ -340,4 +340,19 @@ namespace vez
     {
         m_streamEncoder.CmdResetEvent(event, stageMask);
     }
+
+    void CommandBuffer::CmdDebugMarkerBegin(const char* _szMarker, const float* _pColor)
+    {
+        m_streamEncoder.CmdDebugMarkerBegin(_szMarker, _pColor);
+    }
+
+    void CommandBuffer::CmdDebugMarkerEnd()
+    {
+        m_streamEncoder.CmdDebugMarkerEnd();
+    }
+
+    void CommandBuffer::CmdDebugMarkerInsert(const char* _szMarker, const float* _pColor)
+    {
+        m_streamEncoder.CmdDebugMarkerInsert(_szMarker, _pColor);
+    }
 }
