@@ -196,8 +196,8 @@ typedef struct VezMemberInfo
     uint32_t columns;
     uint32_t arraySize;
     char name[VK_MAX_DESCRIPTION_SIZE];
-    const VezMemberInfo* pNext;
-    const VezMemberInfo* pMembers;
+    const struct VezMemberInfo* pNext;
+    const struct VezMemberInfo* pMembers;
 } VezMemberInfo;
 
 typedef struct VezPipelineResource
@@ -413,7 +413,7 @@ typedef struct VezRenderPassBeginInfo
     const void* pNext;
     VezFramebuffer framebuffer;
     uint32_t attachmentCount;
-    const VezAttachmentInfo* pAttachments;
+    const struct VezAttachmentInfo* pAttachments;
 } VezRenderPassBeginInfo;
 
 typedef struct VezBufferCopy
@@ -591,8 +591,8 @@ VKAPI_ATTR void VKAPI_CALL vezCmdSetVertexInputFormat(VezVertexInputFormat forma
 VKAPI_ATTR void VKAPI_CALL vezCmdSetViewportState(uint32_t viewportCount);
 VKAPI_ATTR void VKAPI_CALL vezCmdSetInputAssemblyState(const VezInputAssemblyState* pStateInfo);
 VKAPI_ATTR void VKAPI_CALL vezCmdSetRasterizationState(const VezRasterizationState* pStateInfo);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetMultisampleState(const VezMultisampleState* pStateInfo);
-VKAPI_ATTR void VKAPI_CALL vezCmdSetDepthStencilState(const VezDepthStencilState* pStateInfo);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetMultisampleState(const struct VezMultisampleState* pStateInfo);
+VKAPI_ATTR void VKAPI_CALL vezCmdSetDepthStencilState(const struct VezDepthStencilState* pStateInfo);
 VKAPI_ATTR void VKAPI_CALL vezCmdSetColorBlendState(const VezColorBlendState* pStateInfo);
 VKAPI_ATTR void VKAPI_CALL vezCmdSetViewport(uint32_t firstViewport, uint32_t viewportCount, const VkViewport* pViewports);
 VKAPI_ATTR void VKAPI_CALL vezCmdSetScissor(uint32_t firstScissor, uint32_t scissorCount, const VkRect2D* pScissors);
