@@ -2118,7 +2118,7 @@ The preprocessor macro <code>VK_WHOLE_SIZE</code> may be passed to the <code>ran
 <div class="sect2">
 <h3 id="_begin_a_render_pass">10.1. Begin A Render Pass</h3>
 <div class="paragraph">
-<p>To begin a render pass, an application may call <code>vkCmdBeginRenderPass</code>.  The <code>VezRenderPassBeginInfo</code> structure requires a target framebuffer to be specified, an array of <code>VezAttachmentReference</code> structures which define load operations, store operations and clear values. The code listing below demonstrates beginning a render pass with two attachments, namely a single color attachment and a depth stencil attachment.  Both attachments are cleared and any values written by the fragment shader stage stored.</p>
+<p>To begin a render pass, an application may call <code>vezCmdBeginRenderPass</code>.  The <code>VezRenderPassBeginInfo</code> structure requires a target framebuffer to be specified, an array of <code>VezAttachmentReference</code> structures which define load operations, store operations and clear values. The code listing below demonstrates beginning a render pass with two attachments, namely a single color attachment and a depth stencil attachment.  Both attachments are cleared and any values written by the fragment shader stage stored.</p>
 </div>
 <div class="listingblock">
 <div class="content">
