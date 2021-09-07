@@ -1110,7 +1110,7 @@ table.CodeRay td.code>pre{padding:0}
 <span class="line-numbers"> 8</span>    uint32_t signalSemaphoreCount;
 <span class="line-numbers"> 9</span>    VkSemaphore* pSignalSemaphores;
 <span class="line-numbers">10</span>    VkResult* pResults;
-<span class="line-numbers">11</span>} VkPresentInfo;</code></pre>
+<span class="line-numbers">11</span>} VezPresentInfo;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1161,7 +1161,7 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 <h2 id="_synchronization">4. Synchronization</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In contrast to Vulkan, the application&#8217;s responsibilities for resource access synchronization is partially alleviated by V-EZ.  Namely, <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-pipeline-barriers">Pipeline Barriers</a> and <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-memory-barriers">Memory Barriers</a> are no longer explicitly required by the application, but handled by V-EZ.  Additionally, fences and semaphores are not explicitly created by the application but requested when calling <code>VkQueueSubmit</code> or <code>vkQueuePresent</code> as previously described in <a href="#_queue_submission">Queue Submission</a>.</p>
+<p>In contrast to Vulkan, the application&#8217;s responsibilities for resource access synchronization is partially alleviated by V-EZ.  Namely, <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-pipeline-barriers">Pipeline Barriers</a> and <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#synchronization-memory-barriers">Memory Barriers</a> are no longer explicitly required by the application, but handled by V-EZ.  Additionally, fences and semaphores are not explicitly created by the application but requested when calling <code>vezQueueSubmit</code> or <code>vezQueuePresent</code> as previously described in <a href="#_queue_submission">Queue Submission</a>.</p>
 </div>
 <div class="sect2">
 <h3 id="_fences">4.1. Fences</h3>
@@ -1440,7 +1440,7 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 <p>The 'offset' and 'size' specify the byte offset and byte size of a resource when declared inside of a struct.</p>
 </div>
 <div class="paragraph">
-<p>If an application knows the name of the pipeline resource to query, <code>vkGetPipelineResource</code> may be used.</p>
+<p>If an application knows the name of the pipeline resource to query, <code>vezGetPipelineResource</code> may be used.</p>
 </div>
 <div class="paragraph">
 <p>For uniform and shader storage buffer objects, the <strong>pMembers</strong> field forms a multi-level linked list of members of these structured bindings. See the <strong>PipelineReflection</strong> sample for how to iterate over these.</p>
@@ -1471,7 +1471,7 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 <div class="sect2">
 <h3 id="_creation">6.1. Creation</h3>
 <div class="paragraph">
-<p>An application now only needs to manage vertex input formats at the mesh or object level.  V-EZ moves the specification of the <code>VkVertexInputBindingDescription</code> and <code>VkVertexInputAttributeDescription</code> arrays to the <code>VkVertexInputFormat</code> object creation.  In the code listing below, a vertex input format is created specifying a single binding point and two vertex attributes.</p>
+<p>An application now only needs to manage vertex input formats at the mesh or object level.  V-EZ moves the specification of the <code>VkVertexInputBindingDescription</code> and <code>VkVertexInputAttributeDescription</code> arrays to the <code>VezVertexInputFormat</code> object creation.  In the code listing below, a vertex input format is created specifying a single binding point and two vertex attributes.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1555,7 +1555,7 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 <div class="sect2">
 <h3 id="_buffers">7.1. Buffers</h3>
 <div class="paragraph">
-<p>Buffers are represented by <code>VkBuffer</code> handles and created by calling <code>vkCreateBuffer</code>. The code listing below demonstrates creating a buffer to be used for <em>staging</em>, or data transfers optimized for host to device.</p>
+<p>Buffers are represented by <code>VkBuffer</code> handles and created by calling <code>vezCreateBuffer</code>. The code listing below demonstrates creating a buffer to be used for <em>staging</em>, or data transfers optimized for host to device.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1801,7 +1801,7 @@ Any images passed to <code>VezPresentInfo::pImages</code> must be created with t
 <span class="line-numbers">56</span>    VkBool32 logicOpEnable;
 <span class="line-numbers">57</span>    VkLogicOp logicOp;
 <span class="line-numbers">58</span>    uint32_t attachmentCount;
-<span class="line-numbers">59</span>    <span class="directive">const</span> VkPipelineColorBlendAttachmentState* pAttachments;
+<span class="line-numbers">59</span>    <span class="directive">const</span> VezColorBlendAttachmentState* pAttachments;
 <span class="line-numbers">60</span>} VezColorBlendState;</code></pre>
 </div>
 </div>
@@ -2076,7 +2076,7 @@ The preprocessor macro <code>VK_WHOLE_SIZE</code> may be passed to the <code>ran
 </table>
 </div>
 <div class="paragraph">
-<p><code>vkCmdBindImageView</code> allows an application to specify a sampler alongside the image view.  When sampler is VK_NULL_HANDLE, the binding represents a <em>sampled image</em> or <strong>texture2D</strong> in GLSL.  When sample is not VK_NULL_HANDLE, it represents a <em>combined image sampler</em> or 'sampler2D' in GLSL.  See <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#descriptorsets-types">13.1.3 Sampled Image</a> in the Vulkan spec for more details.</p>
+<p><code>vezCmdBindImageView</code> allows an application to specify a sampler alongside the image view.  When sampler is VK_NULL_HANDLE, the binding represents a <em>sampled image</em> or <strong>texture2D</strong> in GLSL.  When sample is not VK_NULL_HANDLE, it represents a <em>combined image sampler</em> or 'sampler2D' in GLSL.  See <a href="https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#descriptorsets-types">13.1.3 Sampled Image</a> in the Vulkan spec for more details.</p>
 </div>
 </div>
 </div>
@@ -2118,7 +2118,7 @@ The preprocessor macro <code>VK_WHOLE_SIZE</code> may be passed to the <code>ran
 <div class="sect2">
 <h3 id="_begin_a_render_pass">10.1. Begin A Render Pass</h3>
 <div class="paragraph">
-<p>To begin a render pass, an application may call <code>vkCmdBeginRenderPass</code>.  The <code>VezRenderPassBeginInfo</code> structure requires a target framebuffer to be specified, an array of <code>VezAttachmentReference</code> structures which define load operations, store operations and clear values. The code listing below demonstrates beginning a render pass with two attachments, namely a single color attachment and a depth stencil attachment.  Both attachments are cleared and any values written by the fragment shader stage stored.</p>
+<p>To begin a render pass, an application may call <code>vezCmdBeginRenderPass</code>.  The <code>VezRenderPassBeginInfo</code> structure requires a target framebuffer to be specified, an array of <code>VezAttachmentReference</code> structures which define load operations, store operations and clear values. The code listing below demonstrates beginning a render pass with two attachments, namely a single color attachment and a depth stencil attachment.  Both attachments are cleared and any values written by the fragment shader stage stored.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2144,7 +2144,7 @@ The preprocessor macro <code>VK_WHOLE_SIZE</code> may be passed to the <code>ran
 <div class="sect2">
 <h3 id="_next_subpass">10.2. Next Subpass</h3>
 <div class="paragraph">
-<p>By default, calling vkCmdBeginRenderPass starts the first subpass.  To transition to a proceeding one, an application may call <code>vezCmdNextSubpass</code>.  No parameters are required except the command buffer the call is being recorded to.</p>
+<p>By default, calling vezCmdBeginRenderPass starts the first subpass.  To transition to a proceeding one, an application may call <code>vezCmdNextSubpass</code>.  No parameters are required except the command buffer the call is being recorded to.</p>
 </div>
 <div class="paragraph">
 <p>As previously stated, V-EZ determines which framebuffer attachments are written to within each subpass based on the pipeline objects that are bound and draw calls made.</p>
